@@ -40,6 +40,7 @@ def elite(config_path, module_search_paths=[]):
 
             # Footer
             finally:
+                ansible.cleanup()
                 footer()
 
         return decorated_function

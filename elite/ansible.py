@@ -3,9 +3,11 @@ import contextlib
 from enum import Enum
 import json
 import os
+import random
 import shutil
 import subprocess
 import sys
+import time
 
 from .utils import dict_to_namedtuple
 
@@ -43,7 +45,18 @@ class Ansible(object):
         self.failed_task_info = []
         self.total_tasks = 0
 
+        # Create a temporary location to store Ansible modules as they don't run
+        # well in their installed location (primarily due to copy.py conflicting with Python's
+        # copy library)
+        self._tempdir = os.path.expanduser(os.path.join(
+            '~', '.ansible', 'tmp', f'ansible-tmp-{time.time()}-{random.randint(0, 2**48)}'
+        ))
+        os.makedirs(self._tempdir)
+
         self._find_ansible_modules()
+
+    def cleanup(self):
+        shutil.rmtree(self._tempdir)
 
     def _find_ansible_modules(self):
         """
@@ -109,15 +122,21 @@ class Ansible(object):
             if raw_params:
                 input_json['ANSIBLE_MODULE_ARGS']['_raw_params'] = raw_params
 
+            # Copy the module to our temporary directory
+            temp_module_path = shutil.copy(self._ansible_modules[module], self._tempdir)
+
             # Run the requested module
             sudo = self._ansible_settings.get('sudo', False)
             proc_args = [shutil.which('sudo'), '-n'] if sudo else []
-            proc_args.extend([sys.executable, self._ansible_modules[module]])
+            proc_args.extend([sys.executable, temp_module_path])
 
             proc = subprocess.Popen(
                 proc_args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE
             )
             stdout, stderr = proc.communicate(json.dumps(input_json).encode('utf-8'))
+
+            # Delete the module that was copied
+            os.remove(temp_module_path)
 
             # Parse the result upon successful command run
             if proc.returncode != 0 and stderr:
