@@ -3,6 +3,7 @@ import contextlib
 from enum import Enum
 import json
 import os
+import shutil
 import subprocess
 import sys
 
@@ -18,6 +19,10 @@ class AnsibleState(Enum):
     FAILED = 3
 
 
+class AnsibleError(Exception):
+    """An exception raised when a module fails to execute with the given arguments."""
+
+
 class Ansible(object):
     """
     Provides a way to run the requested Ansible modules with the appropriate arguments.
@@ -31,7 +36,12 @@ class Ansible(object):
         self.module_search_paths = module_search_paths
 
         self._ansible_modules = {}
-        self._ansible_settings = None
+        self._ansible_settings = {}
+
+        self.ok_tasks = 0
+        self.failed_tasks = 0
+        self.failed_task_info = []
+        self.total_tasks = 0
 
         self._find_ansible_modules()
 
@@ -73,10 +83,21 @@ class Ansible(object):
             arguments.
 
             :param raw_params: Raw parameters (used for command and shell modules).
-            :param args: Module arguments to be sent to the module.
+            :param args: Module arguments to be sent to the module.  You may add an underscore
+                         suffix in case a module argument conflicts with a Python keyword
+                         (e.g. the global argument in the npm module).
 
             :return: A named tuple containing the results of the module run.
             """
+            # Replace any keys containing a underscore sufix
+            keys_to_replace = [k for k in args.keys() if k.endswith('_')]
+            for key in keys_to_replace:
+                args[key[:-1]] = args[key]
+                del args[key]
+
+            # Track the number of tasks run
+            self.total_tasks += 1
+
             # Run the callback to indicate we have started running the task
             self.callback(
                 AnsibleState.RUNNING, module, raw_params, args, self._ansible_settings,
@@ -89,21 +110,45 @@ class Ansible(object):
                 input_json['ANSIBLE_MODULE_ARGS']['_raw_params'] = raw_params
 
             # Run the requested module
+            sudo = self._ansible_settings.get('sudo', False)
+            proc_args = [shutil.which('sudo'), '-n'] if sudo else []
+            proc_args.extend([sys.executable, self._ansible_modules[module]])
+
             proc = subprocess.Popen(
-                [sys.executable, self._ansible_modules[module]],
-                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                proc_args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE
             )
             stdout, stderr = proc.communicate(json.dumps(input_json).encode('utf-8'))
 
-            # Parse the result
-            result = json.loads(stdout.decode('utf-8'))
+            # Parse the result upon successful command run
+            if proc.returncode != 0 and stderr:
+                result = {
+                    'msg': stderr.decode('utf-8').strip(),
+                    'rc': proc.returncode
+                }
+            else:
+                result = json.loads(stdout.decode('utf-8'))
 
             # Determine if a failure occurred and run the callback appropriately
             if result.get('rc', 0) != 0:
                 result['failed'] = True
+                if 'msg' not in result:
+                    result['msg'] = result['stderr']
 
             state = AnsibleState.FAILED if result.get('failed', False) else AnsibleState.OK
+
             self.callback(state, module, raw_params, args, self._ansible_settings, result)
+
+            if (
+                state == AnsibleState.FAILED and
+                not self._ansible_settings.get('ignore_errors', False)
+            ):
+                self.failed_tasks +=1
+                self.failed_task_info.append(
+                    (module, raw_params, args, self._ansible_settings, result)
+                )
+                raise AnsibleError(result['msg'])
+
+            self.ok_tasks += 1
 
             # Return a named tuple containing the result
             return dict_to_namedtuple('Result', result)
@@ -119,4 +164,4 @@ class Ansible(object):
     def settings(self, **settings):
         self._ansible_settings = settings
         yield
-        self._ansible_settings = None
+        self._ansible_settings = {}
