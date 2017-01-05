@@ -43,8 +43,8 @@ class Ansible(object):
 
         self.total_tasks = 0
         self.ok_tasks = 0
-        self.failed_tasks = 0
         self.changed_tasks = 0
+        self.failed_tasks = 0
 
         self.failed_task_info = []
         self.changed_task_info = []
@@ -174,8 +174,7 @@ class Ansible(object):
 
                 if not self._ansible_settings.get('ignore_errors', False):
                     raise AnsibleError(result['msg'])
-
-            if result['changed']:
+            elif result['changed']:
                 self.changed_tasks += 1
                 self.changed_task_info.append(
                     (module, raw_params, args, self._ansible_settings, result)
