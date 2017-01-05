@@ -30,16 +30,12 @@ class Ansible(object):
     """
     Provides a way to run the requested Ansible modules with the appropriate arguments.
 
-    :param callback: A callback function that will be called as progress occurs.
-    :param heading: A function that may be called to print a section heading.
+    :param printer: A printer object that will be used to display output.
     :param module_search_paths: The paths to search for modules that should be made available in
                                 addition to Ansible's core library.
     """
-    def __init__(self, callback, heading, info, summary, module_search_paths=[]):
-        self.callback = callback
-        self._heading = heading
-        self._info = info
-        self._summary = summary
+    def __init__(self, printer, module_search_paths=[]):
+        self.printer = printer
         self.module_search_paths = module_search_paths
 
         self._ansible_modules = {}
@@ -120,7 +116,7 @@ class Ansible(object):
             self.total_tasks += 1
 
             # Run the callback to indicate we have started running the task
-            self.callback(
+            self.printer.progress(
                 AnsibleState.RUNNING, module, raw_params, args, self._ansible_settings,
                 result=None
             )
@@ -168,7 +164,7 @@ class Ansible(object):
             else:
                 state = AnsibleState.OK
 
-            self.callback(state, module, raw_params, args, self._ansible_settings, result)
+            self.printer.progress(state, module, raw_params, args, self._ansible_settings, result)
 
             if state == AnsibleState.FAILED:
                 self.failed_tasks += 1
@@ -203,15 +199,10 @@ class Ansible(object):
         yield
         self._ansible_settings = {}
 
-    def heading(self, text):
-        self._heading(text)
-
-    def info(self, text):
-        self._info(text)
-
     def summary(self):
-        self._summary(
+        self.printer.summary(
             self.total_tasks, self.ok_tasks,
-            self.changed_tasks, self.changed_task_info,
-            self.failed_tasks, self.failed_task_info
+            self.changed_tasks, self.failed_tasks,
+            self.changed_task_info, self.failed_task_info
         )
+

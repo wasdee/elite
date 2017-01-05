@@ -1,14 +1,10 @@
-import os
 from functools import wraps
 
 from .ansible import Ansible, AnsibleError
 from .config import Config
-from .print import header, footer, heading, info, progress, summary
+from .printer import Printer
+from .utils import build_relative_path
 from . import ansi
-
-
-def build_relative_path(path):
-    return os.path.join(os.path.dirname(__file__), os.pardir, path)
 
 
 def elite(config_path, module_search_paths=[]):
@@ -20,18 +16,17 @@ def elite(config_path, module_search_paths=[]):
                 module_search_paths_abs = [
                     build_relative_path(msp) for msp in module_search_paths
                 ]
-                ansible = Ansible(
-                    callback=progress, heading=heading, info=info,
-                    summary=summary,
-                    module_search_paths=module_search_paths_abs
-                )
+
+                # Create our objects
+                printer = Printer()
+                ansible = Ansible(printer=printer, module_search_paths=module_search_paths_abs)
                 config = Config(build_relative_path(config_path))
 
                 # Header
-                header()
+                printer.header()
 
                 # Run the main Ansible entrypoint
-                main(ansible, config)
+                main(ansible, config, printer)
 
             # A task failed to run
             except AnsibleError as e:
@@ -45,7 +40,7 @@ def elite(config_path, module_search_paths=[]):
             # Footer
             finally:
                 ansible.cleanup()
-                footer()
+                printer.footer()
 
         return decorated_function
 
