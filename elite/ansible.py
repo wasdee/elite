@@ -18,7 +18,8 @@ class AnsibleState(Enum):
     """
     RUNNING = 1
     OK = 2
-    FAILED = 3
+    CHANGED = 3
+    FAILED = 4
 
 
 class AnsibleError(Exception):
@@ -30,20 +31,27 @@ class Ansible(object):
     Provides a way to run the requested Ansible modules with the appropriate arguments.
 
     :param callback: A callback function that will be called as progress occurs.
+    :param heading: A function that may be called to print a section heading.
     :param module_search_paths: The paths to search for modules that should be made available in
                                 addition to Ansible's core library.
     """
-    def __init__(self, callback, module_search_paths=[]):
+    def __init__(self, callback, heading, info, summary, module_search_paths=[]):
         self.callback = callback
+        self._heading = heading
+        self._info = info
+        self._summary = summary
         self.module_search_paths = module_search_paths
 
         self._ansible_modules = {}
         self._ansible_settings = {}
 
+        self.total_tasks = 0
         self.ok_tasks = 0
         self.failed_tasks = 0
+        self.changed_tasks = 0
+
         self.failed_task_info = []
-        self.total_tasks = 0
+        self.changed_task_info = []
 
         # Create a temporary location to store Ansible modules as they don't run
         # well in their installed location (primarily due to copy.py conflicting with Python's
@@ -153,21 +161,31 @@ class Ansible(object):
                 if 'msg' not in result:
                     result['msg'] = result['stderr']
 
-            state = AnsibleState.FAILED if result.get('failed', False) else AnsibleState.OK
+            if result.get('failed', False):
+                state = AnsibleState.FAILED
+            elif result["changed"]:
+                state = AnsibleState.CHANGED
+            else:
+                state = AnsibleState.OK
 
             self.callback(state, module, raw_params, args, self._ansible_settings, result)
 
-            if (
-                state == AnsibleState.FAILED and
-                not self._ansible_settings.get('ignore_errors', False)
-            ):
-                self.failed_tasks +=1
+            if state == AnsibleState.FAILED:
+                self.failed_tasks += 1
                 self.failed_task_info.append(
                     (module, raw_params, args, self._ansible_settings, result)
                 )
-                raise AnsibleError(result['msg'])
 
-            self.ok_tasks += 1
+                if not self._ansible_settings.get('ignore_errors', False):
+                    raise AnsibleError(result['msg'])
+
+            if result['changed']:
+                self.changed_tasks += 1
+                self.changed_task_info.append(
+                    (module, raw_params, args, self._ansible_settings, result)
+                )
+            else:
+                self.ok_tasks += 1
 
             # Return a named tuple containing the result
             return dict_to_namedtuple('Result', result)
@@ -184,3 +202,16 @@ class Ansible(object):
         self._ansible_settings = settings
         yield
         self._ansible_settings = {}
+
+    def heading(self, text):
+        self._heading(text)
+
+    def info(self, text):
+        self._info(text)
+
+    def summary(self):
+        self._summary(
+            self.total_tasks, self.ok_tasks,
+            self.changed_tasks, self.changed_task_info,
+            self.failed_tasks, self.failed_task_info
+        )

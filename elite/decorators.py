@@ -3,7 +3,7 @@ from functools import wraps
 
 from .ansible import Ansible, AnsibleError
 from .config import Config
-from .print import header, footer, progress
+from .print import header, footer, heading, info, progress, summary
 from . import ansi
 
 
@@ -20,7 +20,11 @@ def elite(config_path, module_search_paths=[]):
                 module_search_paths_abs = [
                     build_relative_path(msp) for msp in module_search_paths
                 ]
-                ansible = Ansible(callback=progress, module_search_paths=module_search_paths_abs)
+                ansible = Ansible(
+                    callback=progress, heading=heading, info=info,
+                    summary=summary,
+                    module_search_paths=module_search_paths_abs
+                )
                 config = Config(build_relative_path(config_path))
 
                 # Header
