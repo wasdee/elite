@@ -1,18 +1,19 @@
 # Colours
-BOLD = '\033[1m'
-UNDERLINE = '\033[4m'
-RED = '\033[91m'
-GREEN = '\033[92m'
-YELLOW = '\033[93m'
-BLUE = '\033[94m'
-WHITE = '\033[97m'
-ENDC = '\033[0m'
+BOLD = '\x1b[1m'
+UNDERLINE = '\x1b[4m'
+RED = '\x1b[91m'
+GREEN = '\x1b[92m'
+YELLOW = '\x1b[93m'
+BLUE = '\x1b[94m'
+WHITE = '\x1b[97m'
+ENDC = '\x1b[0m'
 
 # Other Escape Sequences
-CLEAR_LINE = '\033[0K'
-HIDE_CURSOR = '\033[?25l'
-SHOW_CURSOR = '\033[?25h'
+CLEAR_LINE = '\x1b[0K'
+HIDE_CURSOR = '\x1b[?25l'
+SHOW_CURSOR = '\x1b[?25h'
 
+# TODO: clean me please
 # 'reset': (0, 0),
 
 # 'bold': (1, 22),

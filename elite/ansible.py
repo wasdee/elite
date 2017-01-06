@@ -14,7 +14,7 @@ from .utils import dict_to_namedtuple
 
 class AnsibleState(Enum):
     """
-    Denotes the current state of an Ansible task in a callback function.
+    Denotes the current state of an Ansible task.
     """
     RUNNING = 1
     OK = 2
@@ -35,31 +35,39 @@ class Ansible(object):
                                 addition to Ansible's core library.
     """
     def __init__(self, printer, module_search_paths=[]):
+        # Capture user parameters.
         self.printer = printer
         self.module_search_paths = module_search_paths
 
+        # Available Ansible modules and their location.
         self._ansible_modules = {}
+        self._find_ansible_modules()
+
+        # Store Ansible settings the user has provided (e.g. sudo).
         self._ansible_settings = {}
 
+        # Keep track of totals for the summary.
         self.total_tasks = 0
         self.ok_tasks = 0
         self.changed_tasks = 0
         self.failed_tasks = 0
 
+        # Capture failud and changed tasks to show them in the summary.
         self.failed_task_info = []
         self.changed_task_info = []
 
         # Create a temporary location to store Ansible modules as they don't run
         # well in their installed location (primarily due to copy.py conflicting with Python's
-        # copy library)
+        # copy library).
         self._tempdir = os.path.expanduser(os.path.join(
             '~', '.ansible', 'tmp', f'ansible-tmp-{time.time()}-{random.randint(0, 2**48)}'
         ))
         os.makedirs(self._tempdir)
 
-        self._find_ansible_modules()
-
     def cleanup(self):
+        """
+        Clean up any files contained in the temp directory we're using.
+        """
         shutil.rmtree(self._tempdir)
 
     def _find_ansible_modules(self):
@@ -115,7 +123,7 @@ class Ansible(object):
             # Track the number of tasks run
             self.total_tasks += 1
 
-            # Run the callback to indicate we have started running the task
+            # Run the progress callback to indicate we have started running the task
             self.printer.progress(
                 AnsibleState.RUNNING, module, raw_params, args, self._ansible_settings,
                 result=None
@@ -151,12 +159,13 @@ class Ansible(object):
             else:
                 result = json.loads(stdout.decode('utf-8'))
 
-            # Determine if a failure occurred and run the callback appropriately
+            # Determine if a failure occurred and add the failed and msg attributes if required.
             if result.get('rc', 0) != 0:
                 result['failed'] = True
                 if 'msg' not in result:
                     result['msg'] = result['stderr']
 
+            # Determine the final state of the task.
             if result.get('failed', False):
                 state = AnsibleState.FAILED
             elif result["changed"]:
@@ -164,14 +173,17 @@ class Ansible(object):
             else:
                 state = AnsibleState.OK
 
+            # Run the progress callback with details of the completed task.
             self.printer.progress(state, module, raw_params, args, self._ansible_settings, result)
 
+            # Update totals and task info based on the outcome
             if state == AnsibleState.FAILED:
                 self.failed_tasks += 1
                 self.failed_task_info.append(
                     (module, raw_params, args, self._ansible_settings, result)
                 )
 
+                # If the task failed and was not to be ignored, we bail.
                 if not self._ansible_settings.get('ignore_errors', False):
                     raise AnsibleError(result['msg'])
             elif result['changed']:
@@ -194,14 +206,23 @@ class Ansible(object):
 
     @contextlib.contextmanager
     def settings(self, **settings):
+        """
+        A simple contaext manager allowing the user to override settings for a set of tasks.
+
+        :param settings: Settings to override (sudo, ignore_errors, changed and failed
+                         each may be provided as booleans).
+        """
         self._ansible_settings = settings
         yield
         self._ansible_settings = {}
 
     def summary(self):
+        """
+        Call the summary printer object method with the appropriate totals and task info so the
+        method may display the final summary to the user.
+        """
         self.printer.summary(
             self.total_tasks, self.ok_tasks,
             self.changed_tasks, self.failed_tasks,
             self.changed_task_info, self.failed_task_info
         )
-
