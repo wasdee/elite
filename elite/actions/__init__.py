@@ -33,15 +33,16 @@ class Action(object):
         for arg_spec in arg_specs:
             # Check for forbidden arguments used be elite
             if arg_spec.name in FORBIDDEN_ARGS:
-                self.fail(f'module uses argument {arg_spec.name} which is forbidden')
+                self.fail(f"module uses argument '{arg_spec.name}' which is forbidden")
 
             # Check for arguments that override Python keywords
             if arg_spec.name in keyword.kwlist:
-                self.fail(f'module uses argument {arg_spec.name} which is a Python keyword')
+                self.fail(f"module uses argument '{arg_spec.name}' which is a Python keyword")
 
             # Check for arguments that override Python builtins
-            if arg_spec.name in dir(__builtins__):
-                self.fail(f'module uses argument {arg_spec.name} which is a Python builtin')
+            # TODO: something not right here dawg
+            # if arg_spec.name in dir(__builtins__):
+            #     self.fail(f"module uses argument '{arg_spec.name}' which is a Python builtin")
 
         self.arg_specs = arg_specs
 
@@ -52,7 +53,11 @@ class Action(object):
             exit(2)
         except json.decoder.JSONDecodeError:
             self.fail('the json input provided could not be parsed')
-        self.validate_args()
+
+        self.validate_args_against_spec()
+
+        # Perform any further argument validation as required
+        self.validate_args(**self.args)
 
         # Open /dev/null for our run method
         self.devnull = open(os.devnull, 'w')
@@ -61,7 +66,7 @@ class Action(object):
         """Run the main process function for the action with the appropriate args."""
         self.process(**self.args)
 
-    def validate_args(self):
+    def validate_args_against_spec(self):
         # Check that only supported arguments were provided
         arg_spec_names = [a.name for a in self.arg_specs]
         for arg_name in self.args.keys():
@@ -85,6 +90,9 @@ class Action(object):
             ):
                 self.fail(f"argument '{arg_spec.name}' must be one of {arg_spec.choices}")
 
+    def validate_args(self, **args):
+        pass
+
     def ok(self, **data):
         print(json.dumps({'changed': False, 'ok': True, **data}, indent=2))
         exit(0)
@@ -98,10 +106,11 @@ class Action(object):
         exit(1)
 
     def run(
-        self, command, cwd=None, stdout=False, stderr=False, ignore_fail=False, fail_error=None
+        self, command, cwd=None, stdout=False, stderr=False, shell=False,
+        executable='/bin/bash', ignore_fail=False, fail_error=None
     ):
         # Allow for the user to send in a string instead of a list for the command
-        if isinstance(command, str):
+        if isinstance(command, str) and not shell:
             command = shlex.split(command)
 
         # Determine if we need to capture stdout and stderr
@@ -115,9 +124,12 @@ class Action(object):
 
         # Run the command
         try:
-            proc = subprocess.run(command, cwd=cwd, encoding='utf-8', **kwargs)
+            proc = subprocess.run(
+                command, cwd=cwd, shell=shell, executable=executable, encoding='utf-8', **kwargs
+            )
         except FileNotFoundError:
-            self.fail(f'unable to find executable for command {command}')
+            if not ignore_fail:
+                self.fail(f'unable to find executable for command {command}')
 
         # Fail if the command returned a non-zero returrn code
         if proc.returncode and not ignore_fail:

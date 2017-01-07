@@ -23,3 +23,23 @@ def build_absolute_path(path):
     :return: The absolute path of the provided path.
     """
     return os.path.join(os.path.dirname(__file__), os.pardir, path)
+
+
+def deep_merge(source, destination):
+    """
+    Deep merges the source dict into the destination.
+
+    :param source: The source dict to merge into the destination.
+    :param destination: The destination dict to merge the source into.
+
+    :return: the destination dict is returned (required for recursion) but the destination
+             dict will be updated too
+    """
+    for key, value in source.items():
+        if isinstance(value, dict):
+            node = destination.setdefault(key, {})
+            destination[key] = deep_merge(value, node)
+        else:
+            destination[key] = value
+
+    return destination
