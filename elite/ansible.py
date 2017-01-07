@@ -138,6 +138,9 @@ class Ansible(object):
             temp_module_path = shutil.copy(self._ansible_modules[module], self._tempdir)
 
             # Run the requested module
+            # -S - read password from stdin
+            # -p '<prompt>' - the prompt to display
+            # -u '<user>' - the user to sudo as
             sudo = self._ansible_settings.get('sudo', False)
             proc_args = [shutil.which('sudo'), '-n'] if sudo else []
             proc_args.extend([sys.executable, temp_module_path])
