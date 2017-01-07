@@ -1,4 +1,5 @@
 import json
+import keyword
 import os
 import shlex
 import subprocess
@@ -10,16 +11,16 @@ FORBIDDEN_ARGS = ['sudo', 'ok', 'changed']
 
 
 class Argument(object):
-    def __init__(self, name, required=True, default=None, choices=None):
+    def __init__(self, name, optional=False, default=None, choices=None):
         self.name = name
-        self.required = required
+        self.optional = optional
         self.default = default
         self.choices = choices
 
     def __repr__(self):
         args = [f'name={self.name!r}']
-        if not self.required:
-            args.append(f'required={self.required!r}')
+        if not self.optional:
+            args.append(f'optional={self.optional!r}')
         if self.default is not None:
             args.append(f'default={self.default!r}')
         if self.choices is not None:
@@ -29,16 +30,26 @@ class Argument(object):
 
 class Action(object):
     def __init__(self, *arg_specs):
-        # Check for forbidden arguments
         for arg_spec in arg_specs:
+            # Check for forbidden arguments used be elite
             if arg_spec.name in FORBIDDEN_ARGS:
-                self.fail(f'module uses argument {args_spec.name} which is forbidden')
+                self.fail(f'module uses argument {arg_spec.name} which is forbidden')
+
+            # Check for arguments that override Python keywords
+            if arg_spec.name in keyword.kwlist:
+                self.fail(f'module uses argument {arg_spec.name} which is a Python keyword')
+
+            # Check for arguments that override Python builtins
+            if arg_spec.name in dir(__builtins__):
+                self.fail(f'module uses argument {arg_spec.name} which is a Python builtin')
 
         self.arg_specs = arg_specs
 
         # Parse and validate arguments in JSON via stdin
         try:
             self.args = json.load(sys.stdin)
+        except KeyboardInterrupt:
+            exit(2)
         except json.decoder.JSONDecodeError:
             self.fail('the json input provided could not be parsed')
         self.validate_args()
@@ -46,7 +57,8 @@ class Action(object):
         # Open /dev/null for our run method
         self.devnull = open(os.devnull, 'w')
 
-        # Run the main process function for the action
+    def invoke(self):
+        """Run the main process function for the action with the appropriate args."""
         self.process(**self.args)
 
     def validate_args(self):
@@ -60,11 +72,11 @@ class Action(object):
         for arg_spec in self.arg_specs:
             # Check that each of the arguments are provided or set the default if optional
             if arg_spec.name not in self.args:
-                if arg_spec.required:
-                    self.fail(f"required argument '{arg_spec.name}' not provided")
-                else:
+                if arg_spec.optional:
                     self.args[arg_spec.name] = arg_spec.default
                     continue
+                else:
+                    self.fail(f"mandatory argument '{arg_spec.name}' was not provided")
 
             # Verify that the provided value is one of the choices
             if (
@@ -98,9 +110,14 @@ class Action(object):
         }
         if stderr or (not ignore_fail and not fail_error):
             kwargs['stderr'] = subprocess.PIPE
+        else:
+            kwargs['stderr'] = self.devnull
 
         # Run the command
-        proc = subprocess.run(command, cwd=cwd, encoding='utf-8', **kwargs)
+        try:
+            proc = subprocess.run(command, cwd=cwd, encoding='utf-8', **kwargs)
+        except FileNotFoundError:
+            self.fail(f'unable to find executable for command {command}')
 
         # Fail if the command returned a non-zero returrn code
         if proc.returncode and not ignore_fail:

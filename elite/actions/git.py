@@ -39,7 +39,8 @@ class Git(Action):
 
 if __name__ == '__main__':
     git = Git(
-        Argument('repo', required=True),
-        Argument('destination', required=True),
-        Argument('branch', required=False, default='master')
+        Argument('repo'),
+        Argument('destination'),
+        Argument('branch', optional=True, default='master')
     )
+    git.invoke()
