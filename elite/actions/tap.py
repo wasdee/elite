@@ -41,7 +41,7 @@ class Tap(Action):
 if __name__ == '__main__':
     tap = Tap(
         Argument('name'),
-        Argument('state', choices=['present', 'absent']),
+        Argument('state', choices=['present', 'absent'], default='present'),
         Argument('url', optional=True)
     )
     tap.invoke()

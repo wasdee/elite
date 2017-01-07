@@ -43,7 +43,7 @@ class Cask(Action):
 if __name__ == '__main__':
     cask = Cask(
         Argument('name'),
-        Argument('state', choices=['present', 'absent']),
+        Argument('state', choices=['present', 'absent'], default='present'),
         Argument('options', optional=True)
     )
     cask.invoke()

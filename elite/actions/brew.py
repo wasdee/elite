@@ -69,7 +69,7 @@ class Brew(Action):
 if __name__ == '__main__':
     brew = Brew(
         Argument('name'),
-        Argument('state', choices=['present', 'latest', 'absent']),
+        Argument('state', choices=['present', 'latest', 'absent'], default='present'),
         Argument('options', optional=True)
     )
     brew.invoke()

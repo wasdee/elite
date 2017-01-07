@@ -13,7 +13,7 @@ FORBIDDEN_ARGS = ['sudo', 'ok', 'changed']
 class Argument(object):
     def __init__(self, name, optional=False, default=None, choices=None):
         self.name = name
-        self.optional = optional
+        self.optional = True if default is not None else optional
         self.default = default
         self.choices = choices
 

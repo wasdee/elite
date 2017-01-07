@@ -41,6 +41,6 @@ if __name__ == '__main__':
     git = Git(
         Argument('repo'),
         Argument('destination'),
-        Argument('branch', optional=True, default='master')
+        Argument('branch', default='master')
     )
     git.invoke()
