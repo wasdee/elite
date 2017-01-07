@@ -56,9 +56,9 @@ class Plist(Action):
                 plistlib.dump(plist, f)
 
             if created:
-                self.changed('plist created successfully')
+                self.changed('plist created successfully', path=path)
             else:
-                self.changed('plist updated successfully')
+                self.changed('plist updated successfully', path=path)
         except IOError:
             self.fail('unable to update the requested plist file')
 

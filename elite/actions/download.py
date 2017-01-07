@@ -62,7 +62,7 @@ class Download(Action):
             self.fail('unable to retrieve the download URL requested')
 
         # Download was successful
-        self.changed('file downloaded successfully', filepath=filepath)
+        self.changed('file downloaded successfully', path=filepath)
 
 
 if __name__ == '__main__':
