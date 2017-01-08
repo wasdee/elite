@@ -8,7 +8,7 @@ from . import Argument, Action
 
 
 class Download(Action):
-    def process(self, url, path):
+    def process(self, url, path, mode, owner, group):
         # Download the requested URL to the destination path
         try:
             with urllib.request.urlopen(url) as r:
@@ -50,16 +50,15 @@ class Download(Action):
                 block_size = 1024 * 8
                 try:
                     with open(filepath, 'wb') as f:
-                        while True:
-                            block = r.read(block_size)
-                            if not block:
-                                break
+                        for block in iter(lambda: r.read(block_size), b''):
                             f.write(block)
                 except IOError:
                     self.fail('unable to write the download to the path requester')
 
         except urllib.error.URLError:
             self.fail('unable to retrieve the download URL requested')
+
+        self.set_file_attributes(path)
 
         # Download was successful
         self.changed('file downloaded successfully', path=filepath)
@@ -68,6 +67,7 @@ class Download(Action):
 if __name__ == '__main__':
     download = Download(
         Argument('url'),
-        Argument('path')
+        Argument('path'),
+        add_file_attribute_args=True
     )
     download.invoke()

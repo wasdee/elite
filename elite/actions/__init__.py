@@ -2,6 +2,7 @@ import json
 import keyword
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 
@@ -29,7 +30,7 @@ class Argument(object):
 
 
 class Action(object):
-    def __init__(self, *arg_specs):
+    def __init__(self, *arg_specs, add_file_attribute_args=False):
         for arg_spec in arg_specs:
             # Check for forbidden arguments used be elite
             if arg_spec.name in FORBIDDEN_ARGS:
@@ -44,7 +45,13 @@ class Action(object):
             # if arg_spec.name in dir(__builtins__):
             #     self.fail(f"module uses argument '{arg_spec.name}' which is a Python builtin")
 
-        self.arg_specs = arg_specs
+        self.arg_specs = list(arg_specs)
+        if add_file_attribute_args:
+            self.arg_specs.extend([
+                Argument('mode', optional=True),
+                Argument('owner', optional=True),
+                Argument('group', optional=True)
+            ])
 
         # Parse and validate arguments in JSON via stdin
         try:
@@ -136,3 +143,20 @@ class Action(object):
                 self.fail(f'unable to execute command {command}')
 
         return proc
+
+    def set_file_attributes(self, path):
+        if self.args.get('mode'):
+            try:
+                os.chmod(path, int(self.args['mode'], 8))
+            except IOError:
+                self.fail('unable to set the requested mode on the path specified')
+        if self.args.get('owner'):
+            try:
+                shutil.chown(path, user=self.args['owner'])
+            except IOError:
+                self.fail('unable to set the requested owner on the path specified')
+        if self.args.get('group'):
+            try:
+                shutil.chown(path, group=self.args['group'])
+            except IOError:
+                self.fail('unable to set the requested group on the path specified')

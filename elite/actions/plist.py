@@ -6,14 +6,14 @@ from . import Argument, Action
 
 
 class Plist(Action):
-    def validate_args(self, domain, container, path, values):
+    def validate_args(self, domain, container, path, values, mode, owner, group):
         if not domain and not path:
             self.fail("you must provide either the 'domain' or 'path' argument")
 
         if container and domain in ['NSGlobalDomain', 'Apple Global Domain']:
             self.fail("the 'container' argument is not allowed when updating the global domain")
 
-    def process(self, domain, container, path, values):
+    def process(self, domain, container, path, values, mode, owner, group):
         # Determine the path of the plist
         if domain in ['NSGlobalDomain', 'Apple Global Domain']:
             path = '~/Library/Preferences/.GlobalPreferences.plist'
@@ -55,6 +55,8 @@ class Plist(Action):
             with open(path, 'wb') as f:
                 plistlib.dump(plist, f)
 
+            self.set_file_attributes(path)
+
             if created:
                 self.changed('plist created successfully', path=path)
             else:
@@ -68,6 +70,7 @@ if __name__ == '__main__':
         Argument('domain', optional=True),
         Argument('container', optional=True),
         Argument('path', optional=True),
-        Argument('values')
+        Argument('values'),
+        add_file_attribute_args=True
     )
     plist.invoke()
