@@ -22,7 +22,7 @@ def build_absolute_path(path):
 
     :return: The absolute path of the provided path.
     """
-    return os.path.join(os.path.dirname(__file__), os.pardir, path)
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, path))
 
 
 def deep_merge(source, destination):
