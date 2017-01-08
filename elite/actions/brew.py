@@ -6,6 +6,9 @@ from . import Argument, Action
 
 class Brew(Action):
     def process(self, name, state, options):
+        # We'll work in lowercase as brew is case insensitive
+        name = name.lower()
+
         # Obtain information about the requested package
         brew_info_proc = self.run(
             ['brew', 'info', '--json=v1', name], stdout=True, ignore_fail=True
