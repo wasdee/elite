@@ -12,16 +12,19 @@ class Run(Action):
         if removes and not os.path.exists(removes):
             self.ok
 
+        # Build the kwargs to send to subprocess
+        kwargs = {'cwd': working_dir}
+        if shell:
+            kwargs.update(shell=True, executable=shell)
+
         # Check if the optional check command succeeds
         if unless:
-            unless_proc = self.run(unless, shell=True, executable=shell, ignore_fail=True)
+            unless_proc = self.run(unless, ignore_fail=True, **kwargs)
             if not unless_proc.returncode:
                 self.ok()
 
         # Run the given command
-        proc = self.run(
-            command, cwd=working_dir, stdout=True, stderr=True, shell=True, executable=shell
-        )
+        proc = self.run(command, stdout=True, stderr=True, **kwargs)
         self.ok(stdout=proc.stdout, stderr=proc.stderr, return_code=proc.returncode)
 
 

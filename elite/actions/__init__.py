@@ -105,31 +105,26 @@ class Action(object):
         print(json.dumps({'message': message, 'ok': False, **data}, indent=2))
         exit(1)
 
-    def run(
-        self, command, cwd=None, stdout=False, stderr=False, shell=False,
-        executable='/bin/bash', ignore_fail=False, fail_error=None
-    ):
+    def run(self, command, ignore_fail=False, fail_error=None, **kwargs):
         # Allow for the user to send in a string instead of a list for the command
-        if isinstance(command, str) and not shell:
+        if isinstance(command, str) and not kwargs.get('shell'):
             command = shlex.split(command)
 
-        # Determine if we need to capture stdout and stderr
-        kwargs = {
-            'stdout': subprocess.PIPE if stdout else self.devnull
-        }
-        if stderr or (not ignore_fail and not fail_error):
+        # Allow for the user to simply set stdout to a bool to enable them
+        kwargs['stdout'] = subprocess.PIPE if kwargs.get('stdout') else self.devnull
+
+        # Allow for a bool to enable stderr or enable it anyway if the command will fail on
+        # error and no message has been provided
+        if kwargs.get('stderr') or not ignore_fail and not fail_error:
             kwargs['stderr'] = subprocess.PIPE
         else:
             kwargs['stderr'] = self.devnull
 
         # Run the command
         try:
-            proc = subprocess.run(
-                command, cwd=cwd, shell=shell, executable=executable, encoding='utf-8', **kwargs
-            )
+            proc = subprocess.run(command, encoding='utf-8', **kwargs)
         except FileNotFoundError:
-            if not ignore_fail:
-                self.fail(f'unable to find executable for command {command}')
+            self.fail(f'unable to find executable for command {command}')
 
         # Fail if the command returned a non-zero returrn code
         if proc.returncode and not ignore_fail:
