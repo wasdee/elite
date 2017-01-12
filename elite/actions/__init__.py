@@ -147,7 +147,7 @@ class Action(object):
     def set_file_attributes(self, path):
         if self.args.get('mode'):
             try:
-                os.chmod(path, int(self.args['mode'], 8))
+                os.chmod(path, int(self.args['mode'], 8), follow_symlinks=False)
             except IOError:
                 self.fail('unable to set the requested mode on the path specified')
         if self.args.get('owner'):

@@ -7,140 +7,166 @@ from . import Argument, Action
 
 class File(Action):
     def validate_args(self, path, source, state, mode, owner, group):
-        if source and state in ['directory', 'absent']:
-            self.fail(
-                "the 'source' argument may not be provided when 'state' is "
-                "'directory' or 'absent'"
-            )
+        if source and state == 'absent':
+            self.fail("the 'source' argument may not be provided when 'state' is 'absent'")
 
-        if state == 'symlink' and not path:
-            self.fail("the 'path' argument must be provided when 'state' is 'symlink'")
+        if not source and state == 'symlink':
+            self.fail("the 'source' argument must be provided when 'state' is 'symlink'")
 
     def process(self, path, source, state, mode, owner, group):
         if state == 'file':
-            if source and not os.path.isfile(source):
-                self.fail('the source provided could not be found or is not a file')
+            if source:
+                # The source provided does not exist or is not a file
+                if not os.path.isfile(source):
+                    self.fail('the source provided could not be found or is not a file')
 
-            # An existing file was found
-            if os.path.isfile(path):
-                if source:
-                    # The source and destination are identical so no changes are required
-                    if self.md5(path) == self.md5(source):
-                        self.ok()
+                # If the destination provided is a path, then we place the file in it
+                if os.path.isdir(path):
+                    path = os.path.join(path, os.path.basename(source))
 
-                    # Replace the path with the source as it differed
-                    try:
-                        shutil.copy(source, path)
-                    except IOError:
-                        self.fail('unable to copy source file to path requested')
-
-                    self.set_file_attributes(path)
-                    self.changed('updated the existing path using the source successfully')
-                else:
+                # An existing file at the destination path was found so we compare them
+                # and avoid making changes if they're identical
+                exists = os.path.isfile(path)
+                if exists and self.md5(source) and self.md5(path):
                     self.ok()
 
-            # Clean any existing item in the path requested
-            exists = self.remove(path)
+                # Copy the source to the destination
+                self.copy(source, path)
 
-            # A source file was provided and must be copied to the path
-            if source:
-                try:
-                    shutil.copy(source, path)
-                except IOError:
-                    self.fail('unable to copy source file to path requested')
-
+                # Set mode, owner and group on the path
                 self.set_file_attributes(path)
-                self.changed('copied source to path successfully')
-            # A new empty file must be created at the path requesed
+
+                if exists:
+                    self.changed('copied source over existing file successfully', path=path)
+                else:
+                    self.changed('copied source to requested path successfully', path=path)
             else:
-                try:
-                    with open(path, 'w'):
-                        pass
-                except IOError:
-                    self.fail('unable to create the file requested')
+                # An existing file at the destination path was found
+                if os.path.isfile(path):
+                    self.ok()
 
+                # Create an empty file at the destination path
+                self.create_empty(path)
+
+                # Set mode, owner and group on the path
                 self.set_file_attributes(path)
-                self.changed('created requested file successfully')
+
+                self.changed('created requested file successfully', path=path)
 
         elif state == 'directory':
-            # An existing directory was found
-            if os.path.isdir(path):
-                self.ok()
+            if source:
+                # TODO: implement rsync like functionality here
+                self.fail('this feature is not implemented yet')
+            else:
+                # An existing directory was found
+                if os.path.isdir(path):
+                    self.ok()
 
-            # Clean any existing item in the path requested
-            exists = self.remove(path)
+                # Clean any existing item in the path requested
+                removed = self.remove(path)
 
-            # Create the directory requested
-            try:
-                os.makedirs(path)
-            except IOError:
-                if exists:
-                    self.fail('existing item removed but a new directory could not be created')
-                else:
+                # Create the directory requested
+                try:
+                    os.makedirs(path)
+                except OSError:
                     self.fail('the requested directory could not be created')
 
-            self.set_file_attributes(path)
+                # Set mode, owner and group on the path
+                self.set_file_attributes(path)
 
-            if exists:
-                self.changed('existing item found and replaced with directory successfully')
-            else:
-                self.changed('directory was created successfully')
+                if exists:
+                    self.changed(
+                        'existing item found and replaced with directory successfully', path=path
+                    )
+                else:
+                    self.changed('directory was created successfully', path=path)
 
         elif state == 'symlink':
-            if os.path.islink(path):
+            # If the destination provided is a path, then we place the file in it
+            if os.path.isdir(path):
+                path = os.path.join(path, os.path.basename(source))
+
+            # An existing symlink at the destination path was found so we compare them
+            # and avoid making changes if they're identical
+            exists = os.path.islink(path)
+            if exists and os.readlink(path) == source:
                 self.ok()
 
-            exists = self.remove(path)
+            # Delete any existing file or symlink at the path
+            removed = self.remove(path)
 
+            # Create the symlink requested
             try:
                 os.symlink(source, path)
-            except IOError:
+            except OSError:
                 self.fail('the requested symlink could not be created')
 
+            # Set mode, owner and group on the path
             self.set_file_attributes(path)
-            self.changed('symlink was created successfully')
+
+            if exists:
+                self.changed('symlink was created over existing file successfully', path=path)
+            else:
+                self.changed('symlink was created successfully', path=path)
 
         elif state == 'absent':
-            exists = self.remove(path)
-            if exists:
-                self.changed('existing item was removed successfully')
+            removed = self.remove(path)
+
+            if removed:
+                self.changed('existing item was removed successfully', path=path)
             else:
                 self.ok()
+
+    def copy(self, source, path, buffer_size=1024 * 8):
+        try:
+            with open(source, 'rb') as fsource:
+                with open(path, 'wb') as fpath:
+                    for buffer in iter(lambda: fsource.read(buffer_size), b''):
+                        fpath.write(buffer)
+        except OSError:
+            self.fail('unable to copy source file to path requested')
+
+    def create_empty(self, path):
+        try:
+            with open(path, 'w'):
+                pass
+        except IsADirectoryError:
+            self.fail('the destination path is a directory')
+        except OSError:
+            self.fail('unable to create an empty file at the path requested')
 
     def remove(self, path):
         if not os.path.exists(path) and not os.path.islink(path):
             return False
 
-        if os.path.isdir(path):
-            print(path)
+        if os.path.isfile(path):
+            try:
+                os.remove(path)
+            except OSError:
+                self.fail('existing file could not be removed')
+
+        elif os.path.isdir(path):
             try:
                 shutil.rmtree(path)
             except IOError:
                 self.fail('existing directory could not be recursively removed')
 
-        elif os.path.isfile(path):
-            try:
-                os.remove(path)
-            except IOError:
-                self.fail('existing file could not be removed')
-
         elif os.path.islink(path):
             try:
                 os.remove(path)
-            except IOError:
+            except OSError:
                 self.fail('existing symlink could not be removed')
 
         return True
 
-    def md5(self, path):
-        block_size = 1024 * 8
+    def md5(self, path, block_size=1024 * 8):
         hash = hashlib.md5()
 
         try:
             with open(path, 'rb') as f:
-                for chunk in iter(lambda: f.read(block_size), b''):
-                    hash.update(chunk)
-        except IOError:
+                for buffer in iter(lambda: f.read(block_size), b''):
+                    hash.update(buffer)
+        except OSError:
             self.fail('unable to determine checksum of file')
 
         return hash.hexdigest()
