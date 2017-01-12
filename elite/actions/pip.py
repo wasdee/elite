@@ -78,13 +78,13 @@ class Pip(Action):
                         [executable, 'install'] + options_list + [f'{name}=={version}'],
                         fail_error='unable to reinstall the requested package version'
                     )
-                    self.changed('package reinstalled to requested version successfully')
+                    self.changed()
                 else:
                     self.run(
                         [executable, 'install'] + options_list + [f'{name}=={version}'],
                         fail_error='unable to install the requested package version'
                     )
-                    self.changed('package installed to requested version successfully')
+                    self.changed()
             else:
                 if pip_installed:
                     self.ok()
@@ -93,7 +93,7 @@ class Pip(Action):
                         [executable, 'install'] + options_list + [name],
                         fail_error='unable to install the requested package'
                     )
-                    self.changed('package installed successfully')
+                    self.changed()
 
         elif state == 'latest':
             if pip_installed and not pip_outdated:
@@ -103,13 +103,13 @@ class Pip(Action):
                     [executable, 'install', '--upgrade'] + options_list + [name],
                     fail_error='unable to upgrade the requested package'
                 )
-                self.changed('existing outdated package found and upgraded successfully')
+                self.changed()
             else:
                 self.run(
                     [executable, 'install'] + options_list + [name],
                     fail_error='unable to install the requested package'
                 )
-                self.changed('package installed successfully')
+                self.changed()
 
         elif state == 'absent':
             if not pip_installed:
@@ -119,7 +119,7 @@ class Pip(Action):
                     [executable, 'uninstall', '--yes'] + options_list + [name],
                     fail_error='unable to remove the requested package'
                 )
-                self.changed('package was removed successfully')
+                self.changed()
 
 
 if __name__ == '__main__':

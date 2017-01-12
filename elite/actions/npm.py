@@ -78,14 +78,14 @@ class Npm(Action):
                         [f'{name}@{version}'],
                         fail_error='unable to reinstall the requested package version'
                     )
-                    self.changed('package reinstalled to requested version successfully')
+                    self.changed()
                 else:
                     self.run(
                         [executable, 'install'] + location_options + options_list +
                         [f'{name}@{version}'],
                         fail_error='unable to install the requested package version'
                     )
-                    self.changed('package installed to requested version successfully')
+                    self.changed()
             else:
                 if npm_installed:
                     self.ok()
@@ -94,7 +94,7 @@ class Npm(Action):
                         [executable, 'install'] + location_options + options_list + [name],
                         fail_error='unable to install the requested package'
                     )
-                    self.changed('package installed successfully')
+                    self.changed()
 
         elif state == 'latest':
             if npm_installed and not npm_outdated:
@@ -110,7 +110,7 @@ class Npm(Action):
                     [executable, 'install'] + location_options + options_list + [name],
                     fail_error='unable to install the requested package'
                 )
-                self.changed('package installed successfully')
+                self.changed()
 
         elif state == 'absent':
             if not npm_installed:
@@ -120,7 +120,7 @@ class Npm(Action):
                     [executable, 'uninstall'] + location_options + options_list + [name],
                     fail_error='unable to remove the requested package'
                 )
-                self.changed('package was removed successfully')
+                self.changed()
 
 
 if __name__ == '__main__':

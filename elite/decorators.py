@@ -1,35 +1,33 @@
 from functools import wraps
 
-from .ansible import Ansible, AnsibleError
+from .elite import Elite, EliteError
 from .config import Config
 from .printer import Printer
 from .utils import build_absolute_path
 from . import ansi
 
 
-def elite(config_path, module_search_paths=[]):
+def elite_main(config_path, action_search_paths=[]):
     def decorator(main):
         @wraps(main)
         def decorated_function():
             try:
-                # Setup Ansible and our configuration
-                module_search_paths_abs = [
-                    build_absolute_path(msp) for msp in module_search_paths
-                ]
+                # Setup Elite and our configuration
+                action_search_paths_abs = [build_absolute_path(msp) for msp in action_search_paths]
 
                 # Create our objects
                 printer = Printer()
-                ansible = Ansible(printer=printer, module_search_paths=module_search_paths_abs)
+                elite = Elite(printer=printer, action_search_paths=action_search_paths_abs)
                 config = Config(build_absolute_path(config_path))
 
                 # Header
                 printer.header()
 
-                # Run the main Ansible entrypoint
-                main(ansible, config, printer)
+                # Run the main Elite entrypoint
+                main(elite, config, printer)
 
             # A task failed to run
-            except AnsibleError as e:
+            except EliteError as e:
                 print()
                 print(f'{ansi.RED}Failed: {e}{ansi.ENDC}')
 
@@ -43,7 +41,6 @@ def elite(config_path, module_search_paths=[]):
 
             # Footer
             finally:
-                ansible.cleanup()
                 printer.footer()
 
         return decorated_function

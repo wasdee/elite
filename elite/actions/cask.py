@@ -27,7 +27,7 @@ class Cask(Action):
                     ['brew', 'cask', 'install'] + options_list + [name],
                     fail_error='unable to install the requested package'
                 )
-                self.changed('package installed successfully')
+                self.changed()
 
         elif state == 'absent':
             if not cask_installed:
@@ -37,7 +37,7 @@ class Cask(Action):
                     ['brew', 'cask', 'remove'] + options_list + [name],
                     fail_error='unable to remove the requested package'
                 )
-                self.changed('package was removed successfully')
+                self.changed()
 
 
 if __name__ == '__main__':

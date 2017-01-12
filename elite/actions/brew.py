@@ -40,7 +40,7 @@ class Brew(Action):
                     ['brew', 'install'] + options_list + [name],
                     fail_error='unable to install the requested package'
                 )
-                self.changed('package installed successfully')
+                self.changed()
 
         elif state == 'latest':
             if brew_installed and not brew_outdated:
@@ -50,13 +50,13 @@ class Brew(Action):
                     ['brew', 'upgrade'] + options_list + [name],
                     fail_error='unable to upgrade the requested package'
                 )
-                self.changed('existing outdated package found and upgraded successfully')
+                self.changed()
             else:
                 self.run(
                     ['brew', 'install'] + options_list + [name],
                     fail_error='unable to install the requested package'
                 )
-                self.changed('package installed successfully')
+                self.changed()
 
         elif state == 'absent':
             if not brew_installed:
@@ -66,7 +66,7 @@ class Brew(Action):
                     ['brew', 'remove'] + options_list + [name],
                     fail_error='unable to remove the requested package'
                 )
-                self.changed('package was removed successfully')
+                self.changed()
 
 
 if __name__ == '__main__':

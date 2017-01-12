@@ -5,6 +5,9 @@ from . import Argument, Action
 
 class Git(Action):
     def process(self, repo, path, branch):
+        # Ensure that home directories are taken into account
+        path = os.path.expanduser(path)
+
         # Check if the repository already exists in the destination path
         if os.path.exists(os.path.join(path, '.git', 'config')):
             # Verify that the existing repo is on the correct branch
@@ -22,7 +25,7 @@ class Git(Action):
                     ['git', 'checkout', branch], cwd=path,
                     fail_error='unable to checkout requested branch'
                 )
-                self.changed('existing repo found and switched to requested branch')
+                self.changed()
 
         # Build the clone command
         git_command = ['git', 'clone', '--quiet']
@@ -34,7 +37,7 @@ class Git(Action):
         self.run(git_command, fail_error='unable to clone git repository')
 
         # Clone was successful
-        self.changed('repository cloned successfully')
+        self.changed()
 
 
 if __name__ == '__main__':

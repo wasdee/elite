@@ -14,6 +14,11 @@ class File(Action):
             self.fail("the 'source' argument must be provided when 'state' is 'symlink'")
 
     def process(self, path, source, state, mode, owner, group):
+        # Ensure that home directories are taken into account
+        path = os.path.expanduser(path)
+        if source:
+            source = os.path.expanduser(source)
+
         if state == 'file':
             if source:
                 # The source provided does not exist or is not a file
@@ -36,10 +41,7 @@ class File(Action):
                 # Set mode, owner and group on the path
                 self.set_file_attributes(path)
 
-                if exists:
-                    self.changed('copied source over existing file successfully', path=path)
-                else:
-                    self.changed('copied source to requested path successfully', path=path)
+                self.changed(path=path)
             else:
                 # An existing file at the destination path was found
                 if os.path.isfile(path):
@@ -51,7 +53,7 @@ class File(Action):
                 # Set mode, owner and group on the path
                 self.set_file_attributes(path)
 
-                self.changed('created requested file successfully', path=path)
+                self.changed(path=path)
 
         elif state == 'directory':
             if source:
@@ -74,12 +76,7 @@ class File(Action):
                 # Set mode, owner and group on the path
                 self.set_file_attributes(path)
 
-                if exists:
-                    self.changed(
-                        'existing item found and replaced with directory successfully', path=path
-                    )
-                else:
-                    self.changed('directory was created successfully', path=path)
+                self.changed(path=path)
 
         elif state == 'symlink':
             # If the destination provided is a path, then we place the file in it
@@ -104,18 +101,11 @@ class File(Action):
             # Set mode, owner and group on the path
             self.set_file_attributes(path)
 
-            if exists:
-                self.changed('symlink was created over existing file successfully', path=path)
-            else:
-                self.changed('symlink was created successfully', path=path)
+            self.changed(path=path)
 
         elif state == 'absent':
             removed = self.remove(path)
-
-            if removed:
-                self.changed('existing item was removed successfully', path=path)
-            else:
-                self.ok()
+            self.changed(path=path) if removed else self.ok()
 
     def copy(self, source, path, buffer_size=1024 * 8):
         try:

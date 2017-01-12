@@ -5,6 +5,9 @@ from . import Argument, Action
 
 class FileInfo(Action):
     def process(self, path):
+        # Ensure that home directories are taken into account
+        path = os.path.expanduser(path)
+
         # Check if the filepath exists
         if os.path.exists(path):
             exists = True

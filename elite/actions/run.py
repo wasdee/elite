@@ -5,12 +5,20 @@ from . import Argument, Action
 
 class Run(Action):
     def process(self, command, working_dir, shell, unless, creates, removes):
+        # Ensure that home directories are taken into account
+        if working_dir:
+            working_dir = os.path.expanduser(working_dir)
+        if creates:
+            creates = os.path.expanduser(creates)
+        if removes:
+            removes = os.path.expanduser(removes)
+
         # Check if the created or removed file is already present
         if creates and os.path.exists(creates):
             self.ok()
 
         if removes and not os.path.exists(removes):
-            self.ok
+            self.ok()
 
         # Build the kwargs to send to subprocess
         kwargs = {'cwd': working_dir}
@@ -25,7 +33,7 @@ class Run(Action):
 
         # Run the given command
         proc = self.run(command, stdout=True, stderr=True, **kwargs)
-        self.ok(stdout=proc.stdout, stderr=proc.stderr, return_code=proc.returncode)
+        self.changed(stdout=proc.stdout, stderr=proc.stderr, return_code=proc.returncode)
 
 
 if __name__ == '__main__':

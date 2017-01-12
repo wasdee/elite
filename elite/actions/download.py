@@ -9,6 +9,9 @@ from . import Argument, Action
 
 class Download(Action):
     def process(self, url, path, mode, owner, group):
+        # Ensure that home directories are taken into account
+        path = os.path.expanduser(path)
+
         # Download the requested URL to the destination path
         try:
             with urllib.request.urlopen(url) as r:
@@ -61,7 +64,7 @@ class Download(Action):
         self.set_file_attributes(path)
 
         # Download was successful
-        self.changed('file downloaded successfully', path=filepath)
+        self.changed(path=filepath)
 
 
 if __name__ == '__main__':

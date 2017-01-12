@@ -1,4 +1,4 @@
-from .ansible import AnsibleState
+from .elite import EliteState
 from . import ansi
 
 
@@ -31,24 +31,22 @@ class Printer(object):
         print(f'{ansi.BOLD}{text}{ansi.ENDC}')
         print()
 
-    def progress(self, state, module, raw_params, args, settings, result):
+    def progress(self, state, action, args, result):
         """
         Displays task progress while tasks are both running and completing execution.
 
-        :param state: The state of the task which is an enum of type AnsibleStatus.
-        :param module: The module being called.
-        :param raw_params: The raw parameters sent to the module.
-        :param args: The arguments sent to the module.
-        :param settings: Any settings the user has set on the task run (e.g. sudo).
+        :param state: The state of the task which is an enum of type EliteStatus.
+        :param action: The action being called.
+        :param args: The arguments sent to the action.
         :param result: The result of the execution or None when the task is still running.
         """
         # Overwrite output when the task completes
-        if state != AnsibleState.RUNNING:
+        if state != EliteState.RUNNING:
             print(f'\r{ansi.CLEAR_LINE}', end='', flush=True)
 
         # Print the task being executed
-        newline = state != AnsibleState.RUNNING
-        self._print_task(state, module, raw_params, args, settings, result, newline)
+        newline = state != EliteState.RUNNING
+        self._print_task(state, action, args, result, newline)
 
     def summary(
         self, total_tasks, ok_tasks, changed_tasks, failed_tasks,
@@ -67,17 +65,17 @@ class Printer(object):
         # Display any tasks that caused changes.
         if changed_task_info:
             self.info('Changed task info:')
-            for module, raw_params, args, settings, result in changed_task_info:
+            for action, args, result in changed_task_info:
                 self._print_task(
-                    AnsibleState.CHANGED, module, raw_params, args, settings, result, newline=True
+                    EliteState.CHANGED, action, args, result, newline=True
                 )
 
         # Display any failed tasks.
         if failed_task_info:
             self.info('Failed task info:')
-            for module, raw_params, args, settings, result in failed_task_info:
+            for action, args, result in failed_task_info:
                 self._print_task(
-                    AnsibleState.FAILED, module, raw_params, args, settings, result, newline=True
+                    EliteState.FAILED, action, args, result, newline=True
                 )
 
         # Display all totals
@@ -87,35 +85,28 @@ class Printer(object):
         print(f"{ansi.RED}{'failed':^10}{ansi.ENDC}{failed_tasks:4}")
         print(f"{'total':^10}{total_tasks:4}")
 
-    def _print_task(self, state, module, raw_params, args, settings, result, newline=False):
+    def _print_task(self, state, action, args, result, newline=False):
         """
-        Displays a particular task along with the related msg upon failure.
+        Displays a particular task along with the related message upon failure.
 
-        :param state: The state of the task which is an enum of type AnsibleStatus.
-        :param module: The module being called.
-        :param raw_params: The raw parameters sent to the module.
-        :param args: The arguments sent to the module.
-        :param settings: Any settings the user has set on the task run (e.g. sudo).
+        :param state: The state of the task which is an enum of type EliteStatus.
+        :param action: The action being called.
+        :param args: The arguments sent to the action.
         :param result: The result of the execution or None when the task is still running.
         :param newline: Whether or not to end the output with a newline.
         """
-        # Prepare raw_params for printing
-        print_raw_params = f' {raw_params}' if raw_params else ''
-
         # Prettify arguments for printing
-        print_args_strs = [
-            f'{k}={repr(v)}' for k, v in args.items() if k != '_raw_params' and v is not None
-        ]
+        print_args_strs = [f'{k}={repr(v)}' for k, v in args.items() if v is not None]
         print_args = f" {' '.join(print_args_strs)}" if print_args_strs else ''
 
         # Determine the output colour and state text
-        if state == AnsibleState.RUNNING:
+        if state == EliteState.RUNNING:
             print_colour = ansi.WHITE
             print_state = 'running'
-        elif state == AnsibleState.FAILED:
+        elif state == EliteState.FAILED:
             print_colour = ansi.RED
             print_state = 'failed'
-        elif state == AnsibleState.CHANGED:
+        elif state == EliteState.CHANGED:
             print_colour = ansi.YELLOW
             print_state = 'changed'
         else:
@@ -125,20 +116,22 @@ class Printer(object):
         # Display the status in the appropriate colour
         print(f'{print_colour}{print_state:^10}{ansi.ENDC}', end='', flush=True)
 
-        # Display the module details
-        print(f'{ansi.BLUE}{module}:{ansi.ENDC}', end='', flush=True)
+        # Display the action details
+        print(f'{ansi.BLUE}{action}:{ansi.ENDC}', end='', flush=True)
 
-        # Display the module parameters and arguments
+        # Display the action parameters and arguments
         print(f'{ansi.YELLOW}', end='', flush=True)
-        if settings.get('sudo', False):
-            print(' (sudo)', end='', flush=True)
-        print(f'{print_raw_params}{print_args}{ansi.ENDC}', end='', flush=True)
+        # TODO: re-instate sudo printing
+        # if settings.get('sudo', False):
+        #     print(' (sudo)', end='', flush=True)
+        print(f'{print_args}{ansi.ENDC}', end='', flush=True)
 
-        # Display the failure message if necessary
-        if state == AnsibleState.FAILED:
+        # Display the changed or failure message if necessary
+        if state == EliteState.FAILED:
             print()
             print(
-                f"{ansi.BLUE}{'':^10}msg:{ansi.ENDC} {ansi.YELLOW}{result['msg']}{ansi.ENDC}",
+                f"{ansi.BLUE}{'':^10}message:{ansi.ENDC} "
+                f"{ansi.YELLOW}{result['message']}{ansi.ENDC}",
                 end='', flush=True
             )
 

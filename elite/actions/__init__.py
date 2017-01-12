@@ -8,7 +8,7 @@ import sys
 
 
 # A list of reserved argument names that may not be used by actions
-FORBIDDEN_ARGS = ['sudo', 'ok', 'changed']
+FORBIDDEN_ARGS = ['sudo', 'ok', 'changed', 'ignore_failed']
 
 
 class Argument(object):
@@ -104,8 +104,8 @@ class Action(object):
         print(json.dumps({'changed': False, 'ok': True, **data}, indent=2))
         exit(0)
 
-    def changed(self, message, **data):
-        print(json.dumps({'changed': True, 'message': message, 'ok': True, **data}, indent=2))
+    def changed(self, **data):
+        print(json.dumps({'changed': True, 'ok': True, **data}, indent=2))
         exit(0)
 
     def fail(self, message, **data):

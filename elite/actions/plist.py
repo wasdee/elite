@@ -5,38 +5,51 @@ from utils import deep_merge
 from . import Argument, Action
 
 
+def equal(source, destination):
+    if isinstance(destination, dict) and isinstance(source, dict):
+        for key, value in source.items():
+            if not equal(destination.get(key), value):
+                return False
+    else:
+        return source == destination
+
+    return True
+
+
 class Plist(Action):
     def validate_args(self, domain, container, path, values, mode, owner, group):
         if not domain and not path:
             self.fail("you must provide either the 'domain' or 'path' argument")
 
+        if domain and path:
+            self.fail("you may only provide one of the 'domain' or 'path' arguments")
+
         if container and domain in ['NSGlobalDomain', 'Apple Global Domain']:
             self.fail("the 'container' argument is not allowed when updating the global domain")
 
     def process(self, domain, container, path, values, mode, owner, group):
-        # Determine the path of the plist
-        if domain in ['NSGlobalDomain', 'Apple Global Domain']:
-            path = '~/Library/Preferences/.GlobalPreferences.plist'
-        elif domain and container:
-            path = f'~/Library/Containers/{container}/Data/Library/Preferences/{domain}.plist'
-        elif domain:
-            path = f'~/Library/Preferences/{domain}.plist'
+        # Determine the path of the plist if the domain was provided
+        if domain:
+            if domain in ['NSGlobalDomain', 'Apple Global Domain']:
+                path = '~/Library/Preferences/.GlobalPreferences.plist'
+            elif domain and container:
+                path = f'~/Library/Containers/{container}/Data/Library/Preferences/{domain}.plist'
+            else:
+                path = f'~/Library/Preferences/{domain}.plist'
 
         path = os.path.expanduser(path)
 
         # Load the plist or create a fresh data structure if it doesn't exist
-        created = False
         try:
             with open(path, 'rb') as f:
                 plist = plistlib.load(f)
         except IOError:
-            created = True
             plist = {}
         except plistlib.InvalidFileException:
             self.fail('an invalid plist already exists')
 
         # Check if the current plist is the same as the values provided
-        if plist == values:
+        if equal(values, plist):
             self.ok()
 
         # Update the plist with the values provided
@@ -57,10 +70,7 @@ class Plist(Action):
 
             self.set_file_attributes(path)
 
-            if created:
-                self.changed('plist created successfully', path=path)
-            else:
-                self.changed('plist updated successfully', path=path)
+            self.changed(path=path)
         except IOError:
             self.fail('unable to update the requested plist file')
 

@@ -3,6 +3,9 @@ from . import Argument, Action
 
 class Tap(Action):
     def process(self, name, state, url):
+        # We'll work in lowercase as brew is case insensitive
+        name = name.lower()
+
         # Obtain information about installed taps
         tap_list_proc = self.run('brew tap', stdout=True, ignore_fail=True)
 
@@ -25,7 +28,7 @@ class Tap(Action):
                     ['brew', 'tap'] + [name] + url_list,
                     fail_error='unable to tap the requested repository'
                 )
-                self.changed('repository tapped successfully')
+                self.changed()
 
         elif state == 'absent':
             if not tapped:
@@ -35,7 +38,7 @@ class Tap(Action):
                     ['brew', 'untap', name],
                     fail_error='unable to untap the requested repository'
                 )
-                self.changed('repository untapped successfully')
+                self.changed()
 
 
 if __name__ == '__main__':
