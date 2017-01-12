@@ -124,6 +124,9 @@ class Elite(object):
             else:
                 result = json.loads(stdout.decode('utf-8'))
 
+            if result['ok'] and changed is not None:
+                result['changed'] = changed
+
             # Determine the final state of the task.
             if not result['ok']:
                 state = EliteState.FAILED
