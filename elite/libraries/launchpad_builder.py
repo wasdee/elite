@@ -4,7 +4,7 @@ import os
 import subprocess
 import sqlite3
 
-from ..utils import batch, generate_uuid
+from utils import batch, generate_uuid
 
 
 def get_launchpad_db_dir():
@@ -99,11 +99,11 @@ class LaunchpadBuilder(object):
                     items_in_layout.append(title)
 
         # Determine which items are extra items are present compared to the layout provided
-        extra_items = set(mapping.keys()).difference(items_in_layout)
+        extra_items = list(set(mapping.keys()).difference(items_in_layout))
 
         # If extra items are found, add them to the layout
         if extra_items:
-            for extra_items_batch in batch(list(extra_items), 30):
+            for extra_items_batch in batch(extra_items, 30):
                 layout.append(extra_items_batch)
 
         return extra_items

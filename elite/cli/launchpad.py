@@ -7,7 +7,7 @@ from time import sleep
 
 import yaml
 
-from ..libraries.launchpad_builder import get_launchpad_db_dir, LaunchpadBuilder
+from libraries.launchpad_builder import get_launchpad_db_dir, LaunchpadBuilder
 
 
 # Colours
