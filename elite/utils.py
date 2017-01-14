@@ -1,5 +1,6 @@
 from collections import namedtuple
 import os
+import subprocess
 
 
 def dict_to_namedtuple(typename, dictionary):
@@ -43,3 +44,20 @@ def deep_merge(source, destination):
             destination[key] = value
 
     return destination
+
+
+def batch(items, batch_size):
+    """
+    Batches up a list into multiple lists which each are of the requested batch size;
+
+    :param items: the list of items to be batched
+    :param batch_size: the size of each batch
+    """
+    length = len(items)
+    for index in range(0, length, batch_size):
+        yield items[index:min(index + batch_size, length)]
+
+
+def generate_uuid():
+    """Generate a UUID using uuidgen."""
+    return subprocess.check_output('uuidgen').decode('utf-8').strip()
