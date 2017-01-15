@@ -4,7 +4,7 @@ import os
 import subprocess
 import sqlite3
 
-from utils import batch, generate_uuid
+from ..utils import batch, generate_uuid
 
 
 def get_launchpad_db_dir():

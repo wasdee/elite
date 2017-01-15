@@ -1,7 +1,7 @@
 import os
 
 from . import Argument, Action
-from libraries.launchpad_builder import get_launchpad_db_dir, LaunchpadBuilder
+from ..libraries.launchpad_builder import get_launchpad_db_dir, LaunchpadBuilder
 
 
 class Launchpad(Action):

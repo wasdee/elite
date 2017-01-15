@@ -52,26 +52,44 @@ class Elite(object):
 
     def _find_elite_actions(self):
         """
-        Determine what Elite actions are available along with their full path.  This method
+        Determine what Elite actions are available along with their full module name.  This method
         updates self._elite_actions with a dict containing the action name as the key and the path
-        as the value.
+        as the value.  It also updates sys.path to ensure that modules can be loaded via
+        python -m <full-module-name>.
         """
-        # Find the Elite core actions directory
-        actions_base = os.path.join(os.path.dirname(__file__), 'actions')
+
+        # Start our list of library directories with the elite library
+        library_dirs = [
+            os.path.join(os.path.dirname(__file__))
+        ]
+
+        # TODO: Add additional libraries supplied by the user to our list of library directories
 
         # Search through all action paths for actions
-        for search_path in [actions_base] + self.action_search_paths:
-            for root, dirs, files in os.walk(search_path):
+        for library_dir in library_dirs:
+            # Determine the library containing the library that we will add to our syspath so that
+            # Python can successfully run the module
+            library_parent_dir = os.path.dirname(library_dir)
+            sys.path.append(library_parent_dir)
+
+            # Go through all files in the <module-name>/actions directory
+            for root, dirs, files in os.walk(os.path.join(library_dir, 'actions')):
                 for filename in files:
+                    # Obtain the file's name (which is the action name) and the extension
+                    action_name, extension = os.path.splitext(filename)
+
                     # Skip any files that don't match *.py or start with an underscore
-                    extension = os.path.splitext(filename)
-                    if extension[1] != '.py' or filename.startswith('_'):
+                    if filename.startswith('_') or extension not in ['.py']:
                         continue
 
-                    # Add the action to our dict
-                    action_name = filename[:-3]
-                    action_path = os.path.join(root, filename)
-                    self._elite_actions[action_name] = action_path
+                    # Determine the full module name for the action based on the path we just added
+                    # to sys.path (e.g. <module-name>.actions.<action-name>)
+                    action_rel_name = os.path.join(
+                        os.path.relpath(root, library_parent_dir), action_name
+                    )
+                    action_module = action_rel_name.replace(os.sep, '.')
+
+                    self._elite_actions[action_name] = action_module
 
     def __getattr__(self, action):
         """
@@ -103,14 +121,12 @@ class Elite(object):
             # -S - read password from stdin
             # -p '<prompt>' - the prompt to display
             # -u '<user>' - the user to sudo as
-            cwd = os.path.dirname(os.path.dirname(self._elite_actions[action]))
-            module = self._elite_actions[action].split(cwd)[-1][1:-3].replace('/', '.')
+            action_module = self._elite_actions[action]
             proc_args = [shutil.which('sudo'), '-n'] if sudo else []
-            proc_args.extend([sys.executable, '-m', module])
+            proc_args.extend([sys.executable, '-m', action_module])
 
             proc = subprocess.Popen(
-                proc_args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                cwd=cwd
+                proc_args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE
             )
             stdout, stderr = proc.communicate(json.dumps(args).encode('utf-8'))
 

@@ -1,7 +1,7 @@
 import os
 import plistlib
 
-from utils import deep_merge
+from ..utils import deep_merge
 from . import Argument, Action
 
 
