@@ -7,7 +7,7 @@ from time import sleep
 
 import yaml
 
-from libraries.launchpad_builder import get_launchpad_db_dir, LaunchpadBuilder
+from ..libraries.launchpad_builder import get_launchpad_db_dir, LaunchpadBuilder
 
 
 # Colours
@@ -153,7 +153,11 @@ def main():
             'app_layout': launchpad_builder.app_layout
         }
 
-        if config != layout:
+        if config == layout:
+            print(f'{GREEN}The configuration provided is identical to the current layout{ENDC}')
+        else:
+            print(f'{RED}The configuration provided is different to the current layout{ENDC}')
+            print()
             exit(1)
 
     print()
