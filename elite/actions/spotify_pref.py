@@ -27,7 +27,7 @@ class SpotifyPref(Action):
         try:
             with open(path, 'r') as f:
                 for config_pref_line in f.readlines():
-                    config_pref, config_value = config_pref_line.strip().split('=', 1)
+                    config_pref, config_value = config_pref_line.rstrip().split('=', 1)
                     prefs[config_pref] = config_value
         except ValueError:
             self.fail('unable to parse existing Spotify configuration')

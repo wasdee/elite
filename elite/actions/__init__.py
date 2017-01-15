@@ -136,7 +136,7 @@ class Action(object):
         # Fail if the command returned a non-zero returrn code
         if proc.returncode and not ignore_fail:
             if proc.stderr:
-                self.fail(proc.stderr.strip())
+                self.fail(proc.stderr.rstrip())
             elif fail_error:
                 self.fail(fail_error)
             else:

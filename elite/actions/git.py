@@ -17,7 +17,7 @@ class Git(Action):
             )
 
             # Currently checked out repo is on the correct branch
-            if git_branch_proc.stdout.strip() == branch:
+            if git_branch_proc.stdout.rstrip() == branch:
                 self.ok()
             # Checked out repo is on the wrong branch and must be switched
             else:

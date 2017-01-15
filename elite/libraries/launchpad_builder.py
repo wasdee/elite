@@ -11,7 +11,7 @@ def get_launchpad_db_dir():
     """Determines the user's Launchpad database directory containing the SQLite database."""
     darwin_user_dir = subprocess.check_output(
         ['getconf', 'DARWIN_USER_DIR']
-    ).decode('utf-8').strip()
+    ).decode('utf-8').rstrip()
     return os.path.join(darwin_user_dir, 'com.apple.dock.launchpad', 'db')
 
 

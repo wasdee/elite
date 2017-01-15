@@ -12,7 +12,7 @@ class Cask(Action):
         if cask_list_proc.returncode:
             cask_installed = False
         else:
-            cask_list = cask_list_proc.stdout.strip().split('\n')
+            cask_list = cask_list_proc.stdout.rstrip().split('\n')
             cask_installed = name in cask_list
 
         # Prepare any user provided options

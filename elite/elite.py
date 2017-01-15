@@ -134,7 +134,7 @@ class Elite(object):
             if proc.returncode != 0 and stderr:
                 result = {
                     'ok': False,
-                    'message': stderr.decode('utf-8').strip(),
+                    'message': stderr.decode('utf-8').rstrip(),
                     'return_code': proc.returncode
                 }
             else:

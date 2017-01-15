@@ -13,7 +13,7 @@ class Tap(Action):
         if tap_list_proc.returncode:
             tapped = False
         else:
-            tap_list = tap_list_proc.stdout.strip().split('\n')
+            tap_list = tap_list_proc.stdout.rstrip().split('\n')
             tapped = name in tap_list
 
         # Prepare the URL if provided options
