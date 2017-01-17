@@ -2,6 +2,12 @@ import hashlib
 import os
 import shutil
 
+from CoreFoundation import NSURL, NSData
+from Foundation import (
+    NSURLBookmarkCreationSuitableForBookmarkFile, NSURLBookmarkResolutionWithoutUI
+)
+import objc
+
 from . import Argument, Action
 
 
@@ -77,6 +83,57 @@ class File(Action):
                 self.set_file_attributes(path)
 
                 self.changed(path=path)
+
+        elif state == 'alias':
+            # If the destination provided is a path, then we place the file in it
+            if os.path.isdir(path):
+                path = os.path.join(path, os.path.basename(source))
+
+            # When creating an alias, the source must be an absolute path and exist
+            source = os.path.abspath(source)
+            if not os.path.exists(source):
+                self.fail('the source file provided does not exist')
+
+            # An existing alias at the destination path was found so we compare them
+            # and avoid making changes if they're identical
+            exists = os.path.isfile(path)
+            path_url = NSURL.fileURLWithPath_(path)
+
+            if exists:
+                bookmark_data, error = NSURL.bookmarkDataWithContentsOfURL_error_(
+                    path_url, objc.nil
+                )
+
+                if bookmark_data:
+                    source_url, is_stale, error = NSURL.URLByResolvingBookmarkData_options_relativeToURL_bookmarkDataIsStale_error_(  # flake8: noqa
+                        bookmark_data, NSURLBookmarkResolutionWithoutUI, None, objc.nil, objc.nil
+                    )
+                    if source_url.path() == source:
+                        self.ok()
+
+            # Delete any existing file or symlink at the path
+            removed = self.remove(path)
+
+            # Create an NSURL object for the source (absolute paths must be used for aliases)
+            source_url = NSURL.fileURLWithPath_(source)
+
+            # Build the bookmark for the alias
+            bookmark_data, error = source_url.bookmarkDataWithOptions_includingResourceValuesForKeys_relativeToURL_error_(
+                NSURLBookmarkCreationSuitableForBookmarkFile, None, None, objc.nil
+            )
+
+            # Write the alias using the bookmark data
+            if bookmark_data:
+                success, error = NSURL.writeBookmarkData_toURL_options_error_(
+                    bookmark_data, path_url, NSURLBookmarkCreationSuitableForBookmarkFile, objc.nil
+                )
+            else:
+                self.fail('unable to create alias')
+
+            # Set mode, owner and group on the path
+            self.set_file_attributes(path)
+
+            self.changed(path=path)
 
         elif state == 'symlink':
             # If the destination provided is a path, then we place the file in it
@@ -166,7 +223,9 @@ if __name__ == '__main__':
     file = File(
         Argument('path'),
         Argument('source', optional=True),
-        Argument('state', choices=['file', 'directory', 'symlink', 'absent'], default='file'),
+        Argument(
+            'state', choices=['file', 'directory', 'alias', 'symlink', 'absent'], default='file'
+        ),
         add_file_attribute_args=True
     )
     file.invoke()

@@ -1,5 +1,3 @@
-import os
-
 from . import Argument, Action
 from ..libraries.dock_builder import get_dock_plist_path, DockBuilder
 
