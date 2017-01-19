@@ -38,6 +38,7 @@ class FileInfo(Action):
                     source = source_url.path()
                 else:
                     file_type = 'file'
+                    source = None
 
             # Determine if the path is a mountpoint
             mount = os.path.ismount(path)
