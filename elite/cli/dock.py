@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 import argparse
-import os
 import json
 import subprocess
-from time import sleep
 
 import yaml
 
