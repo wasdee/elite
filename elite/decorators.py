@@ -26,6 +26,10 @@ def elite_main(config_path, action_search_paths=[]):
                 # Run the main Elite entrypoint
                 main(elite, config, printer)
 
+                # Summary
+                printer.heading('Summary')
+                elite.summary()
+
             # A task failed to run
             except EliteError as e:
                 print()

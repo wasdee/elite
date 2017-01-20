@@ -135,7 +135,6 @@ if __name__ == '__main__':
     main()
 ```
 
-
 ## License
 
 Elite is proprietary software and may not be copied and/or distributed without
