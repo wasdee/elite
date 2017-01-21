@@ -1,4 +1,9 @@
 import os
+
+from AppKit import NSFont
+# Strangely NSKeyedArchiver won't import without ScriptingBridge
+import ScriptingBridge  # flake8: noqa
+from Foundation import NSKeyedArchiver, NSCalibratedRGBColor
 import yaml
 
 
@@ -7,7 +12,46 @@ def join_path(loader, node):
     return os.path.join(*[i for i in seq])
 
 
+def macos_font(loader, node):
+    seq = loader.construct_sequence(node)
+
+    if len(seq) != 2:
+        raise ValueError('only two arguments may be provided, the font name and size')
+
+    font_name, font_size = seq
+    font = NSFont.fontWithName_size_(font_name, font_size)
+
+    if font is None:
+        raise ValueError('unable to find the font requested')
+
+    return bytes(NSKeyedArchiver.archivedDataWithRootObject_(font))
+
+
+def macos_color(loader, node):
+    seq = loader.construct_sequence(node)
+
+    if len(seq) != 4:
+        raise ValueError('only four arguments may be provided, red, green, blue and alpha')
+
+    red, green, blue, alpha = seq
+
+    for color in [red, green, blue]:
+        if not 0 <= color <= 255:
+            raise ValueError('colors provided must be in the range 0 to 255')
+
+    if not 0 <= alpha <= 1:
+        raise ValueError('alpha must be in the range 0 to 1')
+
+    color = NSCalibratedRGBColor.alloc().initWithRed_green_blue_alpha_(
+        red / 255, green / 255, blue / 255, alpha
+    )
+
+    return bytes(NSKeyedArchiver.archivedDataWithRootObject_(color))
+
+
 yaml.add_constructor('!join_path', join_path)
+yaml.add_constructor('!macos_font', macos_font)
+yaml.add_constructor('!macos_color', macos_color)
 
 
 class Config(object):

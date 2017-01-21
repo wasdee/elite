@@ -1,6 +1,7 @@
-import json
+import ast
 import keyword
 import os
+from pprint import pprint
 import shlex
 import shutil
 import subprocess
@@ -53,13 +54,13 @@ class Action(object):
                 Argument('group', optional=True)
             ])
 
-        # Parse and validate arguments in JSON via stdin
+        # Parse and validate arguments via stdin
         try:
-            self.args = json.load(sys.stdin)
+            self.args = ast.literal_eval(sys.stdin.read())
         except KeyboardInterrupt:
             exit(2)
-        except json.decoder.JSONDecodeError:
-            self.fail('the json input provided could not be parsed')
+        except ValueError:
+            self.fail('the arguments provided could not be parsed')
 
         self.validate_args_against_spec()
 
@@ -109,15 +110,15 @@ class Action(object):
         pass
 
     def ok(self, **data):
-        print(json.dumps({'changed': False, 'ok': True, **data}, indent=2))
+        pprint({'changed': False, 'ok': True, **data})
         exit(0)
 
     def changed(self, **data):
-        print(json.dumps({'changed': True, 'ok': True, **data}, indent=2))
+        pprint({'changed': True, 'ok': True, **data})
         exit(0)
 
     def fail(self, message, **data):
-        print(json.dumps({'message': message, 'ok': False, **data}, indent=2))
+        pprint({'message': message, 'ok': False, **data})
         exit(1)
 
     def run(self, command, ignore_fail=False, fail_error=None, **kwargs):

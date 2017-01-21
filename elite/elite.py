@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
+import ast
 from enum import Enum
-import json
 import os
 import shutil
 import subprocess
@@ -128,7 +128,7 @@ class Elite(object):
             proc = subprocess.Popen(
                 proc_args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE
             )
-            stdout, stderr = proc.communicate(json.dumps(args).encode('utf-8'))
+            stdout, stderr = proc.communicate(repr(args).encode('utf-8'))
 
             # Parse the result upon successful command run
             if proc.returncode != 0 and stderr:
@@ -138,7 +138,7 @@ class Elite(object):
                     'return_code': proc.returncode
                 }
             else:
-                result = json.loads(stdout.decode('utf-8'))
+                result = ast.literal_eval(stdout.decode('utf-8'))
 
             if result['ok'] and changed is not None:
                 result['changed'] = changed
