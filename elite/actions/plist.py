@@ -8,7 +8,7 @@ from . import Argument, Action
 def equal(source, destination):
     if isinstance(destination, dict) and isinstance(source, dict):
         for key, value in source.items():
-            if not equal(destination.get(key), value):
+            if not equal(value, destination.get(key)):
                 return False
     else:
         return source == destination
