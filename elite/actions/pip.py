@@ -50,6 +50,9 @@ class Pip(Action):
                 pip_installed = name in pip_list
 
                 if pip_installed:
+                    pip_version = pip_list[name]
+
+                if pip_installed and state == 'latest':
                     pip_list_outdated_proc = self.run(
                         [executable, 'list', '--format', 'json', '--outdated'],
                         stdout=True, ignore_fail=True
@@ -60,7 +63,6 @@ class Pip(Action):
                         p['name'].lower() for p in pip_list_outdated_multiple
                     ]
 
-                    pip_version = pip_list[name]
                     pip_outdated = name in pip_list_outdated_names
             except (json.JSONDecodeError, IndexError, KeyError):
                 self.fail('unable to parse installed package listing')
