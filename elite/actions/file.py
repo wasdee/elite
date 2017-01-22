@@ -63,8 +63,10 @@ class File(Action):
 
         elif state == 'directory':
             if source:
-                # TODO: implement rsync like functionality here
-                self.fail('this feature is not implemented yet')
+                self.fail(
+                    "the file action doesn't support copyng one directory to another, use the "
+                    'rsync action instead'
+                )
             else:
                 # An existing directory was found
                 if os.path.isdir(path):
