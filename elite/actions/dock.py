@@ -21,7 +21,7 @@ class Dock(Action):
         ):
             self.ok()
 
-        # Rebuild the layouts for Dock
+        # Rebuild the layout of the Dock
         dock_builder = DockBuilder(dock_db_path, app_layout, other_layout)
         dock_builder.build()
 
