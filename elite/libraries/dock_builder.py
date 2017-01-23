@@ -72,9 +72,8 @@ class DockBuilder(object):
         # the Dock will take the data we've provided and rebuild the item in the correct format.
 
         persistent_apps = []
-        for app in self.app_layout:
-            app_path = app
-            app_label = os.path.basename(os.path.dirname(app_path))[:-4]
+        for app_path in self.app_layout:
+            app_label = os.path.basename(app_path)[:-4]
             persistent_apps.append({
                 'GUID': generate_uuid(),
                 'tile-data': {
