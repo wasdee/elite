@@ -1,4 +1,5 @@
 import os
+import plistlib
 import tempfile
 import urllib.parse
 from xml.etree import ElementTree
@@ -7,7 +8,7 @@ from . import Argument, Action
 
 
 class Package(Action):
-    def process(self, path, choices):
+    def process(self, path, choices, target):
         # Ensure that home directories are taken into account
         path = os.path.expanduser(path)
 
@@ -139,13 +140,35 @@ class Package(Action):
         if package_installed:
             self.ok()
 
-        # TODO: run the package installer
+        # Ensure that the package is being installed with root priveleges
+        if os.geteuid() != 0:
+            self.fail('package installers must be run with root privileges')
+
+        installer_command = ['installer']
+
+        # If choices have been provided, we must create a temporary plist file and pass
+        # it to the installer
+        if choices:
+            # Create a temporary plist for use in providing choices to the installer
+            choices_plist_fd, choices_plist_name = tempfile.mkstemp()
+            with open(choices_plist_name, 'wb') as f:
+                plistlib.dump(choices, f)
+
+            # Pass the path of the choices plist to the installer command
+            installer_command.extend(['-applyChoiceChangesXML', choices_plist_name])
+
+        # Specify the package and target
+        installer_command.extend(['-package', path, '-target', target])
+
+        # Run the installer
+        self.run(installer_command, fail_error='unable to install the requested package')
         self.changed()
 
 
 if __name__ == '__main__':
     package = Package(
         Argument('path'),
-        Argument('choices', optional=True)
+        Argument('choices', optional=True),
+        Argument('target', default='/')
     )
     package.invoke()
