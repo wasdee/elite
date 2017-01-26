@@ -1,19 +1,8 @@
 import os
 import plistlib
 
-from ..utils import deep_merge
+from ..utils import deep_equal, deep_merge
 from . import Argument, Action, FILE_ATTRIBUTE_ARGS
-
-
-def equal(source, destination):
-    if isinstance(destination, dict) and isinstance(source, dict):
-        for key, value in source.items():
-            if not equal(value, destination.get(key)):
-                return False
-    else:
-        return source == destination
-
-    return True
 
 
 class Plist(Action):
@@ -37,6 +26,7 @@ class Plist(Action):
             else:
                 path = f'~/Library/Preferences/{domain}.plist'
 
+        # Ensure that home directories are taken into account
         path = os.path.expanduser(path)
 
         # Load the plist or create a fresh data structure if it doesn't exist
@@ -49,7 +39,7 @@ class Plist(Action):
             self.fail('an invalid plist already exists')
 
         # Check if the current plist is the same as the values provided
-        if equal(values, plist):
+        if deep_equal(values, plist):
             self.ok()
 
         # Update the plist with the values provided
@@ -69,10 +59,9 @@ class Plist(Action):
                 plistlib.dump(plist, f)
 
             self.set_file_attributes(path)
-
             self.changed(path=path)
         except IOError:
-            self.fail('unable to update the requested plist file')
+            self.fail('unable to update the requested plist')
 
 
 if __name__ == '__main__':

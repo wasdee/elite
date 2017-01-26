@@ -26,6 +26,26 @@ def build_absolute_path(path):
     return os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, path))
 
 
+def deep_equal(source, destination):
+    """
+    Deeply compares the source dict against the destination ensuring that all items contained
+    in the source are also in and equal to the destination.
+
+    :param source: The source master dictionary to be used as a reference in the comparison
+    :param destination: The destination dictionary to compare against the source.
+
+    :return: a boolean indicating whether the source is contained in the destination
+    """
+    if isinstance(destination, dict) and isinstance(source, dict):
+        for key, value in source.items():
+            if not deep_equal(value, destination.get(key)):
+                return False
+    else:
+        return source == destination
+
+    return True
+
+
 def deep_merge(source, destination):
     """
     Deep merges the source dict into the destination.
