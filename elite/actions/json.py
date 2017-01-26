@@ -6,7 +6,7 @@ from . import Argument, Action, FILE_ATTRIBUTE_ARGS
 
 
 class Json(Action):
-    def process(self, path, values, indent, mode, owner, group):
+    def process(self, path, values, indent, mode, owner, group, flags):
         # Ensure that home directories are taken into account
         path = os.path.expanduser(path)
 

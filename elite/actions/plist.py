@@ -6,7 +6,7 @@ from . import Argument, Action, FILE_ATTRIBUTE_ARGS
 
 
 class Plist(Action):
-    def validate_args(self, domain, container, path, values, mode, owner, group):
+    def validate_args(self, domain, container, path, values, mode, owner, group, flags):
         if not domain and not path:
             self.fail("you must provide either the 'domain' or 'path' argument")
 
@@ -16,7 +16,7 @@ class Plist(Action):
         if container and domain in ['NSGlobalDomain', 'Apple Global Domain']:
             self.fail("the 'container' argument is not allowed when updating the global domain")
 
-    def process(self, domain, container, path, values, mode, owner, group):
+    def process(self, domain, container, path, values, mode, owner, group, flags):
         # Determine the path of the plist if the domain was provided
         if domain:
             if domain in ['NSGlobalDomain', 'Apple Global Domain']:

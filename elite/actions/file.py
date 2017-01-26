@@ -6,14 +6,14 @@ from . import Argument, Action, FILE_ATTRIBUTE_ARGS
 
 
 class File(Action):
-    def validate_args(self, path, source, state, mode, owner, group):
+    def validate_args(self, path, source, state, mode, owner, group, flags):
         if source and state == 'absent':
             self.fail("the 'source' argument may not be provided when 'state' is 'absent'")
 
         if not source and state == 'symlink':
             self.fail("the 'source' argument must be provided when 'state' is 'symlink'")
 
-    def process(self, path, source, state, mode, owner, group):
+    def process(self, path, source, state, mode, owner, group, flags):
         # Ensure that home directories are taken into account
         path = os.path.expanduser(path)
         if source:

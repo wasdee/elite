@@ -1,6 +1,7 @@
 import os
 
 from . import Argument, Action
+from ..constants import FLAGS
 
 
 class FileInfo(Action):
@@ -45,13 +46,19 @@ class FileInfo(Action):
 
             # Determine if the path is a mountpoint
             mount = os.path.ismount(path)
+
+            # Determine what flags are set on the file
+            stat = os.stat(path)
+            flags_bin = stat.st_flags
+            flags = [flag for flag, flag_bin in FLAGS.items() if flags_bin & flag_bin]
         else:
             exists = False
             file_type = None
-            mount = None
             source = None
+            mount = None
+            flags = None
 
-        self.ok(exists=exists, file_type=file_type, source=source, mount=mount)
+        self.ok(exists=exists, file_type=file_type, source=source, mount=mount, flags=flags)
 
 
 if __name__ == '__main__':

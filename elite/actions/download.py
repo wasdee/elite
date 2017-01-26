@@ -8,7 +8,7 @@ from . import Argument, Action, FILE_ATTRIBUTE_ARGS
 
 
 class Download(Action):
-    def process(self, url, path, mode, owner, group):
+    def process(self, url, path, mode, owner, group, flags):
         # Ensure that home directories are taken into account
         path = os.path.expanduser(path)
 

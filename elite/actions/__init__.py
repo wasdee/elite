@@ -7,6 +7,8 @@ import shutil
 import subprocess
 import sys
 
+from ..constants import FLAGS
+
 
 # A list of reserved argument names that may not be used by actions
 FORBIDDEN_ARGS = ['sudo', 'ok', 'changed', 'ignore_failed']
@@ -34,7 +36,8 @@ class Argument(object):
 FILE_ATTRIBUTE_ARGS = [
     Argument('mode', optional=True),
     Argument('owner', optional=True),
-    Argument('group', optional=True)
+    Argument('group', optional=True),
+    Argument('flags', optional=True),
 ]
 
 
@@ -156,18 +159,38 @@ class Action(object):
         return proc
 
     def set_file_attributes(self, path):
+        # Set the file mode
         if self.args.get('mode'):
             try:
                 os.chmod(path, int(self.args['mode'], 8), follow_symlinks=False)
             except IOError:
                 self.fail('unable to set the requested mode on the path specified')
+
+        # Set the file owner
         if self.args.get('owner'):
             try:
                 shutil.chown(path, user=self.args['owner'])
             except IOError:
                 self.fail('unable to set the requested owner on the path specified')
+
+        # Set the file group
         if self.args.get('group'):
             try:
                 shutil.chown(path, group=self.args['group'])
             except IOError:
                 self.fail('unable to set the requested group on the path specified')
+
+        # Set the file flags
+        if self.args.get('flags'):
+            flags_bin = 0
+
+            for flag in self.args['flags']:
+                if flag not in FLAGS:
+                    self.fail('the specified flag is unsupported')
+
+                flags_bin |= FLAGS[flag]
+
+            try:
+                os.chflags(path, flags_bin)
+            except IOError:
+                self.fail('unable to set the requested flags on the path specified')

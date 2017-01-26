@@ -13,7 +13,7 @@ def convert_to_spotify_value(value):
 
 
 class SpotifyPref(Action):
-    def process(self, username, pref, value, mode, owner, group):
+    def process(self, username, pref, value, mode, owner, group, flags):
         # Determine the path of the Spotify prefs file
         if username:
             path = f'~/Library/Application Support/Spotify/Users/{username}-user/prefs'

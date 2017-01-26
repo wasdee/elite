@@ -1,6 +1,33 @@
-from collections import namedtuple
+from collections import UserDict, namedtuple
 import os
 import subprocess
+
+
+class ReversibleDict(UserDict):
+    """
+    A dict which maintains a reverse mapping between values and keys for easy reverse lookups.
+    """
+    def __init__(self, *args, **kwargs):
+        self.reversed_data = {}
+        super().__init__(*args, **kwargs)
+
+        if len(self.data.values()) != len(set(self.data.values())):
+            raise ValueError('all values in this data structure must be unique')
+
+    def __delitem__(self, key):
+        value = self.data[key]
+        del self.reversed_data[value]
+        super().__delitem__(key)
+
+    def __setitem__(self, key, value):
+        if value in self.data.values():
+            raise ValueError('all values in this data structure must be unique')
+
+        super().__setitem__(key, value)
+        self.reversed_data[value] = key
+
+    def lookup(self, value):
+        return self.reversed_data[value]
 
 
 def dict_to_namedtuple(typename, dictionary):
