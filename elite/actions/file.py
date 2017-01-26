@@ -2,13 +2,11 @@ import hashlib
 import os
 import shutil
 
-from CoreFoundation import NSURL, NSData
 from Foundation import (
-    NSURLBookmarkCreationSuitableForBookmarkFile, NSURLBookmarkResolutionWithoutUI
+    NSURL, NSData, NSURLBookmarkCreationSuitableForBookmarkFile, NSURLBookmarkResolutionWithoutUI
 )
-import objc
 
-from . import Argument, Action
+from . import Argument, Action, FILE_ATTRIBUTE_ARGS
 
 
 class File(Action):
@@ -103,12 +101,12 @@ class File(Action):
 
             if exists:
                 bookmark_data, error = NSURL.bookmarkDataWithContentsOfURL_error_(
-                    path_url, objc.nil
+                    path_url, None
                 )
 
                 if bookmark_data:
                     source_url, is_stale, error = NSURL.URLByResolvingBookmarkData_options_relativeToURL_bookmarkDataIsStale_error_(  # flake8: noqa
-                        bookmark_data, NSURLBookmarkResolutionWithoutUI, None, objc.nil, objc.nil
+                        bookmark_data, NSURLBookmarkResolutionWithoutUI, None, None, None
                     )
                     if source_url.path() == source:
                         self.ok()
@@ -121,13 +119,13 @@ class File(Action):
 
             # Build the bookmark for the alias
             bookmark_data, error = source_url.bookmarkDataWithOptions_includingResourceValuesForKeys_relativeToURL_error_(
-                NSURLBookmarkCreationSuitableForBookmarkFile, None, None, objc.nil
+                NSURLBookmarkCreationSuitableForBookmarkFile, None, None, None
             )
 
             # Write the alias using the bookmark data
             if bookmark_data:
                 success, error = NSURL.writeBookmarkData_toURL_options_error_(
-                    bookmark_data, path_url, NSURLBookmarkCreationSuitableForBookmarkFile, objc.nil
+                    bookmark_data, path_url, NSURLBookmarkCreationSuitableForBookmarkFile, None
                 )
             else:
                 self.fail('unable to create alias')
@@ -228,6 +226,6 @@ if __name__ == '__main__':
         Argument(
             'state', choices=['file', 'directory', 'alias', 'symlink', 'absent'], default='file'
         ),
-        add_file_attribute_args=True
+        *FILE_ATTRIBUTE_ARGS
     )
     file.invoke()

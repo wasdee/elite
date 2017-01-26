@@ -1,6 +1,6 @@
 import os
 
-from . import Argument, Action
+from . import Argument, Action, FILE_ATTRIBUTE_ARGS
 
 
 def convert_to_spotify_value(value):
@@ -67,6 +67,6 @@ if __name__ == '__main__':
         Argument('username', optional=True),
         Argument('pref'),
         Argument('value'),
-        add_file_attribute_args=True
+        *FILE_ATTRIBUTE_ARGS
     )
     spotify_pref.invoke()

@@ -1,8 +1,6 @@
 import os
 
-from CoreFoundation import NSURL
-from Foundation import NSURLBookmarkResolutionWithoutUI
-import objc
+from Foundation import NSURL, NSURLBookmarkResolutionWithoutUI
 
 from . import Argument, Action
 
@@ -27,13 +25,13 @@ class FileInfo(Action):
                 # Determine if the file is an alias
                 alias_url = NSURL.fileURLWithPath_(path)
                 bookmark_data, error = NSURL.bookmarkDataWithContentsOfURL_error_(
-                    alias_url, objc.nil
+                    alias_url, None
                 )
 
                 if bookmark_data:
                     file_type = 'alias'
                     source_url, is_stale, error = NSURL.URLByResolvingBookmarkData_options_relativeToURL_bookmarkDataIsStale_error_(  # flake8: noqa
-                        bookmark_data, NSURLBookmarkResolutionWithoutUI, None, objc.nil, objc.nil
+                        bookmark_data, NSURLBookmarkResolutionWithoutUI, None, None, None
                     )
                     source = source_url.path()
                 else:

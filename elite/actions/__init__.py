@@ -30,8 +30,16 @@ class Argument(object):
         return f"{type(self).__name__}({', '.join(args)})"
 
 
+# Convenience list of useful arguments to add for actions that modify files
+FILE_ATTRIBUTE_ARGS = [
+    Argument('mode', optional=True),
+    Argument('owner', optional=True),
+    Argument('group', optional=True)
+]
+
+
 class Action(object):
-    def __init__(self, *arg_specs, add_file_attribute_args=False):
+    def __init__(self, *arg_specs):
         for arg_spec in arg_specs:
             # Check for forbidden arguments used be elite
             if arg_spec.name in FORBIDDEN_ARGS:
@@ -47,12 +55,6 @@ class Action(object):
             #     self.fail(f"module uses argument '{arg_spec.name}' which is a Python builtin")
 
         self.arg_specs = list(arg_specs)
-        if add_file_attribute_args:
-            self.arg_specs.extend([
-                Argument('mode', optional=True),
-                Argument('owner', optional=True),
-                Argument('group', optional=True)
-            ])
 
         # Parse and validate arguments via stdin
         try:

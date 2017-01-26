@@ -4,7 +4,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-from . import Argument, Action
+from . import Argument, Action, FILE_ATTRIBUTE_ARGS
 
 
 class Download(Action):
@@ -71,6 +71,6 @@ if __name__ == '__main__':
     download = Download(
         Argument('url'),
         Argument('path'),
-        add_file_attribute_args=True
+        *FILE_ATTRIBUTE_ARGS
     )
     download.invoke()

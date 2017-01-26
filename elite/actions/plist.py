@@ -2,7 +2,7 @@ import os
 import plistlib
 
 from ..utils import deep_merge
-from . import Argument, Action
+from . import Argument, Action, FILE_ATTRIBUTE_ARGS
 
 
 def equal(source, destination):
@@ -81,6 +81,6 @@ if __name__ == '__main__':
         Argument('container', optional=True),
         Argument('path', optional=True),
         Argument('values'),
-        add_file_attribute_args=True
+        *FILE_ATTRIBUTE_ARGS
     )
     plist.invoke()
