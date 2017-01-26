@@ -46,7 +46,7 @@ class Download(Action):
                     try:
                         if not os.path.exists(path):
                             os.makedirs(path)
-                    except IOError:
+                    except OSError:
                         self.fail('unable to create the directory to store the download')
 
                 # Perform the download to a binary file in chunks
@@ -55,13 +55,13 @@ class Download(Action):
                     with open(filepath, 'wb') as f:
                         for block in iter(lambda: r.read(block_size), b''):
                             f.write(block)
-                except IOError:
+                except OSError:
                     self.fail('unable to write the download to the path requester')
 
         except urllib.error.URLError:
             self.fail('unable to retrieve the download URL requested')
 
-        self.set_file_attributes(path)
+        self.set_file_attributes(filepath)
 
         # Download was successful
         self.changed(path=filepath)

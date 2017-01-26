@@ -1,11 +1,12 @@
 import ast
+import grp
 import keyword
 import os
-from pprint import pprint
+import pwd
 import shlex
-import shutil
 import subprocess
 import sys
+from pprint import pprint
 
 from ..constants import FLAGS
 
@@ -159,38 +160,77 @@ class Action(object):
         return proc
 
     def set_file_attributes(self, path):
+        # Obtain the associated arguments to set file attributes
+        mode = self.args.get('mode')
+        owner = self.args.get('owner')
+        group = self.args.get('group')
+        flags = self.args.get('flags')
+
+        # No file attributes have been set, so we bail and advise that no changes were made
+        if not any([mode, owner, group, flags]):
+            return False
+
+        changed = False
+        stat = os.stat(path)
+
         # Set the file mode
-        if self.args.get('mode'):
-            try:
-                os.chmod(path, int(self.args['mode'], 8), follow_symlinks=False)
-            except IOError:
-                self.fail('unable to set the requested mode on the path specified')
+        if mode:
+            # Determine the binary representation of the mode requseted
+            mode_bin = int(mode, 8)
 
-        # Set the file owner
-        if self.args.get('owner'):
-            try:
-                shutil.chown(path, user=self.args['owner'])
-            except IOError:
-                self.fail('unable to set the requested owner on the path specified')
+            # Update the file mode if required
+            if stat.st_mode != mode_bin:
+                changed = True
+                try:
+                    os.chmod(path, mode_bin, follow_symlinks=False)
+                except OSError:
+                    self.fail('unable to set the requested mode on the path specified')
 
-        # Set the file group
-        if self.args.get('group'):
-            try:
-                shutil.chown(path, group=self.args['group'])
-            except IOError:
-                self.fail('unable to set the requested group on the path specified')
+        # Set the file owner and/or groups
+        if owner or group:
+            # Obtain the uid of the owner requested
+            if owner:
+                try:
+                    uid = pwd.getpwnam(owner).pw_uid
+                except KeyError:
+                    self.fail('the owner requested was not found')
+            else:
+                uid = -1
+
+            # Obtain the gid of the group requested
+            if group:
+                try:
+                    gid = grp.getgrnam(group).gr_gid
+                except KeyError:
+                    self.fail('the group requested was not found')
+            else:
+                gid = -1
+
+            # Update the owner and/or group if required
+            if owner and stat.st_uid != uid or group and stat.st_gid != gid:
+                changed = True
+                try:
+                    os.chown(path, uid, gid)
+                except OSError:
+                    self.fail('unable to set the requested owner on the path specified')
 
         # Set the file flags
-        if self.args.get('flags'):
+        if flags:
+            # Determine the binary representation of the flags requseted
             flags_bin = 0
 
-            for flag in self.args['flags']:
+            for flag in flags:
                 if flag not in FLAGS:
                     self.fail('the specified flag is unsupported')
 
                 flags_bin |= FLAGS[flag]
 
-            try:
-                os.chflags(path, flags_bin)
-            except IOError:
-                self.fail('unable to set the requested flags on the path specified')
+            # Update the flags if required
+            if stat.st_flags != flags_bin:
+                changed = True
+                try:
+                    os.chflags(path, flags_bin)
+                except OSError:
+                    self.fail('unable to set the requested flags on the path specified')
+
+        return changed

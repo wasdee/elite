@@ -31,7 +31,7 @@ class SpotifyPref(Action):
                     prefs[config_pref] = config_value
         except ValueError:
             self.fail('unable to parse existing Spotify configuration')
-        except IOError:
+        except OSError:
             pass
 
         # Check if the provided pref and value is the same as what's in the config file
@@ -46,7 +46,7 @@ class SpotifyPref(Action):
         try:
             if not os.path.exists(config_dir):
                 os.makedirs(config_dir)
-        except IOError:
+        except OSError:
             self.fail('unable to create the directory to store the Spotify config')
 
         # Write the updated Spotify config
@@ -58,7 +58,7 @@ class SpotifyPref(Action):
             self.set_file_attributes(path)
 
             self.changed(path=path)
-        except IOError:
+        except OSError:
             self.fail('unable to update the Spotify config file file')
 
 

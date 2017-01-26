@@ -33,7 +33,7 @@ class Plist(Action):
         try:
             with open(path, 'rb') as f:
                 plist = plistlib.load(f)
-        except IOError:
+        except OSError:
             plist = {}
         except plistlib.InvalidFileException:
             self.fail('an invalid plist already exists')
@@ -50,7 +50,7 @@ class Plist(Action):
         try:
             if not os.path.exists(plist_dir):
                 os.makedirs(plist_dir)
-        except IOError:
+        except OSError:
             self.fail('unable to create the directory to store the plist')
 
         # Write the updated plist
@@ -60,7 +60,7 @@ class Plist(Action):
 
             self.set_file_attributes(path)
             self.changed(path=path)
-        except IOError:
+        except OSError:
             self.fail('unable to update the requested plist')
 
 

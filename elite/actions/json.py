@@ -14,7 +14,7 @@ class Json(Action):
         try:
             with open(path, 'r') as f:
                 json = jsonlib.load(f)
-        except IOError:
+        except OSError:
             json = {}
         except jsonlib.JSONDecodeError:
             self.fail('an invalid JSON file already exists')
@@ -31,7 +31,7 @@ class Json(Action):
         try:
             if not os.path.exists(json_dir):
                 os.makedirs(json_dir)
-        except IOError:
+        except OSError:
             self.fail('unable to create the directory to store the JSON file')
 
         # Write the updated JSON file
@@ -41,7 +41,7 @@ class Json(Action):
 
             self.set_file_attributes(path)
             self.changed(path=path)
-        except IOError:
+        except OSError:
             self.fail('unable to update the requested JSON file')
 
 

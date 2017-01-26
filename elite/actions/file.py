@@ -197,7 +197,7 @@ class File(Action):
         elif os.path.isdir(path):
             try:
                 shutil.rmtree(path)
-            except IOError:
+            except OSError:
                 self.fail('existing directory could not be recursively removed')
 
         elif os.path.islink(path):
