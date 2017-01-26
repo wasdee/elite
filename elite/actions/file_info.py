@@ -1,12 +1,14 @@
 import os
 
-from Foundation import NSURL, NSURLBookmarkResolutionWithoutUI
-
 from . import Argument, Action
 
 
 class FileInfo(Action):
-    def process(self, path):
+    def process(self, path, aliases):
+        # Only import PyObjC libraries if necessary (as they take time)
+        if aliases:
+            from Foundation import NSURL, NSURLBookmarkResolutionWithoutUI
+
         # Ensure that home directories are taken into account
         path = os.path.expanduser(path)
 
@@ -21,7 +23,7 @@ class FileInfo(Action):
             elif os.path.isdir(path):
                 file_type = 'directory'
                 source = None
-            else:
+            elif aliases:
                 # Determine if the file is an alias
                 alias_url = NSURL.fileURLWithPath_(path)
                 bookmark_data, error = NSURL.bookmarkDataWithContentsOfURL_error_(
@@ -37,6 +39,9 @@ class FileInfo(Action):
                 else:
                     file_type = 'file'
                     source = None
+            else:
+                file_type = 'file'
+                source = None
 
             # Determine if the path is a mountpoint
             mount = os.path.ismount(path)
@@ -51,6 +56,7 @@ class FileInfo(Action):
 
 if __name__ == '__main__':
     file_info = FileInfo(
-        Argument('path')
+        Argument('path'),
+        Argument('aliases', default=True)
     )
     file_info.invoke()

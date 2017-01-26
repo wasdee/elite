@@ -1,4 +1,4 @@
-from CoreFoundation import NSBundle
+from Foundation import NSBundle
 from LaunchServices import (
     LSCopyDefaultRoleHandlerForContentType, LSSetDefaultRoleHandlerForContentType,
     LSCopyDefaultHandlerForURLScheme, LSSetDefaultHandlerForURLScheme, kLSRolesAll

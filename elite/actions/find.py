@@ -1,8 +1,6 @@
 from fnmatch import fnmatch
 import os
 
-from Foundation import NSURL, NSURLIsAliasFileKey
-
 from . import Argument, Action
 
 
@@ -25,6 +23,10 @@ class Find(Action):
         self, path, root_depth, min_depth=None, max_depth=None, types=None, patterns=None,
         aliases=True
     ):
+        # Only import PyObjC libraries if necessary (as they take time)
+        if aliases:
+            from Foundation import NSURL, NSURLIsAliasFileKey
+
         # Create a list to store all the files found
         paths = []
 

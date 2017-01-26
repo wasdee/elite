@@ -2,10 +2,6 @@ import hashlib
 import os
 import shutil
 
-from Foundation import (
-    NSURL, NSData, NSURLBookmarkCreationSuitableForBookmarkFile, NSURLBookmarkResolutionWithoutUI
-)
-
 from . import Argument, Action, FILE_ATTRIBUTE_ARGS
 
 
@@ -85,6 +81,12 @@ class File(Action):
                 self.changed(path=path)
 
         elif state == 'alias':
+            # Only import PyObjC libraries if necessary (as they take time)
+            from Foundation import (
+                NSURL, NSData, NSURLBookmarkCreationSuitableForBookmarkFile,
+                NSURLBookmarkResolutionWithoutUI
+            )
+
             # If the destination provided is a path, then we place the file in it
             if os.path.isdir(path):
                 path = os.path.join(path, os.path.basename(source))

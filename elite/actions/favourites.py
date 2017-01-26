@@ -1,7 +1,6 @@
 import os
 
-from CoreFoundation import kCFAllocatorDefault
-from Foundation import NSURL
+from Foundation import NSURL, kCFAllocatorDefault
 from LaunchServices import (
     LSSharedFileListCreate, LSSharedFileListInsertItemURL, LSSharedFileListRemoveAllItems,
     kLSSharedFileListFavoriteItems, kLSSharedFileListItemLast

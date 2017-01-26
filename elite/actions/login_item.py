@@ -21,7 +21,7 @@ class LoginItem(Action):
         # Note that the import of SystemEventsLoginItem must occur after we initialise
         # system events or it simply won't work.
         # https://bitbucket.org/ronaldoussoren/pyobjc/issues/179/strange-import-behaviour-with
-        from CoreFoundation import SystemEventsLoginItem
+        from Foundation import SystemEventsLoginItem
 
         # Find a specific login item
         login_items = system_events.loginItems()
