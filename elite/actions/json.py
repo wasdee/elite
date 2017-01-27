@@ -21,7 +21,8 @@ class Json(Action):
 
         # Check if the current JSON is the same as the values provided
         if deep_equal(values, json):
-            self.ok()
+            changed = self.set_file_attributes(path)
+            self.changed(path=path) if changed else self.ok()
 
         # Update the JSON with the values provided
         deep_merge(values, json)

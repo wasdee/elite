@@ -36,7 +36,8 @@ class SpotifyPref(Action):
 
         # Check if the provided pref and value is the same as what's in the config file
         if pref in prefs and prefs[pref] == convert_to_spotify_value(value):
-            self.ok()
+            changed = self.set_file_attributes(path)
+            self.changed(path=path) if changed else self.ok()
 
         # Update the config with the pref and value provided
         prefs[pref] = convert_to_spotify_value(value)
@@ -56,7 +57,6 @@ class SpotifyPref(Action):
                     print(f'{current_pref}={current_value}', file=f)
 
             self.set_file_attributes(path)
-
             self.changed(path=path)
         except OSError:
             self.fail('unable to update the Spotify config file file')

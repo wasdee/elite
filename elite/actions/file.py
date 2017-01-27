@@ -33,26 +33,24 @@ class File(Action):
                 # and avoid making changes if they're identical
                 exists = os.path.isfile(path)
                 if exists and self.md5(source) and self.md5(path):
-                    self.ok()
+                    changed = self.set_file_attributes(path)
+                    self.changed(path=path) if changed else self.ok()
 
                 # Copy the source to the destination
                 self.copy(source, path)
 
-                # Set mode, owner and group on the path
                 self.set_file_attributes(path)
-
                 self.changed(path=path)
             else:
                 # An existing file at the destination path was found
                 if os.path.isfile(path):
-                    self.ok()
+                    changed = self.set_file_attributes(path)
+                    self.changed(path=path) if changed else self.ok()
 
                 # Create an empty file at the destination path
                 self.create_empty(path)
 
-                # Set mode, owner and group on the path
                 self.set_file_attributes(path)
-
                 self.changed(path=path)
 
         elif state == 'directory':
@@ -64,10 +62,11 @@ class File(Action):
             else:
                 # An existing directory was found
                 if os.path.isdir(path):
-                    self.ok()
+                    changed = self.set_file_attributes(path)
+                    self.changed(path=path) if changed else self.ok()
 
                 # Clean any existing item in the path requested
-                removed = self.remove(path)
+                self.remove(path)
 
                 # Create the directory requested
                 try:
@@ -75,9 +74,7 @@ class File(Action):
                 except OSError:
                     self.fail('the requested directory could not be created')
 
-                # Set mode, owner and group on the path
                 self.set_file_attributes(path)
-
                 self.changed(path=path)
 
         elif state == 'alias':
@@ -111,10 +108,11 @@ class File(Action):
                         bookmark_data, NSURLBookmarkResolutionWithoutUI, None, None, None
                     )
                     if source_url.path() == source:
-                        self.ok()
+                        changed = self.set_file_attributes(path)
+                        self.changed(path=path) if changed else self.ok()
 
             # Delete any existing file or symlink at the path
-            removed = self.remove(path)
+            self.remove(path)
 
             # Create an NSURL object for the source (absolute paths must be used for aliases)
             source_url = NSURL.fileURLWithPath_(source)
@@ -132,9 +130,7 @@ class File(Action):
             else:
                 self.fail('unable to create alias')
 
-            # Set mode, owner and group on the path
             self.set_file_attributes(path)
-
             self.changed(path=path)
 
         elif state == 'symlink':
@@ -146,10 +142,11 @@ class File(Action):
             # and avoid making changes if they're identical
             exists = os.path.islink(path)
             if exists and os.readlink(path) == source:
-                self.ok()
+                changed = self.set_file_attributes(path)
+                self.changed(path=path) if changed else self.ok()
 
             # Delete any existing file or symlink at the path
-            removed = self.remove(path)
+            self.remove(path)
 
             # Create the symlink requested
             try:
@@ -157,9 +154,7 @@ class File(Action):
             except OSError:
                 self.fail('the requested symlink could not be created')
 
-            # Set mode, owner and group on the path
             self.set_file_attributes(path)
-
             self.changed(path=path)
 
         elif state == 'absent':

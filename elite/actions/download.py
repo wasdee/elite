@@ -40,7 +40,8 @@ class Download(Action):
 
                     # Check if the file already exists in the destination path
                     if os.path.exists(filepath):
-                        self.ok()
+                        changed = self.set_file_attributes(filepath)
+                        self.changed(path=filepath) if changed else self.ok()
 
                     # Create the directory to place the download in if required
                     try:
@@ -62,8 +63,6 @@ class Download(Action):
             self.fail('unable to retrieve the download URL requested')
 
         self.set_file_attributes(filepath)
-
-        # Download was successful
         self.changed(path=filepath)
 
 
