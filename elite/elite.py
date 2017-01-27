@@ -138,7 +138,13 @@ class Elite(object):
                     'return_code': proc.returncode
                 }
             else:
-                result = ast.literal_eval(stdout.decode('utf-8'))
+                try:
+                    result = ast.literal_eval(stdout.decode('utf-8'))
+                except SyntaxError:
+                    result = {
+                        'ok': False,
+                        'message': 'unable to parse the result returned by this action'
+                    }
 
             if result['ok'] and changed is not None:
                 result['changed'] = changed
