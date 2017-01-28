@@ -14,10 +14,10 @@ class Launchpad(Action):
         launchpad_builder = LaunchpadBuilder(launchpad_db_path)
         launchpad_builder.extract()
 
-        # The existing layout is identical to that provided
+        # All pages specified in the provided layout are identical to those present
         if (
-            launchpad_builder.widget_layout == widget_layout and
-            launchpad_builder.app_layout == app_layout
+            launchpad_builder.widget_layout[:len(widget_layout)] == widget_layout and
+            launchpad_builder.app_layout[:len(app_layout)] == app_layout
         ):
             self.ok()
 
