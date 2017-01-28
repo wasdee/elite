@@ -15,19 +15,19 @@ SHOW_CURSOR = '\x1b[?25h'
 
 
 def move_up(num_lines):
-    return f'\033[{num_lines}A'
+    return f'\033[{num_lines}A' if num_lines else ''
 
 
 def move_down(num_lines):
-    return f'\033[{num_lines}B'
+    return f'\033[{num_lines}B' if num_lines else ''
 
 
-def move_forward(num_lines):
-    return f'\033[{num_lines}C'
+def move_forward(num_columns):
+    return f'\033[{num_columns}C' if num_columns else ''
 
 
-def move_backward(num_lines):
-    return f'\033[{num_lines}D'
+def move_backward(num_columns):
+    return f'\033[{num_columns}D' if num_columns else ''
 
 
 # TODO: clean me please

@@ -141,9 +141,8 @@ class Printer(object):
             if self.overlap_lines is not None:
                 # Move to the very left of the last line
                 print('\r', end='', flush=True)
-                if self.overlap_lines:
-                    # Move up to the line we wish to start printing from
-                    print(ansi.move_up(self.overlap_lines), end='', flush=True)
+                # Move up to the line we wish to start printing from
+                print(ansi.move_up(self.overlap_lines), end='', flush=True)
 
             print_status = (
                 f'{print_colour}{print_state:^10}{ansi.ENDC}'
