@@ -153,11 +153,9 @@ class Printer(object):
 
             # Display the changed or failure message if necessary
             if state == EliteState.FAILED:
-                print()
                 print(
                     f"{ansi.BLUE}{'':^10}message:{ansi.ENDC} "
-                    f"{ansi.YELLOW}{result['message']}{ansi.ENDC}",
-                    end='', flush=True
+                    f"{ansi.YELLOW}{result['message']}{ansi.ENDC}"
                 )
 
             # Reset the number of lines to overlap

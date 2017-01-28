@@ -32,8 +32,9 @@ def elite_main(config_path, action_search_paths=[]):
 
             # A task failed to run
             except EliteError as e:
-                print()
-                print(f'{ansi.RED}Failed: {e}{ansi.ENDC}')
+                # Summary
+                printer.heading('Summary')
+                elite.summary()
 
             # User has hit Ctrl+C
             except KeyboardInterrupt:
