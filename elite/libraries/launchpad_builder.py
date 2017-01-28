@@ -24,6 +24,10 @@ class Types(object):
     WIDGET = 6
 
 
+class LaunchpadValidationError(Exception):
+    """An error that occurs when validating a provided Launchpad layout"""
+
+
 class LaunchpadBuilder(object):
     def __init__(self, launchpad_db_path, widget_layout=[], app_layout=[]):
         # The Launchpad database location
@@ -32,10 +36,6 @@ class LaunchpadBuilder(object):
         # Widget and app layouts
         self.widget_layout = widget_layout
         self.app_layout = app_layout
-
-        # Widgets or apps that were in the layout but not found in the db
-        self.missing_widgets = []
-        self.missing_apps = []
 
         # Widgets or apps that were not in the layout but found in the db
         self.extra_widgets = []
@@ -70,6 +70,64 @@ class LaunchpadBuilder(object):
             max_id = max(max_id, id)
 
         return mapping, max_id
+
+    def _validate_layout(self, type_, layout, mapping):
+        """
+        Validates the provided layout to confirm that all items exist and that folders are
+        correctly structured.
+
+        :param type_: The type of item being validated (usually Types.APP or Types.WIDGET)
+        :param layout: The layout requested by the user provided as a list (pages) of lists (items)
+                       whereby items are strings.  If the item is a folder, then it is to be a dict
+                       with a folder_title and folder_items key and associated values.
+        :param mapping: The title to data mapping for the respective items being validated.
+
+        :raises: A LaunchpadValidationError is raised with a suitable message if an issue is found
+        """
+        # Iterate through pages
+        for page in layout:
+            # Iterate through items
+            for item in page:
+                # A folder has been encountered
+                if isinstance(item, dict):
+                    # Verify that folder information was provided correctly
+                    if 'folder_title' not in item or 'folder_layout' not in item:
+                        raise LaunchpadValidationError(
+                            'each folder layout must contain a folder_title and folder_layout'
+                        )
+
+                    folder_layout = item['folder_layout']
+
+                    # Iterate through folder pages
+                    for folder_page_ordering, folder_page in enumerate(folder_layout):
+
+                        # Iterate through folder items
+                        for title in folder_page:
+
+                            # Verify that the widget or app requested exists
+                            if title not in mapping:
+                                if type_ == Types.WIDGET:
+                                    raise LaunchpadValidationError(
+                                        f"the widget '{title}' does not exist"
+                                    )
+                                elif type_ == Types.APP:
+                                    raise LaunchpadValidationError(
+                                        f"the app '{title}' does not exist"
+                                    )
+                # Flat items
+                else:
+                    title = item
+
+                    # Verify that the widget or app requested exists
+                    if title not in mapping:
+                        if type_ == Types.WIDGET:
+                            raise LaunchpadValidationError(
+                                f"the widget '{title}' does not exist"
+                            )
+                        elif type_ == Types.APP:
+                            raise LaunchpadValidationError(
+                                f"the app '{title}' does not exist"
+                            )
 
     def _add_extra_items(self, layout, mapping):
         """
@@ -213,13 +271,6 @@ class LaunchpadBuilder(object):
                         # Iterate through folder items
                         folder_item_ordering = 0
                         for title in folder_page:
-                            if title not in mapping:
-                                if type_ == Types.WIDGET:
-                                    self.missing_widgets.append(title)
-                                elif type_ == Types.APP:
-                                    self.missing_apps.append(title)
-                                continue
-
                             item_id, uuid, flags = mapping[title]
                             cursor.execute('''
                                 UPDATE items
@@ -245,13 +296,6 @@ class LaunchpadBuilder(object):
                 # Flat items
                 else:
                     title = item
-                    if title not in mapping:
-                        if type_ == Types.WIDGET:
-                            self.missing_widgets.append(title)
-                        elif type_ == Types.APP:
-                            self.missing_apps.append(title)
-                        continue
-
                     item_id, uuid, flags = mapping[title]
                     cursor.execute('''
                         UPDATE items
@@ -284,6 +328,12 @@ class LaunchpadBuilder(object):
         # Obtain app and widget mappings
         widget_mapping, widget_max_id = self._get_title_id_mapping('widgets')
         app_mapping, app_max_id = self._get_title_id_mapping('apps')
+
+        # Validate widget layout
+        self._validate_layout(Types.WIDGET, self.widget_layout, widget_mapping)
+
+        # Validate app layout
+        self._validate_layout(Types.APP, self.app_layout, app_mapping)
 
         # We will begin our group records using the max ids found (groups always appear after
         # apps and widgets)
@@ -425,10 +475,7 @@ class LaunchpadBuilder(object):
         return layout
 
     def extract(self):
-        # Reset missing and extra widgets and apps as we are reading a config that won't
-        # have such items
-        self.missing_widgets = []
-        self.missing_apps = []
+        # Reset extra widgets and apps as we are reading a config that won't have such items
         self.extra_widgets = []
         self.extra_apps = []
 

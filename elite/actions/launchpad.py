@@ -1,7 +1,9 @@
 import os
 
 from . import Argument, Action
-from ..libraries.launchpad_builder import get_launchpad_db_dir, LaunchpadBuilder
+from ..libraries.launchpad_builder import (
+    get_launchpad_db_dir, LaunchpadBuilder, LaunchpadValidationError
+)
 
 
 class Launchpad(Action):
@@ -23,12 +25,14 @@ class Launchpad(Action):
 
         # Rebuild the layouts for Launchpad
         launchpad_builder = LaunchpadBuilder(launchpad_db_path, widget_layout, app_layout)
-        launchpad_builder.build()
+
+        try:
+            launchpad_builder.build()
+        except LaunchpadValidationError as e:
+            self.fail(str(e))
 
         # The rebuild was successful
         self.changed(
-            missing_widgets=launchpad_builder.missing_widgets,
-            missing_apps=launchpad_builder.missing_apps,
             extra_widgets=launchpad_builder.extra_widgets,
             extra_apps=launchpad_builder.extra_apps
         )
