@@ -13,6 +13,23 @@ CLEAR_LINE = '\x1b[0K'
 HIDE_CURSOR = '\x1b[?25l'
 SHOW_CURSOR = '\x1b[?25h'
 
+
+def move_up(num_lines):
+    return f'\033[{num_lines}A'
+
+
+def move_down(num_lines):
+    return f'\033[{num_lines}B'
+
+
+def move_forward(num_lines):
+    return f'\033[{num_lines}C'
+
+
+def move_backward(num_lines):
+    return f'\033[{num_lines}D'
+
+
 # TODO: clean me please
 # 'reset': (0, 0),
 

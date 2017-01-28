@@ -1,8 +1,15 @@
+import math
+import shutil
+
 from .elite import EliteState
 from . import ansi
 
 
 class Printer(object):
+    def __init__(self):
+        # Track the number of lines we must move upwards to overlap text
+        self.overlap_lines = None
+
     def header(self):
         """Prints the master header which hides the cursor."""
         print(ansi.HIDE_CURSOR, end='', flush=True)
@@ -40,13 +47,7 @@ class Printer(object):
         :param args: The arguments sent to the action.
         :param result: The result of the execution or None when the task is still running.
         """
-        # Overwrite output when the task completes
-        if state != EliteState.RUNNING:
-            print(f'\r{ansi.CLEAR_LINE}', end='', flush=True)
-
-        # Print the task being executed
-        newline = state != EliteState.RUNNING
-        self._print_task(state, action, args, result, newline)
+        self._print_task(state, action, args, result)
 
     def summary(
         self, total_tasks, ok_tasks, changed_tasks, failed_tasks,
@@ -66,17 +67,13 @@ class Printer(object):
         if changed_task_info:
             self.info('Changed task info:')
             for action, args, result in changed_task_info:
-                self._print_task(
-                    EliteState.CHANGED, action, args, result, newline=True
-                )
+                self._print_task(EliteState.CHANGED, action, args, result)
 
         # Display any failed tasks.
         if failed_task_info:
             self.info('Failed task info:')
             for action, args, result in failed_task_info:
-                self._print_task(
-                    EliteState.FAILED, action, args, result, newline=True
-                )
+                self._print_task(EliteState.FAILED, action, args, result)
 
         # Display all totals
         self.info('Totals:')
@@ -85,7 +82,7 @@ class Printer(object):
         print(f"{ansi.RED}{'failed':^10}{ansi.ENDC}{failed_tasks:4}")
         print(f"{'total':^10}{total_tasks:4}")
 
-    def _print_task(self, state, action, args, result, newline=False):
+    def _print_task(self, state, action, args, result):
         """
         Displays a particular task along with the related message upon failure.
 
@@ -93,12 +90,7 @@ class Printer(object):
         :param action: The action being called.
         :param args: The arguments sent to the action.
         :param result: The result of the execution or None when the task is still running.
-        :param newline: Whether or not to end the output with a newline.
         """
-        # Prettify arguments for printing
-        print_args_strs = [f'{k}={repr(v)}' for k, v in args.items() if v is not None]
-        print_args = f" {' '.join(print_args_strs)}" if print_args_strs else ''
-
         # Determine the output colour and state text
         if state == EliteState.RUNNING:
             print_colour = ansi.WHITE
@@ -113,28 +105,61 @@ class Printer(object):
             print_colour = ansi.GREEN
             print_state = 'ok'
 
-        # Display the status in the appropriate colour
-        print(f'{print_colour}{print_state:^10}{ansi.ENDC}', end='', flush=True)
+        # Prettify arguments and action for printing
+        print_args_strs = [f'{k}={repr(v)}' for k, v in args.items() if v is not None]
+        print_args = ' '.join(print_args_strs) if print_args_strs else ''
+        print_action = f'{action}: ' if print_args else action
 
-        # Display the action details
-        print(f'{ansi.BLUE}{action}:{ansi.ENDC}', end='', flush=True)
+        # Determine the max characters we can print
+        if state == EliteState.RUNNING:
+            terminal_size = shutil.get_terminal_size()
+            max_chars = terminal_size.columns * terminal_size.lines
 
-        # Display the action parameters and arguments
-        print(f'{ansi.YELLOW}', end='', flush=True)
-        # TODO: re-instate sudo printing
-        # if settings.get('sudo', False):
-        #     print(' (sudo)', end='', flush=True)
-        print(f'{print_args}{ansi.ENDC}', end='', flush=True)
+            print_status = ''
+            print_chars = 0
 
-        # Display the changed or failure message if necessary
-        if state == EliteState.FAILED:
-            print()
-            print(
-                f"{ansi.BLUE}{'':^10}message:{ansi.ENDC} "
-                f"{ansi.YELLOW}{result['message']}{ansi.ENDC}",
-                end='', flush=True
+            for colour, text in [
+                (print_colour, f'{print_state:^10}'),
+                (ansi.BLUE, print_action),
+                (ansi.YELLOW, print_args)
+            ]:
+                print_chars += len(text)
+
+                # We have reached the maximum characters possible to print in the terminal so we
+                # crop the text and stop processing further text.
+                if print_chars > max_chars:
+                    chop_chars = print_chars - max_chars + 3
+                    print_status += f'{colour}{text[:-chop_chars]}...{ansi.ENDC}'
+                    break
+                else:
+                    print_status += f'{colour}{text}{ansi.ENDC}'
+
+            print(print_status, end='', flush=True)
+            self.overlap_lines = math.ceil(print_chars / terminal_size.columns) - 1
+        else:
+            # Display the current action and its details
+            if self.overlap_lines is not None:
+                # Move to the very left of the last line
+                print('\r', end='', flush=True)
+                if self.overlap_lines:
+                    # Move up to the line we wish to start printing from
+                    print(ansi.move_up(self.overlap_lines), end='', flush=True)
+
+            print_status = (
+                f'{print_colour}{print_state:^10}{ansi.ENDC}'
+                f'{ansi.BLUE}{print_action}{ansi.ENDC}'
+                f'{ansi.YELLOW}{print_args}{ansi.ENDC}'
             )
+            print(print_status)
 
-        # Display a new line if required
-        if newline:
-            print()
+            # Display the changed or failure message if necessary
+            if state == EliteState.FAILED:
+                print()
+                print(
+                    f"{ansi.BLUE}{'':^10}message:{ansi.ENDC} "
+                    f"{ansi.YELLOW}{result['message']}{ansi.ENDC}",
+                    end='', flush=True
+                )
+
+            # Reset the number of lines to overlap
+            self.overlap_lines = None
