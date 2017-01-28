@@ -173,18 +173,17 @@ class Action(object):
         changed = False
         stat = os.stat(path)
 
-        # Set the file mode
-        if mode:
+        # Set the file mode if required
+        if mode and oct(stat.st_mode)[-4:] != mode:
+            changed = True
+
             # Determine the binary representation of the mode requseted
             mode_bin = int(mode, 8)
 
-            # Update the file mode if required
-            if stat.st_mode != mode_bin:
-                changed = True
-                try:
-                    os.chmod(path, mode_bin, follow_symlinks=False)
-                except OSError:
-                    self.fail('unable to set the requested mode on the path specified')
+            try:
+                os.chmod(path, mode_bin, follow_symlinks=False)
+            except OSError:
+                self.fail('unable to set the requested mode on the path specified')
 
         # Set the file owner and/or groups
         if owner or group:
