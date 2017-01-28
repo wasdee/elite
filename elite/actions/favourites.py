@@ -63,7 +63,7 @@ class Favourites(Action):
         for sidebar_item in current_favourites.items():
             url = sidebar_item.URL()
             name = str(sidebar_item.name())
-            properties = dict(sidebar_item.properties())
+            properties = dict(sidebar_item.properties() or {})
 
             current_structure.append((url, name, properties))
 
