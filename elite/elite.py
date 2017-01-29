@@ -99,7 +99,7 @@ class Elite(object):
 
         :return: The respective function that implements that action.
         """
-        def _call_action(sudo=False, ok=None, changed=None, ignore_failed=False, **args):
+        def _call_action(sudo=False, ok=None, changed=None, ignore_failed=False, env={}, **args):
             """
             A sub-method that calls the requested action with the provided raw parameters and
             arguments.
@@ -125,8 +125,13 @@ class Elite(object):
             proc_args = [shutil.which('sudo'), '-n'] if sudo else []
             proc_args.extend([sys.executable, '-m', action_module])
 
+            # Build the final env by merging our existing environment with provided overrides
+            merged_env = os.environ.copy()
+            merged_env.update(env)
+
             proc = subprocess.Popen(
-                proc_args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                proc_args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                env=merged_env
             )
             stdout, stderr = proc.communicate(repr(args).encode('utf-8'))
 
