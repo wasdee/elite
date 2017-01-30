@@ -25,7 +25,7 @@ def first_existing_path(loader, node):
         if os.path.exists(os.path.expanduser(os.path.join(base_dir, path))):
             return path
     else:
-        raise ValueError('none of the paths provided exist')
+        return paths[-1]
 
 
 def macos_font(loader, node):
