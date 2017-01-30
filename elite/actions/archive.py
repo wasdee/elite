@@ -7,12 +7,6 @@ from . import Argument, Action
 
 class Archive(Action):
     def process(self, path, source, preserve_mode, ignore_files, base_dir):
-        # Create the destination base directory if requested to do so
-        try:
-            os.makedirs(path)
-        except FileExistsError:
-            pass
-
         # Determine the type of archive provided
         extension = os.path.splitext(source)[1]
         archive_type = extension[1:].lower()

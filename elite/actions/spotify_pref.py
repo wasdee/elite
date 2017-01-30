@@ -42,14 +42,6 @@ class SpotifyPref(Action):
         # Update the config with the pref and value provided
         prefs[pref] = convert_to_spotify_value(value)
 
-        # Create the directory to place the config in if required
-        config_dir = os.path.dirname(path)
-        try:
-            if not os.path.exists(config_dir):
-                os.makedirs(config_dir)
-        except OSError:
-            self.fail('unable to create the directory to store the Spotify config')
-
         # Write the updated Spotify config
         try:
             with open(path, 'w') as f:

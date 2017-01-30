@@ -70,7 +70,7 @@ class File(Action):
 
                 # Create the directory requested
                 try:
-                    os.makedirs(path)
+                    os.mkdir(path)
                 except OSError:
                     self.fail('the requested directory could not be created')
 

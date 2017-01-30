@@ -46,14 +46,6 @@ class Plist(Action):
         # Update the plist with the values provided
         deep_merge(values, plist)
 
-        # Create the directory to place the plist in if required
-        plist_dir = os.path.dirname(path)
-        try:
-            if not os.path.exists(plist_dir):
-                os.makedirs(plist_dir)
-        except OSError:
-            self.fail('unable to create the directory to store the plist')
-
         # Write the updated plist
         try:
             with open(path, 'wb') as f:

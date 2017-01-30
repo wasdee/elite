@@ -43,13 +43,6 @@ class Download(Action):
                         changed = self.set_file_attributes(filepath)
                         self.changed(path=filepath) if changed else self.ok()
 
-                    # Create the directory to place the download in if required
-                    try:
-                        if not os.path.exists(path):
-                            os.makedirs(path)
-                    except OSError:
-                        self.fail('unable to create the directory to store the download')
-
                 # Perform the download to a binary file in chunks
                 block_size = 1024 * 8
                 try:

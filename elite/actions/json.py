@@ -27,14 +27,6 @@ class Json(Action):
         # Update the JSON with the values provided
         deep_merge(values, json)
 
-        # Create the directory to place the JSON file in if required
-        json_dir = os.path.dirname(path)
-        try:
-            if not os.path.exists(json_dir):
-                os.makedirs(json_dir)
-        except OSError:
-            self.fail('unable to create the directory to store the JSON file')
-
         # Write the updated JSON file
         try:
             with open(path, 'w') as f:
