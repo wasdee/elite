@@ -1,13 +1,15 @@
 from functools import wraps
 
+import yaml
+
 from .elite import Elite, EliteError
-from .config import Config
+from .config import load_config
 from .printer import Printer
 from .utils import build_absolute_path
 from . import ansi
 
 
-def elite_main(config_path, action_search_paths=[]):
+def elite_main(config_path, config_order, action_search_paths=[]):
     def decorator(main):
         @wraps(main)
         def decorated_function():
@@ -18,7 +20,7 @@ def elite_main(config_path, action_search_paths=[]):
                 # Create our objects
                 printer = Printer()
                 elite = Elite(printer=printer, action_search_paths=action_search_paths_abs)
-                config = Config(build_absolute_path(config_path))
+                config = load_config(build_absolute_path(config_path), config_order)
 
                 # Header
                 printer.header()
@@ -29,6 +31,13 @@ def elite_main(config_path, action_search_paths=[]):
                 # Summary
                 printer.heading('Summary')
                 elite.summary()
+
+            # A config issue was encountered
+            except yaml.YAMLError as e:
+                print()
+                print(
+                    f'{ansi.RED}Config Error: {e}{ansi.ENDC}'
+                )
 
             # A task failed to run
             except EliteError as e:
