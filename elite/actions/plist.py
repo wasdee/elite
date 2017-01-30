@@ -6,7 +6,7 @@ from . import Argument, Action, FILE_ATTRIBUTE_ARGS
 
 
 class Plist(Action):
-    def validate_args(self, domain, container, path, values, mode, owner, group, flags):
+    def validate_args(self, domain, container, path, source, values, mode, owner, group, flags):
         if not domain and not path:
             self.fail("you must provide either the 'domain' or 'path' argument")
 
@@ -16,7 +16,7 @@ class Plist(Action):
         if container and domain in ['NSGlobalDomain', 'Apple Global Domain']:
             self.fail("the 'container' argument is not allowed when updating the global domain")
 
-    def process(self, domain, container, path, values, mode, owner, group, flags):
+    def process(self, domain, container, path, source, values, mode, owner, group, flags):
         # Determine the path of the plist if the domain was provided
         if domain:
             if domain in ['NSGlobalDomain', 'Apple Global Domain']:
@@ -37,6 +37,21 @@ class Plist(Action):
             plist = {}
         except plistlib.InvalidFileException:
             self.fail('an invalid plist already exists')
+
+        # When a source has been defined, we merge values with the source
+        if source:
+            # Ensure that home directories are taken into account
+            source = os.path.expanduser(source)
+
+            try:
+                with open(source, 'rb') as f:
+                    source_plist = plistlib.load(f)
+                    source_plist.update(values)
+                    values = source_plist
+            except OSError:
+                self.fail('the source file provided does not exist')
+            except plistlib.InvalidFileException:
+                self.fail('the source file is an invalid plist')
 
         # Check if the current plist is the same as the values provided
         if deep_equal(values, plist):
@@ -62,6 +77,7 @@ if __name__ == '__main__':
         Argument('domain', optional=True),
         Argument('container', optional=True),
         Argument('path', optional=True),
+        Argument('source', optional=True),
         Argument('values'),
         *FILE_ATTRIBUTE_ARGS
     )
