@@ -32,7 +32,7 @@ class File(Action):
                 # An existing file at the destination path was found so we compare them
                 # and avoid making changes if they're identical
                 exists = os.path.isfile(path)
-                if exists and self.md5(source) and self.md5(path):
+                if exists and self.md5(source) == self.md5(path):
                     changed = self.set_file_attributes(path)
                     self.changed(path=path) if changed else self.ok()
 
