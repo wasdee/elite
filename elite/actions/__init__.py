@@ -167,7 +167,7 @@ class Action(object):
         flags = self.args.get('flags')
 
         # No file attributes have been set, so we bail and advise that no changes were made
-        if not any([mode, owner, group, flags]):
+        if not any([mode, owner, group]) and flags is None:
             return False
 
         changed = False
@@ -214,7 +214,7 @@ class Action(object):
                     self.fail('unable to set the requested owner on the path specified')
 
         # Set the file flags
-        if flags:
+        if flags is not None:
             # Determine the binary representation of the flags requseted
             flags_bin = 0
 
