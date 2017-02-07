@@ -135,7 +135,7 @@ class File(Action):
 
         elif state == 'symlink':
             # If the destination provided is a path, then we place the file in it
-            if os.path.isdir(path):
+            if os.path.isdir(path) and not os.path.islink(path):
                 path = os.path.join(path, os.path.basename(source))
 
             # An existing symlink at the destination path was found so we compare them
