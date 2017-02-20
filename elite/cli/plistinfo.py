@@ -49,10 +49,10 @@ def main():
         print(yaml.dump(plist_data, default_flow_style=False), end='')
     except IOError:
         print(f'{RED}Error: The requested plist file {plist_file} was not found{ENDC}')
-        exit(1)
+        sys.exit(1)
     except plistlib.InvalidFileException:
         print(f'{RED}Error: Unable to parse the requested plist file {plist_file}{ENDC}')
-        exit(1)
+        sys.exit(1)
     except KeyboardInterrupt:
         pass
 

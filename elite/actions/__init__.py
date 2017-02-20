@@ -64,7 +64,7 @@ class Action(object):
         try:
             self.args = ast.literal_eval(sys.stdin.read())
         except KeyboardInterrupt:
-            exit(2)
+            sys.exit(2)
         except ValueError:
             self.fail('the arguments provided could not be parsed')
 
@@ -117,15 +117,15 @@ class Action(object):
 
     def ok(self, **data):
         pprint({'changed': False, 'ok': True, **data})
-        exit(0)
+        sys.exit(0)
 
     def changed(self, **data):
         pprint({'changed': True, 'ok': True, **data})
-        exit(0)
+        sys.exit(0)
 
     def fail(self, message, **data):
         pprint({'message': message, 'ok': False, **data})
-        exit(1)
+        sys.exit(1)
 
     def run(self, command, ignore_fail=False, fail_error=None, **kwargs):
         # Allow for the user to send in a string instead of a list for the command

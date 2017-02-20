@@ -2,6 +2,7 @@
 import argparse
 import json
 import subprocess
+import sys
 
 import yaml
 
@@ -122,7 +123,7 @@ def main():
         else:
             print(f'{RED}The configuration provided is different to the current layout{ENDC}')
             print()
-            exit(1)
+            sys.exit(1)
 
     print()
 
