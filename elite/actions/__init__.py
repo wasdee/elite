@@ -78,7 +78,7 @@ class Action(object):
 
     def hide_pyobjc_app(self):
         # When certain actions use PyObjC, we must set the spawned app to run in the background
-        # so it # doesn't show up in the Dock.
+        # so it doesn't show up in the Dock.
         # Please only call this when necessary as it does require some processing and time.
         from AppKit import NSBundle
         bundle_info = NSBundle.mainBundle().infoDictionary()
