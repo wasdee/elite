@@ -68,6 +68,12 @@ class Archive(Action):
                 # Set the block size to an optimal value (based on performance testing)
                 block_size = 131_072
 
+                # Verify that the directory we're writing in is present (especially useful
+                # for ZIP archives)
+                output_dirname = os.path.dirname(output_filepath)
+                if not os.path.exists(output_dirname):
+                    os.makedirs(output_dirname)
+
                 # Extract the file
                 with archive.open(filepath) as a:
                     with open(output_filepath, 'wb') as f:
