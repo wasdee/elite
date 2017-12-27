@@ -8,12 +8,13 @@ class Cask(Action):
         # Obtain information about installed packages
         cask_list_proc = self.run('brew cask list', stdout=True, ignore_fail=True)
 
-        # Check whether the package is installed
+        # Check whether the package is installed using only its short name
+        # (e.g. fgimian/general/cog will check for a cask called cog)
         if cask_list_proc.returncode:
             cask_installed = False
         else:
             cask_list = cask_list_proc.stdout.rstrip().split('\n')
-            cask_installed = name in cask_list
+            cask_installed = name.split('/')[-1] in cask_list
 
         # Prepare any user provided options
         options_list = shlex.split(options) if options else []
