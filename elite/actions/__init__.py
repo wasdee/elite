@@ -1,4 +1,5 @@
 import ast
+import builtins
 import grp
 import keyword
 import os
@@ -54,9 +55,8 @@ class Action(object):
                 self.fail(f"module uses argument '{arg_spec.name}' which is a Python keyword")
 
             # Check for arguments that override Python builtins
-            # TODO: something not right here dawg
-            # if arg_spec.name in dir(__builtins__):
-            #     self.fail(f"module uses argument '{arg_spec.name}' which is a Python builtin")
+            if arg_spec.name in dir(builtins):
+                self.fail(f"module uses argument '{arg_spec.name}' which is a Python builtin")
 
         self.arg_specs = list(arg_specs)
 
