@@ -29,7 +29,8 @@ class Elite(object):
 
     :param printer: A printer object that will be used to display output.
     :param action_search_paths: The paths to search for actions that should be made available in
-                                addition to Elite's core library.
+                                addition to Elite's core library.  Actions must be placed in the
+                                sub-directory "actions" in the path provided.
     """
     def __init__(self, printer, action_search_paths=[]):
         # Capture user parameters.
@@ -59,11 +60,9 @@ class Elite(object):
         """
 
         # Start our list of library directories with the elite library
-        library_dirs = [
+        library_dirs = self.action_search_paths + [
             os.path.join(os.path.dirname(__file__))
         ]
-
-        # TODO: Add additional libraries supplied by the user to our list of library directories
 
         # Search through all action paths for actions
         for library_dir in library_dirs:
