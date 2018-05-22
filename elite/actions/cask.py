@@ -30,6 +30,31 @@ class Cask(Action):
                 )
                 self.changed()
 
+        if state == 'latest':
+            if cask_installed:
+                # Determine if the installed package is outdated
+                cask_outdated = False
+
+                cask_outdated_proc = self.run('brew cask outdated', stdout=True, ignore_fail=True)
+                if not cask_outdated_proc.returncode:
+                    cask_list = cask_outdated_proc.stdout.rstrip().split('\n')
+                    cask_outdated = name.split('/')[-1] in cask_list
+
+                if not cask_outdated:
+                    self.ok()
+                else:
+                    self.run(
+                        ['brew', 'cask', 'upgrade'] + options_list + [name],
+                        fail_error='unable to upgrade the requested package'
+                    )
+                    self.changed()
+            else:
+                self.run(
+                    ['brew', 'cask', 'install'] + options_list + [name],
+                    fail_error='unable to install the requested package'
+                )
+                self.changed()
+
         elif state == 'absent':
             if not cask_installed:
                 self.ok()
@@ -44,7 +69,7 @@ class Cask(Action):
 if __name__ == '__main__':
     cask = Cask(
         Argument('name'),
-        Argument('state', choices=['present', 'absent'], default='present'),
+        Argument('state', choices=['present', 'latest', 'absent'], default='present'),
         Argument('options', optional=True)
     )
     cask.invoke()
