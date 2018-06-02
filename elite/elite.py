@@ -41,15 +41,10 @@ class Elite(object):
         self._elite_actions = {}
         self._find_elite_actions()
 
-        # Keep track of totals for the summary.
-        self.total_tasks = 0
-        self.ok_tasks = 0
-        self.changed_tasks = 0
-        self.failed_tasks = 0
-
-        # Capture failud and changed tasks to show them in the summary.
-        self.failed_task_info = []
-        self.changed_task_info = []
+        # Capture task information to show them in the summary.
+        self.ok_tasks = []
+        self.failed_tasks = []
+        self.changed_tasks = []
 
     def _find_elite_actions(self):
         """
@@ -110,9 +105,6 @@ class Elite(object):
 
             :return: A named tuple containing the results of the action run.
             """
-            # Track the number of tasks run
-            self.total_tasks += 1
-
             # Run the progress callback to indicate we have started running the task
             self.printer.progress(EliteState.RUNNING, action, args, result=None)
 
@@ -166,17 +158,15 @@ class Elite(object):
 
             # Update totals and task info based on the outcome
             if state == EliteState.FAILED:
-                self.failed_tasks += 1
-                self.failed_task_info.append((action, args, result))
+                self.failed_tasks.append((action, args, result))
 
                 # If the task failed and was not to be ignored, we bail.
                 if not ignore_failed:
                     raise EliteError(result['message'])
             elif result['changed']:
-                self.changed_tasks += 1
-                self.changed_task_info.append((action, args, result))
+                self.changed_tasks.append((action, args, result))
             else:
-                self.ok_tasks += 1
+                self.ok_tasks.append((action, args, result))
 
             # Return a named tuple containing the result
             return dict_to_namedtuple('Result', result)
@@ -193,8 +183,4 @@ class Elite(object):
         Call the summary printer object method with the appropriate totals and task info so the
         method may display the final summary to the user.
         """
-        self.printer.summary(
-            self.total_tasks, self.ok_tasks,
-            self.changed_tasks, self.failed_tasks,
-            self.changed_task_info, self.failed_task_info
-        )
+        self.printer.summary(self.ok_tasks, self.changed_tasks, self.failed_tasks)
