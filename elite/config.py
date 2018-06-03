@@ -13,19 +13,14 @@ def join_path(loader, node):
     return os.path.join(*[i for i in seq])
 
 
-def first_existing_path(loader, node):
-    map = loader.construct_mapping(node, deep=True)
-    try:
-        base_dir = map['base_dir']
-        paths = map['paths']
-    except KeyError:
-        raise ValueError('both a base_dir and paths key must be provided')
+def first_existing_dir(loader, node):
+    seq = loader.construct_sequence(node)
 
-    for path in paths:
-        if os.path.exists(os.path.expanduser(os.path.join(base_dir, path))):
+    for path in seq:
+        if os.path.isdir(os.path.expanduser(path)):
             return path
     else:
-        return paths[-1]
+        return None
 
 
 def macos_font(loader, node):
@@ -66,7 +61,7 @@ def macos_color(loader, node):
 
 
 yaml.add_constructor('!join_path', join_path)
-yaml.add_constructor('!first_existing_path', first_existing_path)
+yaml.add_constructor('!first_existing_dir', first_existing_dir)
 yaml.add_constructor('!macos_font', macos_font)
 yaml.add_constructor('!macos_color', macos_color)
 
