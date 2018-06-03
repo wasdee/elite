@@ -40,7 +40,7 @@ def elite_main(config_path, config_order, action_search_paths=[]):
                 )
 
             # A task failed to run
-            except EliteError as e:
+            except EliteError:
                 # Summary
                 printer.heading('Summary')
                 elite.summary()
