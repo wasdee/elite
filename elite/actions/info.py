@@ -1,13 +1,13 @@
 from . import Argument, Action
 
 
-class Fail(Action):
+class Info(Action):
     def process(self, message):
-        self.fail(message=None)
+        self.ok()
 
 
 if __name__ == '__main__':
-    fail = Fail(
+    info = Info(
         Argument('message')
     )
-    fail.invoke()
+    info.invoke()

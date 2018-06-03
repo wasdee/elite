@@ -148,7 +148,7 @@ class Printer(object):
             print(print_status)
 
             # Display the changed or failure message if necessary
-            if state == EliteState.FAILED:
+            if state == EliteState.FAILED and result['message'] is not None:
                 print(
                     f"{ansi.BLUE}{'':^10}message:{ansi.ENDC} "
                     f"{ansi.YELLOW}{result['message']}{ansi.ENDC}"
