@@ -9,7 +9,7 @@ from .utils import build_absolute_path
 from . import ansi
 
 
-def elite_main(config_path, config_order, action_search_paths=[]):
+def main(config_path, config_order, action_search_paths=[]):
     def decorator(main):
         @wraps(main)
         def decorated_function():
