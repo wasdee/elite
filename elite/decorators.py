@@ -1,9 +1,7 @@
 from functools import wraps
 
-from ruamel.yaml import YAMLError
-
 from .elite import Elite, EliteError
-from .config import load_config
+from .config import load_config, ConfigError
 from .printer import Printer
 from .utils import build_absolute_path
 from . import ansi
@@ -33,7 +31,7 @@ def main(config_path, action_search_paths=[]):
                 elite.summary()
 
             # A config issue was encountered
-            except YAMLError as e:
+            except ConfigError as e:
                 print()
                 print(
                     f'{ansi.RED}Config Error: {e}{ansi.ENDC}'
