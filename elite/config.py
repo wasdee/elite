@@ -1,11 +1,19 @@
 from collections import namedtuple
 import os
+import pathlib
 
 from AppKit import NSFont
 # Strangely NSKeyedArchiver won't import without ScriptingBridge
 import ScriptingBridge  # flake8: noqa
 from Foundation import NSKeyedArchiver, NSCalibratedRGBColor
-import yaml
+from ruamel.yaml import YAML, YAMLError
+
+
+def include(loader, node):
+    path = pathlib.Path(loader.loader.reader.stream.name).parent.joinpath(node.value)
+    yaml = YAML(typ=loader.loader.typ, pure=loader.loader.pure)
+    yaml.composer.anchors = loader.composer.anchors
+    return yaml.load(path)
 
 
 def join_path(loader, node):
@@ -60,53 +68,38 @@ def macos_color(loader, node):
     return bytes(NSKeyedArchiver.archivedDataWithRootObject_(color))
 
 
-yaml.add_constructor('!join_path', join_path)
-yaml.add_constructor('!first_existing_dir', first_existing_dir)
-yaml.add_constructor('!macos_font', macos_font)
-yaml.add_constructor('!macos_color', macos_color)
+def compose_document_without_anchor_reset(self):
+    self.parser.get_event()
+    node = self.compose_node(None, None)
+    self.parser.get_event()
+    # self.anchors = {}  # Commented out to avoid resetting of anchors
+    return node
 
 
-class ConfigError(object):
+yaml = YAML(typ='safe', pure=True)
+yaml.default_flow_style = False
+yaml.Composer.compose_document = compose_document_without_anchor_reset
+yaml.Constructor.add_constructor("!include", include)
+yaml.Constructor.add_constructor('!join_path', join_path)
+yaml.Constructor.add_constructor('!first_existing_dir', first_existing_dir)
+yaml.Constructor.add_constructor('!macos_font', macos_font)
+yaml.Constructor.add_constructor('!macos_color', macos_color)
+
+
+class ConfigError(Exception):
     """An error raised when problem is encountered reading a config file or variable"""
 
 
-def load_config(search_path, config_order):
-    # Find the paths to all YAML config files in the chosen search path and in the appropriate
-    # order and then add them to the config_files list.
-    config_files = []
-    for config_file in config_order:
-        abs_config_path = os.path.join(search_path, config_file)
-        if os.path.isdir(abs_config_path):
-            for root, dirs, files in os.walk(abs_config_path):
-                for filename in files:
-                    # Skip any files that aren't YAML
-                    extension = os.path.splitext(filename)
-                    if extension[1] not in ['.yml', '.yaml']:
-                        continue
+def load_config(config_path):
+    try:
+        config = yaml.load(pathlib.Path(config_path))
+    except OSError:
+        raise ConfigError(f"the path specified {config_path} doesn't exist")
+    except YAMLError:
+        raise ConfigError(f'unable to parse the config file at path {config_path}')
 
-                    # Add the config to our list
-                    config_path = os.path.join(root, filename)
-                    config_files.append(config_path)
-        elif os.path.isfile(abs_config_path):
-            config_files.append(abs_config_path)
-        else:
-            raise ConfigError(f"the path specified {abs_config_path} doesn't exist")
-
-    # Load all the configs requested into one big combined data structure.
-    configs = []
-    for config_file in config_files:
-        with open(config_file) as f:
-            config_str = f.read()
-            configs.append(config_str if config_str.endswith('\n') else config_str + '\n')
-
-    config_dict = yaml.load(''.join(configs))
-
-    if not isinstance(config_dict, dict):
+    if not isinstance(config, dict):
         raise ConfigError('the top level of your config must contain key-value pairs')
 
-    for key in list(config_dict):
-        if key.startswith('_'):
-            del config_dict[key]
-
-    Config = namedtuple('Config', config_dict.keys())
-    return Config(**config_dict)
+    Config = namedtuple('Config', config.keys())
+    return Config(**config)

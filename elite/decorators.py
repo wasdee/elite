@@ -1,6 +1,6 @@
 from functools import wraps
 
-import yaml
+from ruamel.yaml import YAMLError
 
 from .elite import Elite, EliteError
 from .config import load_config
@@ -9,7 +9,7 @@ from .utils import build_absolute_path
 from . import ansi
 
 
-def main(config_path, config_order, action_search_paths=[]):
+def main(config_path, action_search_paths=[]):
     def decorator(main):
         @wraps(main)
         def decorated_function():
@@ -20,7 +20,7 @@ def main(config_path, config_order, action_search_paths=[]):
                 # Create our objects
                 printer = Printer()
                 elite = Elite(printer=printer, action_search_paths=action_search_paths_abs)
-                config = load_config(build_absolute_path(config_path), config_order)
+                config = load_config(build_absolute_path(config_path))
 
                 # Header
                 printer.header()
@@ -33,7 +33,7 @@ def main(config_path, config_order, action_search_paths=[]):
                 elite.summary()
 
             # A config issue was encountered
-            except yaml.YAMLError as e:
+            except YAMLError as e:
                 print()
                 print(
                     f'{ansi.RED}Config Error: {e}{ansi.ENDC}'
