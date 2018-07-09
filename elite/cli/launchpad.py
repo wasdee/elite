@@ -6,10 +6,13 @@ import subprocess
 import sys
 from time import sleep
 
-import yaml
+from ruamel.yaml import YAML
 
 from ..libraries.launchpad_builder import get_launchpad_db_dir, LaunchpadBuilder
 
+
+# Configure YAML parsing to be safe by default
+yaml = YAML(typ='safe')
 
 # Colours
 BOLD = '\033[1m'

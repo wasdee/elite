@@ -1,9 +1,13 @@
 import shlex
 import shutil
 
-import yaml
+from ruamel.yaml import YAML, YAMLError
 
 from . import Argument, Action
+
+
+# Configure YAML parsing to be safe by default
+yaml = YAML(typ='safe')
 
 
 def ruby_object(loader, node):
@@ -17,7 +21,7 @@ for ruby_type in [
     '!ruby/object:Gem::Dependency',
     '!ruby/object:Gem::Version'
 ]:
-    yaml.add_constructor(ruby_type, ruby_object)
+    yaml.Constructor.add_constructor(ruby_type, ruby_object)
 
 
 class Gem(Action):
@@ -62,7 +66,7 @@ class Gem(Action):
 
                     # Determine if the latest package is already installed
                     gem_outdated = gem_remote_version not in gem_versions
-            except (yaml.scanner.ScannerError, KeyError):
+            except (YAMLError, KeyError):
                 self.fail('unable to parse installed package listing')
 
         # Prepare any user provided options

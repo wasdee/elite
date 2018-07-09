@@ -3,8 +3,11 @@ import os
 from glob import glob
 import plistlib
 import sys
-import yaml
+from ruamel.yaml import YAML
 
+
+# Configure YAML parsing to be safe by default
+yaml = YAML(typ='safe')
 
 # Colours
 BOLD = '\033[1m'

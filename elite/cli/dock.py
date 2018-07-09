@@ -4,10 +4,13 @@ import json
 import subprocess
 import sys
 
-import yaml
+from ruamel.yaml import YAML
 
 from ..libraries.dock_builder import get_dock_plist_path, DockBuilder
 
+
+# Configure YAML parsing to be safe by default
+yaml = YAML(typ='safe')
 
 # Colours
 BOLD = '\033[1m'

@@ -9,6 +9,10 @@ from Foundation import NSKeyedArchiver, NSCalibratedRGBColor
 from ruamel.yaml import YAML, YAMLError
 
 
+# Configure YAML parsing to be safe by default
+yaml = YAML(typ='safe', pure=True)
+
+
 def include(loader, node):
     path = pathlib.Path(loader.loader.reader.stream.name).parent.joinpath(node.value)
     yaml = YAML(typ=loader.loader.typ, pure=loader.loader.pure)
@@ -76,8 +80,6 @@ def compose_document_without_anchor_reset(self):
     return node
 
 
-yaml = YAML(typ='safe', pure=True)
-yaml.default_flow_style = False
 yaml.Composer.compose_document = compose_document_without_anchor_reset
 yaml.Constructor.add_constructor("!include", include)
 yaml.Constructor.add_constructor('!join_path', join_path)
