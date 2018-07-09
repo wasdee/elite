@@ -1,1 +1,1 @@
-from .decorators import main
+from .decorators import main  # noqa
