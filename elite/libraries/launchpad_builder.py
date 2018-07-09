@@ -15,7 +15,7 @@ def get_launchpad_db_dir():
     return os.path.join(darwin_user_dir, 'com.apple.dock.launchpad', 'db')
 
 
-class Types(object):
+class Types:
     ROOT = 1
     FOLDER_ROOT = 2
     PAGE = 3
@@ -28,7 +28,7 @@ class LaunchpadValidationError(Exception):
     """An error that occurs when validating a provided Launchpad layout"""
 
 
-class LaunchpadBuilder(object):
+class LaunchpadBuilder:
     def __init__(self, launchpad_db_path, widget_layout=[], app_layout=[]):
         # The Launchpad database location
         self.launchpad_db_path = launchpad_db_path

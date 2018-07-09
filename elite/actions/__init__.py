@@ -16,7 +16,7 @@ from ..constants import FLAGS
 FORBIDDEN_ARGS = ['sudo', 'ok', 'changed', 'ignore_failed']
 
 
-class Argument(object):
+class Argument:
     def __init__(self, name, optional=False, default=None, choices=None):
         self.name = name
         self.optional = True if default is not None else optional
@@ -43,7 +43,7 @@ FILE_ATTRIBUTE_ARGS = [
 ]
 
 
-class Action(object):
+class Action:
     def __init__(self, *arg_specs):
         for arg_spec in arg_specs:
             # Check for forbidden arguments used be elite

@@ -23,7 +23,7 @@ class EliteError(Exception):
     """An exception raised when an action fails to execute with the given arguments."""
 
 
-class Elite(object):
+class Elite:
     """
     Provides a way to run the requested Elite action with the appropriate arguments.
 

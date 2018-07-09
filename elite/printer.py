@@ -5,7 +5,7 @@ from .elite import EliteState
 from . import ansi
 
 
-class Printer(object):
+class Printer:
     def __init__(self):
         # Track the number of lines we must move upwards to overlap text
         self.overlap_lines = None
