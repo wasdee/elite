@@ -4,7 +4,7 @@ import pathlib
 
 from AppKit import NSFont
 # Strangely NSKeyedArchiver won't import without ScriptingBridge
-import ScriptingBridge  # flake8: noqa
+import ScriptingBridge  # noqa: F401
 from Foundation import NSKeyedArchiver, NSCalibratedRGBColor
 from ruamel.yaml import YAML, YAMLError
 

@@ -33,7 +33,7 @@ class FileInfo(Action):
 
                 if bookmark_data:
                     file_type = 'alias'
-                    source_url, is_stale, error = NSURL.URLByResolvingBookmarkData_options_relativeToURL_bookmarkDataIsStale_error_(  # flake8: noqa
+                    source_url, is_stale, error = NSURL.URLByResolvingBookmarkData_options_relativeToURL_bookmarkDataIsStale_error_(  # noqa: E501
                         bookmark_data, NSURLBookmarkResolutionWithoutUI, None, None, None
                     )
                     source = source_url.path()
