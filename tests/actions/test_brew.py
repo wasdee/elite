@@ -1,0 +1,162 @@
+import pytest
+
+from elite.actions import ActionResponse, ActionError
+from elite.actions.brew import Brew
+
+from .helpers import CommandMapping, build_run
+
+
+def test_invalid_name(monkeypatch):
+    monkeypatch.setattr(Brew, 'run', build_run(
+        fixture_subpath='brew/present',
+        command_mappings=[
+            CommandMapping(
+                command=['brew', 'info', '--json=v1', 'fake'],
+                returncode=1
+            )
+        ]
+    ))
+
+    brew = Brew(name='fake', state='present')
+    with pytest.raises(ActionError):
+        brew.process()
+
+
+def test_invalid_state():
+    with pytest.raises(ValueError):
+        Brew(name='wget', state='hmmm')
+
+
+def test_invalid_info_output(monkeypatch):
+    monkeypatch.setattr(Brew, 'run', build_run(
+        fixture_subpath='brew/present',
+        command_mappings=[
+            CommandMapping(
+                command=['brew', 'info', '--json=v1', 'wget']
+            )
+        ]
+    ))
+
+    brew = Brew(name='wget', state='present')
+    with pytest.raises(ActionError):
+        brew.process()
+
+
+def test_present_installed(monkeypatch):
+    monkeypatch.setattr(Brew, 'run', build_run(
+        fixture_subpath='brew/present',
+        command_mappings=[
+            CommandMapping(
+                command=['brew', 'info', '--json=v1', 'wget'],
+                stdout_filename='brew_info_installed.stdout'
+            )
+        ]
+    ))
+
+    brew = Brew(name='wget', state='present')
+    assert brew.process() == ActionResponse(changed=False, data={})
+
+
+def test_present_not_installed(monkeypatch):
+    monkeypatch.setattr(Brew, 'run', build_run(
+        fixture_subpath='brew/present',
+        command_mappings=[
+            CommandMapping(
+                command=['brew', 'info', '--json=v1', 'wget'],
+                stdout_filename='brew_info_not_installed.stdout'
+            ),
+            CommandMapping(
+                command=['brew', 'install', 'wget']
+            )
+        ]
+    ))
+
+    brew = Brew(name='wget', state='present')
+    assert brew.process() == ActionResponse(changed=True, data={})
+
+
+def test_latest_installed_and_up_to_date(monkeypatch):
+    monkeypatch.setattr(Brew, 'run', build_run(
+        fixture_subpath='brew/latest',
+        command_mappings=[
+            CommandMapping(
+                command=['brew', 'info', '--json=v1', 'wget'],
+                stdout_filename='brew_info_installed_and_up_to_date.stdout'
+            )
+        ]
+    ))
+
+    brew = Brew(name='wget', state='latest')
+    assert brew.process() == ActionResponse(changed=False, data={})
+
+
+def test_latest_installed_but_outdated(monkeypatch):
+    monkeypatch.setattr(Brew, 'run', build_run(
+        fixture_subpath='brew/latest',
+        command_mappings=[
+            CommandMapping(
+                command=['brew', 'info', '--json=v1', 'hugo'],
+                stdout_filename='brew_info_installed_but_outdated.stdout'
+            ),
+            CommandMapping(
+                command=['brew', 'upgrade', 'hugo']
+            )
+        ]
+    ))
+
+    brew = Brew(name='hugo', state='latest')
+    assert brew.process() == ActionResponse(changed=True, data={})
+
+
+def test_latest_not_installed(monkeypatch):
+    monkeypatch.setattr(Brew, 'run', build_run(
+        fixture_subpath='brew/latest',
+        command_mappings=[
+            CommandMapping(
+                command=['brew', 'info', '--json=v1', 'wget'],
+                stdout_filename='brew_info_not_installed.stdout'
+            ),
+            CommandMapping(
+                command=['brew', 'install', 'wget']
+            )
+        ]
+    ))
+
+    brew = Brew(name='wget', state='latest')
+    assert brew.process() == ActionResponse(changed=True, data={})
+
+
+def test_absent_not_installed(monkeypatch):
+    monkeypatch.setattr(Brew, 'run', build_run(
+        fixture_subpath='brew/absent',
+        command_mappings=[
+            CommandMapping(
+                command=['brew', 'info', '--json=v1', 'wget'],
+                stdout_filename='brew_info_not_installed.stdout'
+            ),
+            CommandMapping(
+                command=['brew', 'remove', 'wget']
+            )
+        ]
+    ))
+
+    brew = Brew(name='wget', state='absent')
+    assert brew.process() == ActionResponse(changed=False, data={})
+
+
+def test_absent_installed(monkeypatch):
+    monkeypatch.setattr(Brew, 'run', build_run(
+        fixture_subpath='brew/absent',
+        command_mappings=[
+            CommandMapping(
+                command=['brew', 'info', '--json=v1', 'wget'],
+                stdout_filename='brew_info_installed.stdout'
+            ),
+            CommandMapping(
+                command=['brew', 'remove', 'wget']
+            )
+        ]
+    ))
+
+    brew = Brew(name='wget', state='absent')
+    assert brew.process() == ActionResponse(changed=True, data={})

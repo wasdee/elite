@@ -13,7 +13,9 @@ class LoginItem(Action):
 
         # The scripting bridge pops up in the Dock, so we must explicitly hide the app
         # before starting
-        self.hide_pyobjc_app()
+        from AppKit import NSBundle
+        bundle_info = NSBundle.mainBundle().infoDictionary()
+        bundle_info["LSBackgroundOnly"] = True
 
         # Obtain the System Events application
         system_events = SBApplication.applicationWithBundleIdentifier_('com.apple.systemevents')
