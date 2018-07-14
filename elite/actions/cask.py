@@ -35,7 +35,7 @@ class Cask(Action):
         # Check whether the package is installed using only its short name
         # (e.g. fgimian/general/cog will check for a cask called cog)
         if cask_list_proc.returncode:
-            raise ActionError('unable to obtain a list of cask_list')
+            raise ActionError('unable to obtain a list of cask packages')
         else:
             cask_list = cask_list_proc.stdout.rstrip().split('\n')
             cask_installed = self.name.split('/')[-1] in cask_list

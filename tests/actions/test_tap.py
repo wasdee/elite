@@ -11,13 +11,13 @@ def test_invalid_state():
         Tap(name='homebrew/cask-fonts', state='hmmm')
 
 
-def test_invalid_output(monkeypatch):
+def test_invalid_command(monkeypatch):
     monkeypatch.setattr(Tap, 'run', build_run(
         fixture_subpath='tap',
         command_mappings=[
             CommandMapping(
                 command='brew tap',
-                returncode=1
+                returncode=2
             )
         ]
     ))

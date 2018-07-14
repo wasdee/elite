@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "express": {
+      "version": "4.15.5",
+      "from": "express@4.15.5",
+      "resolved": "https://registry.npmjs.org/express/-/express-4.15.5.tgz"
+    }
+  }
+}

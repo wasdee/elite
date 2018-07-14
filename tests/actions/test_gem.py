@@ -1,5 +1,6 @@
-import pytest
 import shutil
+
+import pytest
 
 from elite.actions import ActionResponse, ActionError
 from elite.actions.gem import Gem
@@ -176,6 +177,24 @@ def test_latest_installed_but_outdated(monkeypatch):
             CommandMapping(
                 command=['gem', 'specification', '--remote', 'rails'],
                 stdout_filename='gem_specification_remote.stdout'
+            ),
+            CommandMapping(
+                command=['gem', 'install', 'rails']
+            )
+        ]
+    ))
+
+    gem = Gem(name='rails', state='latest', executable='gem')
+    assert gem.process() == ActionResponse(changed=True)
+
+
+def test_latest_not_installed(monkeypatch):
+    monkeypatch.setattr(Gem, 'run', build_run(
+        fixture_subpath='gem',
+        command_mappings=[
+            CommandMapping(
+                command=['gem', 'specification', '--all', 'rails'],
+                returncode=1
             ),
             CommandMapping(
                 command=['gem', 'install', 'rails']

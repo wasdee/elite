@@ -2,34 +2,107 @@ import json
 import shlex
 import shutil
 
-from . import Argument, Action
+from . import Action, ActionError
 
 
 class Npm(Action):
-    def validate_args(self, name, version, state, path, mode, executable, options):
-        if mode == 'local' and not path:
-            self.fail("you must specify the 'path' parameter when 'mode' is set to 'local'")
+    """
+    Provides the ability to manage packages using the Node.js npm package manager.
 
-        if state == 'latest' and version:
-            self.fail(
+    :param name: the name of the package
+    :param version: the version of the package to install
+    :param state: the state that the package must be in
+    :param executable: the npm executable to use
+    :param mode: whether the installation should be local or global
+    :param path: the path in which to install the package (when mode is local)
+    :param options: additional command line options to pass to the npm command
+    """
+    __action_name__ = 'npm'
+
+    def __init__(
+        self, name, version=None, state='present', executable=None, mode='local', path=None,
+        options=None
+    ):
+        # We must set these attributes so the initial setting of version works
+        self._mode = None
+        self._state = None
+
+        self.name = name
+        self.version = version
+        self.state = state
+        self.path = path
+        self.mode = mode
+        self.executable = executable
+        self.options = options
+
+    @property
+    def version(self):
+        return self._version
+
+    @version.setter
+    def version(self, version):
+        if self.state == 'latest' and version:
+            raise ValueError(
                 "you may not request 'state' to be 'latest' and provide a 'version' argument"
             )
+        self._version = version
 
-    def process(self, name, version, state, path, mode, executable, options):
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if state not in ['present', 'latest', 'absent']:
+            raise ValueError('state must be present, latest or absent')
+        if state == 'latest' and self.version:
+            raise ValueError(
+                "you may not request 'state' to be 'latest' and provide a 'version' argument"
+            )
+        self._state = state
+
+    @property
+    def mode(self):
+        return self._mode
+
+    @mode.setter
+    def mode(self, mode):
+        if mode not in ['local', 'global']:
+            raise ValueError('mode must be local or global')
+        if mode == 'local' and not self.path:
+            raise ValueError(
+                "you must specify the 'path' parameter when 'mode' is set to 'local'"
+            )
+        self._mode = mode
+
+    @property
+    def path(self):
+        return self._path
+
+    @path.setter
+    def path(self, path):
+        if self.mode == 'local' and not path:
+            raise ValueError(
+                "you must specify the 'path' parameter when 'mode' is set to 'local'"
+            )
+        self._path = path
+
+    def process(self):
         # Determine the npm executable
-        if not executable:
+        if self.executable:
+            executable = self.executable
+        else:
             executable = shutil.which('npm')
             if not executable:
-                self.fail('unable to determine npm executable to use')
+                raise ActionError('unable to determine npm executable to use')
 
-        location_options = []
-        if mode == 'global':
-            location_options.append('--global')
-        if path:
-            location_options.extend(['--prefix', path])
+        if self.mode == 'global':
+            location_options = ['--global']
+        else:
+            location_options = ['--prefix', self.path]
 
         # We'll work in lowercase as npm is case insensitive
-        name = name.lower()
+        name = self.name.lower()
 
         # Obtain a list of the requested package
         npm_list_proc = self.run(
@@ -39,98 +112,86 @@ class Npm(Action):
 
         # Check whether the package is installed and whether it is outdated
         if npm_list_proc.returncode:
-            npm_installed = False
+            raise ActionError('unable to obtain a list of npm packages')
         else:
             # Determine if the package is installed and/or outdated
             try:
                 npm_list_multiple = json.loads(npm_list_proc.stdout)
                 npm_list = {
                     p.lower(): i['version']
-                    for p, i in npm_list_multiple['dependencies'].items()
+                    for p, i in npm_list_multiple.get('dependencies', {}).items()
                 }
 
                 npm_installed = name in npm_list
 
                 if npm_installed:
+                    npm_version = npm_list[name]
+
+                if npm_installed and self.state == 'latest':
                     npm_view_proc = self.run(
                         [executable, 'view', '--json', name], stdout=True, ignore_fail=True
                     )
 
                     npm_view = json.loads(npm_view_proc.stdout)
 
-                    npm_version = npm_list[name]
                     npm_outdated = npm_version != npm_view['version']
-            except (json.JSONDecodeError, IndexError, KeyError) as e:
-                print(e)
-                self.fail('unable to parse package information')
+            except (json.JSONDecodeError, IndexError, KeyError):
+                raise ActionError('unable to parse package information')
 
         # Prepare any user provided options
-        options_list = shlex.split(options) if options else []
+        options_list = shlex.split(self.options) if self.options else []
 
         # Install, upgrade or remove the package as requested
-        if state == 'present':
-            if version:
-                if npm_installed and version == npm_version:
-                    self.ok()
+        if self.state == 'present':
+            if self.version:
+                if npm_installed and self.version == npm_version:
+                    return self.ok()
                 elif npm_installed:
                     self.run(
                         [executable, 'install'] + location_options + options_list +
-                        [f'{name}@{version}'],
+                        [f'{name}@{self.version}'],
                         fail_error='unable to reinstall the requested package version'
                     )
-                    self.changed()
+                    return self.changed()
                 else:
                     self.run(
                         [executable, 'install'] + location_options + options_list +
-                        [f'{name}@{version}'],
+                        [f'{name}@{self.version}'],
                         fail_error='unable to install the requested package version'
                     )
-                    self.changed()
+                    return self.changed()
             else:
                 if npm_installed:
-                    self.ok()
+                    return self.ok()
                 else:
                     self.run(
                         [executable, 'install'] + location_options + options_list + [name],
                         fail_error='unable to install the requested package'
                     )
-                    self.changed()
+                    return self.changed()
 
-        elif state == 'latest':
+        elif self.state == 'latest':
             if npm_installed and not npm_outdated:
-                self.ok()
+                return self.ok()
             elif npm_installed and npm_outdated:
                 self.run(
                     [executable, 'install'] + location_options + options_list + [name],
                     fail_error='unable to upgrade the requested package'
                 )
-                self.changed('existing outdated package found and upgraded successfully')
+                return self.changed()
             else:
                 self.run(
                     [executable, 'install'] + location_options + options_list + [name],
                     fail_error='unable to install the requested package'
                 )
-                self.changed()
+                return self.changed()
 
-        elif state == 'absent':
+        elif self.state == 'absent':
             if not npm_installed:
-                self.ok()
+                return self.ok()
             else:
                 self.run(
                     [executable, 'uninstall'] + location_options + options_list + [name],
                     fail_error='unable to remove the requested package'
                 )
-                self.changed()
-
-
-if __name__ == '__main__':
-    npm = Npm(
-        Argument('name'),
-        Argument('version', optional=True),
-        Argument('state', choices=['present', 'latest', 'absent'], default='present'),
-        Argument('path', optional=True),
-        Argument('mode', choices=['local', 'global'], default='local'),
-        Argument('executable', optional=True),
-        Argument('options', optional=True)
-    )
-    npm.invoke()
+                return self.changed()

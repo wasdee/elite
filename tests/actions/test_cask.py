@@ -11,13 +11,13 @@ def test_invalid_state():
         Cask(name='musescore', state='hmmm')
 
 
-def test_invalid_list_output(monkeypatch):
+def test_invalid_list_command(monkeypatch):
     monkeypatch.setattr(Cask, 'run', build_run(
         fixture_subpath='cask',
         command_mappings=[
             CommandMapping(
                 command='brew cask list',
-                returncode=1
+                returncode=2
             )
         ]
     ))
