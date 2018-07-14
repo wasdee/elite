@@ -50,7 +50,7 @@ def test_find_executable_found(monkeypatch):
         shutil, 'which', lambda cmd: '/opt/ruby/bin/gem' if cmd == 'gem' else None
     )
     monkeypatch.setattr(Gem, 'run', build_run(
-        fixture_subpath='gem/present',
+        fixture_subpath='gem',
         command_mappings=[
             CommandMapping(
                 command=['/opt/ruby/bin/gem', 'specification', '--all', 'rails'],
@@ -66,7 +66,7 @@ def test_find_executable_found(monkeypatch):
 def test_find_executable_not_found(monkeypatch):
     monkeypatch.setattr(shutil, 'which', lambda cmd: None)
     monkeypatch.setattr(Gem, 'run', build_run(
-        fixture_subpath='gem/present',
+        fixture_subpath='gem',
         command_mappings=[
             CommandMapping(
                 command=['/opt/ruby/bin/gem', 'specification', '--all', 'rails'],
@@ -82,7 +82,7 @@ def test_find_executable_not_found(monkeypatch):
 
 def test_present_installed(monkeypatch):
     monkeypatch.setattr(Gem, 'run', build_run(
-        fixture_subpath='gem/present',
+        fixture_subpath='gem',
         command_mappings=[
             CommandMapping(
                 command=['gem', 'specification', '--all', 'rails'],
@@ -97,7 +97,7 @@ def test_present_installed(monkeypatch):
 
 def test_present_not_installed(monkeypatch):
     monkeypatch.setattr(Gem, 'run', build_run(
-        fixture_subpath='gem/present',
+        fixture_subpath='gem',
         command_mappings=[
             CommandMapping(
                 command=['gem', 'specification', '--all', 'rails'],
@@ -115,7 +115,7 @@ def test_present_not_installed(monkeypatch):
 
 def test_present_with_version_installed(monkeypatch):
     monkeypatch.setattr(Gem, 'run', build_run(
-        fixture_subpath='gem/present_with_version',
+        fixture_subpath='gem',
         command_mappings=[
             CommandMapping(
                 command=['gem', 'specification', '--all', 'rails'],
@@ -124,13 +124,13 @@ def test_present_with_version_installed(monkeypatch):
         ]
     ))
 
-    gem = Gem(name='rails', version='5.1.6', state='present', executable='gem')
+    gem = Gem(name='rails', version='5.2.0', state='present', executable='gem')
     assert gem.process() == ActionResponse(changed=False)
 
 
 def test_present_with_version_not_installed(monkeypatch):
     monkeypatch.setattr(Gem, 'run', build_run(
-        fixture_subpath='gem/present_with_version',
+        fixture_subpath='gem',
         command_mappings=[
             CommandMapping(
                 command=['gem', 'specification', '--all', 'rails'],
@@ -148,15 +148,15 @@ def test_present_with_version_not_installed(monkeypatch):
 
 def test_latest_installed_and_up_to_date(monkeypatch):
     monkeypatch.setattr(Gem, 'run', build_run(
-        fixture_subpath='gem/latest',
+        fixture_subpath='gem',
         command_mappings=[
             CommandMapping(
                 command=['gem', 'specification', '--all', 'rails'],
-                stdout_filename='gem_specification_all_installed_and_up_to_date.stdout'
+                stdout_filename='gem_specification_all_installed.stdout'
             ),
             CommandMapping(
                 command=['gem', 'specification', '--remote', 'rails'],
-                stdout_filename='gem_specification_remote_installed_and_up_to_date.stdout'
+                stdout_filename='gem_specification_remote.stdout'
             )
         ]
     ))
@@ -167,7 +167,7 @@ def test_latest_installed_and_up_to_date(monkeypatch):
 
 def test_latest_installed_but_outdated(monkeypatch):
     monkeypatch.setattr(Gem, 'run', build_run(
-        fixture_subpath='gem/latest',
+        fixture_subpath='gem',
         command_mappings=[
             CommandMapping(
                 command=['gem', 'specification', '--all', 'rails'],
@@ -175,7 +175,7 @@ def test_latest_installed_but_outdated(monkeypatch):
             ),
             CommandMapping(
                 command=['gem', 'specification', '--remote', 'rails'],
-                stdout_filename='gem_specification_remote_installed_but_outdated.stdout'
+                stdout_filename='gem_specification_remote.stdout'
             ),
             CommandMapping(
                 command=['gem', 'install', 'rails']
@@ -189,7 +189,7 @@ def test_latest_installed_but_outdated(monkeypatch):
 
 def test_absent_not_installed(monkeypatch):
     monkeypatch.setattr(Gem, 'run', build_run(
-        fixture_subpath='gem/absent',
+        fixture_subpath='gem',
         command_mappings=[
             CommandMapping(
                 command=['gem', 'specification', '--all', 'rails'],
@@ -204,7 +204,7 @@ def test_absent_not_installed(monkeypatch):
 
 def test_absent_installed(monkeypatch):
     monkeypatch.setattr(Gem, 'run', build_run(
-        fixture_subpath='gem/absent',
+        fixture_subpath='gem',
         command_mappings=[
             CommandMapping(
                 command=['gem', 'specification', '--all', 'rails'],
@@ -222,7 +222,7 @@ def test_absent_installed(monkeypatch):
 
 def test_absent_with_version_not_installed(monkeypatch):
     monkeypatch.setattr(Gem, 'run', build_run(
-        fixture_subpath='gem/absent_with_version',
+        fixture_subpath='gem',
         command_mappings=[
             CommandMapping(
                 command=['gem', 'specification', '--all', 'rails'],
@@ -237,11 +237,11 @@ def test_absent_with_version_not_installed(monkeypatch):
 
 def test_absent_with_version_installed_other_version(monkeypatch):
     monkeypatch.setattr(Gem, 'run', build_run(
-        fixture_subpath='gem/absent_with_version',
+        fixture_subpath='gem',
         command_mappings=[
             CommandMapping(
                 command=['gem', 'specification', '--all', 'rails'],
-                stdout_filename='gem_specification_all_installed_other_version.stdout'
+                stdout_filename='gem_specification_all_installed.stdout'
             )
         ]
     ))
@@ -252,17 +252,17 @@ def test_absent_with_version_installed_other_version(monkeypatch):
 
 def test_absent_with_version_installed(monkeypatch):
     monkeypatch.setattr(Gem, 'run', build_run(
-        fixture_subpath='gem/absent_with_version',
+        fixture_subpath='gem',
         command_mappings=[
             CommandMapping(
                 command=['gem', 'specification', '--all', 'rails'],
                 stdout_filename='gem_specification_all_installed.stdout'
             ),
             CommandMapping(
-                command=['gem', 'uninstall', '--version', '5.1.6', '--executables', 'rails']
+                command=['gem', 'uninstall', '--version', '5.2.0', '--executables', 'rails']
             )
         ]
     ))
 
-    gem = Gem(name='rails', version='5.1.6', state='absent', executable='gem')
+    gem = Gem(name='rails', version='5.2.0', state='absent', executable='gem')
     assert gem.process() == ActionResponse(changed=True)

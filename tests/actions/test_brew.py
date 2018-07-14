@@ -8,7 +8,7 @@ from .helpers import CommandMapping, build_run
 
 def test_invalid_name(monkeypatch):
     monkeypatch.setattr(Brew, 'run', build_run(
-        fixture_subpath='brew/present',
+        fixture_subpath='brew',
         command_mappings=[
             CommandMapping(
                 command=['brew', 'info', '--json=v1', 'fake'],
@@ -29,7 +29,7 @@ def test_invalid_state():
 
 def test_invalid_info_output(monkeypatch):
     monkeypatch.setattr(Brew, 'run', build_run(
-        fixture_subpath='brew/present',
+        fixture_subpath='brew',
         command_mappings=[
             CommandMapping(
                 command=['brew', 'info', '--json=v1', 'wget']
@@ -44,7 +44,7 @@ def test_invalid_info_output(monkeypatch):
 
 def test_present_installed(monkeypatch):
     monkeypatch.setattr(Brew, 'run', build_run(
-        fixture_subpath='brew/present',
+        fixture_subpath='brew',
         command_mappings=[
             CommandMapping(
                 command=['brew', 'info', '--json=v1', 'wget'],
@@ -59,7 +59,7 @@ def test_present_installed(monkeypatch):
 
 def test_present_not_installed(monkeypatch):
     monkeypatch.setattr(Brew, 'run', build_run(
-        fixture_subpath='brew/present',
+        fixture_subpath='brew',
         command_mappings=[
             CommandMapping(
                 command=['brew', 'info', '--json=v1', 'wget'],
@@ -77,11 +77,11 @@ def test_present_not_installed(monkeypatch):
 
 def test_latest_installed_and_up_to_date(monkeypatch):
     monkeypatch.setattr(Brew, 'run', build_run(
-        fixture_subpath='brew/latest',
+        fixture_subpath='brew',
         command_mappings=[
             CommandMapping(
                 command=['brew', 'info', '--json=v1', 'wget'],
-                stdout_filename='brew_info_installed_and_up_to_date.stdout'
+                stdout_filename='brew_info_installed.stdout'
             )
         ]
     ))
@@ -92,7 +92,7 @@ def test_latest_installed_and_up_to_date(monkeypatch):
 
 def test_latest_installed_but_outdated(monkeypatch):
     monkeypatch.setattr(Brew, 'run', build_run(
-        fixture_subpath='brew/latest',
+        fixture_subpath='brew',
         command_mappings=[
             CommandMapping(
                 command=['brew', 'info', '--json=v1', 'hugo'],
@@ -110,7 +110,7 @@ def test_latest_installed_but_outdated(monkeypatch):
 
 def test_latest_not_installed(monkeypatch):
     monkeypatch.setattr(Brew, 'run', build_run(
-        fixture_subpath='brew/latest',
+        fixture_subpath='brew',
         command_mappings=[
             CommandMapping(
                 command=['brew', 'info', '--json=v1', 'wget'],
@@ -128,7 +128,7 @@ def test_latest_not_installed(monkeypatch):
 
 def test_absent_not_installed(monkeypatch):
     monkeypatch.setattr(Brew, 'run', build_run(
-        fixture_subpath='brew/absent',
+        fixture_subpath='brew',
         command_mappings=[
             CommandMapping(
                 command=['brew', 'info', '--json=v1', 'wget'],
@@ -146,7 +146,7 @@ def test_absent_not_installed(monkeypatch):
 
 def test_absent_installed(monkeypatch):
     monkeypatch.setattr(Brew, 'run', build_run(
-        fixture_subpath='brew/absent',
+        fixture_subpath='brew',
         command_mappings=[
             CommandMapping(
                 command=['brew', 'info', '--json=v1', 'wget'],

@@ -13,7 +13,7 @@ def test_invalid_state():
 
 def test_invalid_list_output(monkeypatch):
     monkeypatch.setattr(Cask, 'run', build_run(
-        fixture_subpath='cask/present',
+        fixture_subpath='cask',
         command_mappings=[
             CommandMapping(
                 command='brew cask list',
@@ -29,7 +29,7 @@ def test_invalid_list_output(monkeypatch):
 
 def test_present_installed(monkeypatch):
     monkeypatch.setattr(Cask, 'run', build_run(
-        fixture_subpath='cask/present',
+        fixture_subpath='cask',
         command_mappings=[
             CommandMapping(
                 command='brew cask list',
@@ -44,7 +44,7 @@ def test_present_installed(monkeypatch):
 
 def test_present_not_installed(monkeypatch):
     monkeypatch.setattr(Cask, 'run', build_run(
-        fixture_subpath='cask/present',
+        fixture_subpath='cask',
         command_mappings=[
             CommandMapping(
                 command='brew cask list',
@@ -62,15 +62,15 @@ def test_present_not_installed(monkeypatch):
 
 def test_latest_installed_and_up_to_date(monkeypatch):
     monkeypatch.setattr(Cask, 'run', build_run(
-        fixture_subpath='cask/latest',
+        fixture_subpath='cask',
         command_mappings=[
             CommandMapping(
                 command='brew cask list',
-                stdout_filename='brew_cask_list_installed_and_up_to_date.stdout'
+                stdout_filename='brew_cask_list_installed.stdout'
             ),
             CommandMapping(
                 command='brew cask outdated',
-                stdout_filename='brew_cask_outdated_and_up_to_date.stdout'
+                stdout_filename='brew_cask_outdated_up_to_date.stdout'
             )
         ]
     ))
@@ -81,11 +81,11 @@ def test_latest_installed_and_up_to_date(monkeypatch):
 
 def test_latest_installed_but_outdated(monkeypatch):
     monkeypatch.setattr(Cask, 'run', build_run(
-        fixture_subpath='cask/latest',
+        fixture_subpath='cask',
         command_mappings=[
             CommandMapping(
                 command='brew cask list',
-                stdout_filename='brew_cask_list_installed_but_outdated.stdout'
+                stdout_filename='brew_cask_list_installed.stdout'
             ),
             CommandMapping(
                 command='brew cask outdated',
@@ -103,7 +103,7 @@ def test_latest_installed_but_outdated(monkeypatch):
 
 def test_latest_not_installed(monkeypatch):
     monkeypatch.setattr(Cask, 'run', build_run(
-        fixture_subpath='cask/latest',
+        fixture_subpath='cask',
         command_mappings=[
             CommandMapping(
                 command='brew cask list',
@@ -121,7 +121,7 @@ def test_latest_not_installed(monkeypatch):
 
 def test_absent_not_installed(monkeypatch):
     monkeypatch.setattr(Cask, 'run', build_run(
-        fixture_subpath='cask/absent',
+        fixture_subpath='cask',
         command_mappings=[
             CommandMapping(
                 command='brew cask list',
@@ -139,7 +139,7 @@ def test_absent_not_installed(monkeypatch):
 
 def test_absent_installed(monkeypatch):
     monkeypatch.setattr(Cask, 'run', build_run(
-        fixture_subpath='cask/absent',
+        fixture_subpath='cask',
         command_mappings=[
             CommandMapping(
                 command='brew cask list',
