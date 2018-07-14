@@ -1,6 +1,3 @@
-import pytest
-
-
 from elite.actions import ActionResponse
 from elite.actions.info import Info
 
