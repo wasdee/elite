@@ -58,16 +58,16 @@ class LaunchpadBuilder:
         mapping = {}
         max_id = 0
 
-        for id, title, uuid, flags in self.conn.execute(f'''
+        for item_id, title, uuid, flags in self.conn.execute(f'''
             SELECT {table}.item_id, {table}.title, items.uuid, items.flags
             FROM {table}
             JOIN items ON items.rowid = {table}.item_id
         '''):
             # Add the item to our mapping
-            mapping[title] = (id, uuid, flags)
+            mapping[title] = (item_id, uuid, flags)
 
             # Obtain the maximum id in this table
-            max_id = max(max_id, id)
+            max_id = max(max_id, item_id)
 
         return mapping, max_id
 
@@ -428,7 +428,7 @@ class LaunchpadBuilder:
             page_items = []
 
             # Iterate through items
-            for id, type_, app_title, widget_title, group_title in parent_mapping[page_id]:
+            for row_id, type_, app_title, widget_title, group_title in parent_mapping[page_id]:
                 # An app has been encountered which is added to the page
                 if type_ == Types.APP:
                     page_items.append(app_title)
@@ -446,7 +446,7 @@ class LaunchpadBuilder:
                     }
 
                     # Iterate through folder pages
-                    for folder_page_id, _, _, _, _ in parent_mapping[id]:
+                    for folder_page_id, _, _, _, _ in parent_mapping[row_id]:
                         folder_page_items = []
 
                         # Iterate through folder items
@@ -494,7 +494,7 @@ class LaunchpadBuilder:
         parent_mapping = defaultdict(list)
 
         # Obtain all items and their associated titles
-        for id, parent_id, type_, app_title, widget_title, group_title in self.conn.execute('''
+        for row_id, parent_id, type_, app_title, widget_title, group_title in self.conn.execute('''
             SELECT items.rowid, items.parent_id, items.type,
                    apps.title AS app_title,
                    widgets.title AS widget_title,
@@ -508,7 +508,7 @@ class LaunchpadBuilder:
                                      'ROOTPAGE_VERS', 'HOLDINGPAGE_VERS')
             ORDER BY items.parent_id, items.ordering
         '''):
-            parent_mapping[parent_id].append((id, type_, app_title, widget_title, group_title))
+            parent_mapping[parent_id].append((row_id, type_, app_title, widget_title, group_title))
 
         self.widget_layout = self._build_layout(dashboard_root, parent_mapping)
         self.app_layout = self._build_layout(launchpad_root, parent_mapping)

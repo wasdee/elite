@@ -206,16 +206,16 @@ class File(Action):
         return True
 
     def md5(self, path, block_size=1024 * 8):
-        hash = hashlib.md5()
+        hash_md5 = hashlib.md5()
 
         try:
             with open(path, 'rb') as f:
                 for buffer in iter(lambda: f.read(block_size), b''):
-                    hash.update(buffer)
+                    hash_md5.update(buffer)
         except OSError:
             self.fail('unable to determine checksum of file')
 
-        return hash.hexdigest()
+        return hash_md5.hexdigest()
 
 
 if __name__ == '__main__':
