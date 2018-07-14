@@ -1,13 +1,16 @@
-from . import Argument, Action
+from . import Action, ActionError
 
 
 class Fail(Action):
-    def process(self, message):
-        self.fail(message=None)
+    """
+    Causes the script to fail after displaying a suitable error message.
 
+    :param message: the error message to display
+    """
+    __action_name__ = 'fail'
 
-if __name__ == '__main__':
-    fail = Fail(
-        Argument('message')
-    )
-    fail.invoke()
+    def __init__(self, message):
+        self.message = message
+
+    def process(self):
+        raise ActionError

@@ -22,12 +22,12 @@ def build_run(fixture_subpath, command_mappings):
 
             expected_stdout = ''
             if stdout_filename:
-                with open(os.path.join(fixture_path, stdout_filename), 'rb') as f:
+                with open(os.path.join(fixture_path, stdout_filename), 'r') as f:
                     expected_stdout = f.read()
 
             expected_stderr = ''
             if stderr_filename:
-                with open(os.path.join(fixture_path, stderr_filename), 'rb') as f:
+                with open(os.path.join(fixture_path, stderr_filename), 'r') as f:
                     expected_stderr = f.read()
 
             return CompletedProcess(

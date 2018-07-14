@@ -54,7 +54,7 @@ def test_present_installed(monkeypatch):
     ))
 
     brew = Brew(name='wget', state='present')
-    assert brew.process() == ActionResponse(changed=False, data={})
+    assert brew.process() == ActionResponse(changed=False)
 
 
 def test_present_not_installed(monkeypatch):
@@ -72,7 +72,7 @@ def test_present_not_installed(monkeypatch):
     ))
 
     brew = Brew(name='wget', state='present')
-    assert brew.process() == ActionResponse(changed=True, data={})
+    assert brew.process() == ActionResponse(changed=True)
 
 
 def test_latest_installed_and_up_to_date(monkeypatch):
@@ -87,7 +87,7 @@ def test_latest_installed_and_up_to_date(monkeypatch):
     ))
 
     brew = Brew(name='wget', state='latest')
-    assert brew.process() == ActionResponse(changed=False, data={})
+    assert brew.process() == ActionResponse(changed=False)
 
 
 def test_latest_installed_but_outdated(monkeypatch):
@@ -105,7 +105,7 @@ def test_latest_installed_but_outdated(monkeypatch):
     ))
 
     brew = Brew(name='hugo', state='latest')
-    assert brew.process() == ActionResponse(changed=True, data={})
+    assert brew.process() == ActionResponse(changed=True)
 
 
 def test_latest_not_installed(monkeypatch):
@@ -123,7 +123,7 @@ def test_latest_not_installed(monkeypatch):
     ))
 
     brew = Brew(name='wget', state='latest')
-    assert brew.process() == ActionResponse(changed=True, data={})
+    assert brew.process() == ActionResponse(changed=True)
 
 
 def test_absent_not_installed(monkeypatch):
@@ -141,7 +141,7 @@ def test_absent_not_installed(monkeypatch):
     ))
 
     brew = Brew(name='wget', state='absent')
-    assert brew.process() == ActionResponse(changed=False, data={})
+    assert brew.process() == ActionResponse(changed=False)
 
 
 def test_absent_installed(monkeypatch):
@@ -159,4 +159,4 @@ def test_absent_installed(monkeypatch):
     ))
 
     brew = Brew(name='wget', state='absent')
-    assert brew.process() == ActionResponse(changed=True, data={})
+    assert brew.process() == ActionResponse(changed=True)
