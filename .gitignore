@@ -1,3 +1,23 @@
-*.pyc
-.cache
+# Mac folder information setting files
 .DS_Store
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Unit tests
+.cache/
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+coverage.xml
+*,cover
+
+# Sphinx documentation
+docs/_build/
