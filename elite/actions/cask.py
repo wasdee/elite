@@ -1,36 +1,60 @@
 import shlex
 
-from . import Argument, Action
+from . import Action, ActionError
 
 
 class Cask(Action):
-    def process(self, name, state, options):
+    """
+    Provides the ability to manage packages using Cask via the Homebrew package manager.
+
+    :param name: the name of the package
+    :param state: the state that the package must be in
+    :param options: additional command line options to pass to the brew cask command
+    """
+    __action_name__ = 'cask'
+
+    def __init__(self, name, state='present', options=None):
+        self.name = name
+        self.state = state
+        self.options = options
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if state not in ['present', 'latest', 'absent']:
+            raise ValueError('state must be present, latest or absent')
+        self._state = state
+
+    def process(self):
         # Obtain information about installed packages
         cask_list_proc = self.run('brew cask list', stdout=True, ignore_fail=True)
 
         # Check whether the package is installed using only its short name
         # (e.g. fgimian/general/cog will check for a cask called cog)
         if cask_list_proc.returncode:
-            cask_installed = False
+            raise ActionError('unable to obtain a list of cask_list')
         else:
             cask_list = cask_list_proc.stdout.rstrip().split('\n')
-            cask_installed = name.split('/')[-1] in cask_list
+            cask_installed = self.name.split('/')[-1] in cask_list
 
         # Prepare any user provided options
-        options_list = shlex.split(options) if options else []
+        options_list = shlex.split(self.options) if self.options else []
 
         # Install or remove the package as requested
-        if state == 'present':
+        if self.state == 'present':
             if cask_installed:
-                self.ok()
+                return self.ok()
             else:
                 self.run(
-                    ['brew', 'cask', 'install'] + options_list + [name],
+                    ['brew', 'cask', 'install'] + options_list + [self.name],
                     fail_error='unable to install the requested package'
                 )
-                self.changed()
+                return self.changed()
 
-        if state == 'latest':
+        if self.state == 'latest':
             if cask_installed:
                 # Determine if the installed package is outdated
                 cask_outdated = False
@@ -38,38 +62,29 @@ class Cask(Action):
                 cask_outdated_proc = self.run('brew cask outdated', stdout=True, ignore_fail=True)
                 if not cask_outdated_proc.returncode:
                     cask_list = cask_outdated_proc.stdout.rstrip().split('\n')
-                    cask_outdated = name.split('/')[-1] in cask_list
+                    cask_outdated = self.name.split('/')[-1] in cask_list
 
                 if not cask_outdated:
-                    self.ok()
+                    return self.ok()
                 else:
                     self.run(
-                        ['brew', 'cask', 'upgrade'] + options_list + [name],
+                        ['brew', 'cask', 'upgrade'] + options_list + [self.name],
                         fail_error='unable to upgrade the requested package'
                     )
-                    self.changed()
+                    return self.changed()
             else:
                 self.run(
-                    ['brew', 'cask', 'install'] + options_list + [name],
+                    ['brew', 'cask', 'install'] + options_list + [self.name],
                     fail_error='unable to install the requested package'
                 )
-                self.changed()
+                return self.changed()
 
-        elif state == 'absent':
+        elif self.state == 'absent':
             if not cask_installed:
-                self.ok()
+                return self.ok()
             else:
                 self.run(
-                    ['brew', 'cask', 'remove'] + options_list + [name],
+                    ['brew', 'cask', 'remove'] + options_list + [self.name],
                     fail_error='unable to remove the requested package'
                 )
-                self.changed()
-
-
-if __name__ == '__main__':
-    cask = Cask(
-        Argument('name'),
-        Argument('state', choices=['present', 'latest', 'absent'], default='present'),
-        Argument('options', optional=True)
-    )
-    cask.invoke()
+                return self.changed()

@@ -1,13 +1,16 @@
-from . import Argument, Action
+from . import Action
 
 
 class Info(Action):
-    def process(self, message):
-        self.ok()
+    """
+    Causes the script to displaying a suitable info message.
 
+    :param message: the info message to display
+    """
+    __action_name__ = 'info'
 
-if __name__ == '__main__':
-    info = Info(
-        Argument('message')
-    )
-    info.invoke()
+    def __init__(self, message):
+        self.message = message
+
+    def process(self):
+        return self.ok()
