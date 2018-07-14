@@ -99,13 +99,13 @@ class File(Action):
             path_url = NSURL.fileURLWithPath_(path)
 
             if exists:
-                bookmark_data, error = NSURL.bookmarkDataWithContentsOfURL_error_(
-                    path_url, None
-                )
+                bookmark_data, error = NSURL.bookmarkDataWithContentsOfURL_error_(path_url, None)
 
                 if bookmark_data:
-                    source_url, is_stale, error = NSURL.URLByResolvingBookmarkData_options_relativeToURL_bookmarkDataIsStale_error_(  # noqa: E501
-                        bookmark_data, NSURLBookmarkResolutionWithoutUI, None, None, None
+                    source_url, is_stale, error = (
+                        NSURL.URLByResolvingBookmarkData_options_relativeToURL_bookmarkDataIsStale_error_(  # noqa: E501
+                            bookmark_data, NSURLBookmarkResolutionWithoutUI, None, None, None
+                        )
                     )
                     if source_url.path() == source:
                         changed = self.set_file_attributes(path)
@@ -118,8 +118,10 @@ class File(Action):
             source_url = NSURL.fileURLWithPath_(source)
 
             # Build the bookmark for the alias
-            bookmark_data, error = source_url.bookmarkDataWithOptions_includingResourceValuesForKeys_relativeToURL_error_(  # noqa: E501
-                NSURLBookmarkCreationSuitableForBookmarkFile, None, None, None
+            bookmark_data, error = (
+                source_url.bookmarkDataWithOptions_includingResourceValuesForKeys_relativeToURL_error_(  # noqa: E501
+                    NSURLBookmarkCreationSuitableForBookmarkFile, None, None, None
+                )
             )
 
             # Write the alias using the bookmark data
