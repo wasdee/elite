@@ -36,7 +36,7 @@ class Cask(Action):
 
         # Check whether the package is installed using only its short name
         # (e.g. fgimian/general/cog will check for a cask called cog)
-        if cask_list_proc.returncode:
+        if cask_list_proc.returncode != 0:
             raise ActionError('unable to obtain a list of cask packages')
         else:
             cask_list = cask_list_proc.stdout.rstrip().split('\n')
@@ -62,7 +62,7 @@ class Cask(Action):
                 cask_outdated = False
 
                 cask_outdated_proc = self.run('brew cask outdated', stdout=True, ignore_fail=True)
-                if not cask_outdated_proc.returncode:
+                if cask_outdated_proc.returncode == 0:
                     cask_list = cask_outdated_proc.stdout.rstrip().split('\n')
                     cask_outdated = self.name.split('/')[-1] in cask_list
 

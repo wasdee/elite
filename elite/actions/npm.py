@@ -112,7 +112,7 @@ class Npm(Action):
         )
 
         # Check whether the package is installed and whether it is outdated
-        if npm_list_proc.returncode:
+        if npm_list_proc.returncode != 0:
             raise ActionError('unable to obtain a list of npm packages')
         else:
             # Determine if the package is installed and/or outdated

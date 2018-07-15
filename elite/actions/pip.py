@@ -109,7 +109,7 @@ class Pip(Action):
         )
 
         # Check whether the package is installed and whether it is outdated
-        if pip_list_proc.returncode:
+        if pip_list_proc.returncode != 0:
             raise ActionError('unable to obtain a list of pip packages')
         else:
             # Determine if the package is installed and/or outdated

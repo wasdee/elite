@@ -50,7 +50,7 @@ class Run(Action):
         # Check if the optional check command succeeds
         if self.unless:
             unless_proc = self.run(self.unless, ignore_fail=True, **kwargs)
-            if not unless_proc.returncode:
+            if unless_proc.returncode == 0:
                 return self.ok()
 
         # Run the given command

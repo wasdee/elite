@@ -88,7 +88,7 @@ class Gem(Action):
         )
 
         # Check whether the package is installed and whether it is outdated
-        if gem_spec_proc.returncode:
+        if gem_spec_proc.returncode != 0:
             gem_installed = False
         else:
             gem_installed = True

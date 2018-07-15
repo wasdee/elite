@@ -36,7 +36,7 @@ class Tap(Action):
         tap_list_proc = self.run('brew tap', stdout=True, ignore_fail=True)
 
         # Check whether the package is installed
-        if tap_list_proc.returncode:
+        if tap_list_proc.returncode != 0:
             raise ActionError('unable to obtain a list of taps')
         else:
             tap_list = tap_list_proc.stdout.rstrip().split('\n')
