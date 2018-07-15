@@ -1,6 +1,5 @@
 import pytest
-
-from elite.actions import ActionResponse, ActionError
+from elite.actions import ActionError, ActionResponse
 from elite.actions.brew import Brew
 
 from .helpers import CommandMapping, build_run

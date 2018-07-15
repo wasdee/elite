@@ -1,10 +1,10 @@
 from Foundation import NSBundle
 from LaunchServices import (
-    LSCopyDefaultRoleHandlerForContentType, LSSetDefaultRoleHandlerForContentType,
-    LSCopyDefaultHandlerForURLScheme, LSSetDefaultHandlerForURLScheme, kLSRolesAll
+    LSCopyDefaultHandlerForURLScheme, LSCopyDefaultRoleHandlerForContentType,
+    LSSetDefaultHandlerForURLScheme, LSSetDefaultRoleHandlerForContentType, kLSRolesAll
 )
 
-from . import Argument, Action
+from . import Action, Argument
 
 
 class Handler(Action):

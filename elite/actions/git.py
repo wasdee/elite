@@ -1,6 +1,6 @@
 import os
 
-from . import Argument, Action
+from . import Action, Argument
 
 
 class Git(Action):

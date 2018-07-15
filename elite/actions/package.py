@@ -4,7 +4,7 @@ import tempfile
 import urllib.parse
 from xml.etree import ElementTree
 
-from . import Argument, Action
+from . import Action, Argument
 
 
 class Package(Action):

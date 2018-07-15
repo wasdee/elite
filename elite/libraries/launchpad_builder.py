@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-from collections import defaultdict
 import os
-import subprocess
 import sqlite3
+import subprocess
+from collections import defaultdict
 
 from ..utils import batch, generate_uuid
 

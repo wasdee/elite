@@ -1,9 +1,9 @@
-from fnmatch import fnmatch
 import grp
-import pwd
 import os
+import pwd
+from fnmatch import fnmatch
 
-from . import Argument, Action, FILE_ATTRIBUTE_ARGS
+from . import Action, Argument, FILE_ATTRIBUTE_ARGS
 from ..constants import FLAGS
 
 

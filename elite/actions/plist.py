@@ -1,8 +1,8 @@
 import os
 import plistlib
 
+from . import Action, Argument, FILE_ATTRIBUTE_ARGS
 from ..utils import deep_equal, deep_merge
-from . import Argument, Action, FILE_ATTRIBUTE_ARGS
 
 
 class Plist(Action):

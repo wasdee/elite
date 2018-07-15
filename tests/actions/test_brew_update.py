@@ -1,7 +1,6 @@
 from elite.actions import ActionResponse
 from elite.actions.brew_update import BrewUpdate
 
-
 from .helpers import CommandMapping, build_run
 
 

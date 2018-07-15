@@ -1,8 +1,8 @@
 import os
 
-from . import Argument, Action
+from . import Action, Argument
 from ..libraries.launchpad_builder import (
-    get_launchpad_db_dir, LaunchpadBuilder, LaunchpadValidationError
+    LaunchpadBuilder, LaunchpadValidationError, get_launchpad_db_dir
 )
 
 

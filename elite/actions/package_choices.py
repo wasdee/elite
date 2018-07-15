@@ -2,7 +2,7 @@ import os
 import plistlib
 import tempfile
 
-from . import Argument, Action
+from . import Action, Argument
 
 
 class PackageChoices(Action):

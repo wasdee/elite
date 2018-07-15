@@ -3,7 +3,7 @@ import os
 import shlex
 import shutil
 
-from . import Argument, Action
+from . import Action, Argument
 
 
 class Rsync(Action):

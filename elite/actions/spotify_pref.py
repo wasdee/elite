@@ -1,6 +1,6 @@
 import os
 
-from . import Argument, Action, FILE_ATTRIBUTE_ARGS
+from . import Action, Argument, FILE_ATTRIBUTE_ARGS
 
 
 def convert_to_spotify_value(value):

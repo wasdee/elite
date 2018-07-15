@@ -1,8 +1,8 @@
 import json as jsonlib
 import os
 
+from . import Action, Argument, FILE_ATTRIBUTE_ARGS
 from ..utils import deep_equal, deep_merge
-from . import Argument, Action, FILE_ATTRIBUTE_ARGS
 
 
 class Json(Action):

@@ -1,10 +1,10 @@
 from functools import wraps
 
+from . import ansi
+from .config import ConfigError, load_config
 from .elite import Elite, EliteError
-from .config import load_config, ConfigError
 from .printer import Printer
 from .utils import build_absolute_path
-from . import ansi
 
 
 def main(config_path, action_search_paths=None):

@@ -4,7 +4,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-from . import Argument, Action, FILE_ATTRIBUTE_ARGS
+from . import Action, Argument, FILE_ATTRIBUTE_ARGS
 
 
 class Download(Action):

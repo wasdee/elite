@@ -1,11 +1,11 @@
-from collections import namedtuple
 import os
 import pathlib
+from collections import namedtuple
 
 from AppKit import NSFont
 # Strangely NSKeyedArchiver won't import without ScriptingBridge
-import ScriptingBridge  # noqa: F401
-from Foundation import NSKeyedArchiver, NSCalibratedRGBColor
+import ScriptingBridge  # noqa: F401,I100
+from Foundation import NSCalibratedRGBColor, NSKeyedArchiver
 from ruamel.yaml import YAML, YAMLError
 
 

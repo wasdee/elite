@@ -1,6 +1,4 @@
 import pytest
-
-
 from elite.actions import ActionError
 from elite.actions.fail import Fail
 

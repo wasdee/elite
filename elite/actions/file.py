@@ -2,7 +2,7 @@ import hashlib
 import os
 import shutil
 
-from . import Argument, Action, FILE_ATTRIBUTE_ARGS
+from . import Action, Argument, FILE_ATTRIBUTE_ARGS
 
 
 class File(Action):

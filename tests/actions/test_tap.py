@@ -1,6 +1,5 @@
 import pytest
-
-from elite.actions import ActionResponse, ActionError
+from elite.actions import ActionError, ActionResponse
 from elite.actions.tap import Tap
 
 from .helpers import CommandMapping, build_run

@@ -1,5 +1,5 @@
-from . import Argument, Action, FILE_ATTRIBUTE_ARGS
-from ..libraries.dock_builder import get_dock_plist_path, DockBuilder
+from . import Action, Argument, FILE_ATTRIBUTE_ARGS
+from ..libraries.dock_builder import DockBuilder, get_dock_plist_path
 
 
 class Dock(Action):

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 import ast
-from enum import Enum
 import os
 import shutil
 import subprocess
 import sys
+from enum import Enum
 
 from .utils import dict_to_namedtuple
 

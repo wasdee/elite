@@ -1,8 +1,7 @@
 import shutil
 
 import pytest
-
-from elite.actions import ActionResponse, ActionError
+from elite.actions import ActionError, ActionResponse
 from elite.actions.npm import Npm
 
 from .helpers import CommandMapping, build_run

@@ -1,8 +1,9 @@
 import os
-import rarfile
 import zipfile
 
-from . import Argument, Action
+import rarfile
+
+from . import Action, Argument
 
 
 class Archive(Action):

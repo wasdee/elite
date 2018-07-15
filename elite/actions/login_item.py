@@ -2,7 +2,7 @@ import os
 
 from ScriptingBridge import SBApplication
 
-from . import Argument, Action
+from . import Action, Argument
 
 
 class LoginItem(Action):

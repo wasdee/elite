@@ -6,7 +6,7 @@ import sys
 
 from ruamel.yaml import YAML
 
-from ..libraries.dock_builder import get_dock_plist_path, DockBuilder
+from ..libraries.dock_builder import DockBuilder, get_dock_plist_path
 
 
 # Configure YAML parsing to be safe by default

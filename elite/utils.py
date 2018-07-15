@@ -1,6 +1,6 @@
-from collections import UserDict, namedtuple
 import os
 import subprocess
+from collections import UserDict, namedtuple
 
 
 class ReversibleDict(UserDict):

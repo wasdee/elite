@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import os
-from glob import glob
 import plistlib
 import sys
+from glob import glob
+
 from ruamel.yaml import YAML
 
 

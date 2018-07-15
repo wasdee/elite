@@ -2,8 +2,7 @@ import os
 import shutil
 
 import pytest
-
-from elite.actions import ActionResponse, ActionError
+from elite.actions import ActionError, ActionResponse
 from elite.actions.pip import Pip
 
 from .helpers import CommandMapping, build_run

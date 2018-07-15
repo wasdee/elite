@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 import argparse
-import os
 import json
+import os
 import subprocess
 import sys
 from time import sleep
 
 from ruamel.yaml import YAML
 
-from ..libraries.launchpad_builder import get_launchpad_db_dir, LaunchpadBuilder
+from ..libraries.launchpad_builder import LaunchpadBuilder, get_launchpad_db_dir
 
 
 # Configure YAML parsing to be safe by default

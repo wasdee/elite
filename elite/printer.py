@@ -1,8 +1,8 @@
 import math
 import shutil
 
-from .elite import EliteState
 from . import ansi
+from .elite import EliteState
 
 
 class Printer:
