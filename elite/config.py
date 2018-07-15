@@ -81,7 +81,7 @@ def compose_document_without_anchor_reset(self):
 
 
 yaml.Composer.compose_document = compose_document_without_anchor_reset
-yaml.Constructor.add_constructor("!include", include)
+yaml.Constructor.add_constructor('!include', include)
 yaml.Constructor.add_constructor('!join_path', join_path)
 yaml.Constructor.add_constructor('!first_existing_dir', first_existing_dir)
 yaml.Constructor.add_constructor('!macos_font', macos_font)

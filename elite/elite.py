@@ -154,7 +154,7 @@ class Elite:
             # Determine the final state of the task.
             if not result['ok']:
                 state = EliteState.FAILED
-            elif result["changed"]:
+            elif result['changed']:
                 state = EliteState.CHANGED
             else:
                 state = EliteState.OK

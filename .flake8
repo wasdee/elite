@@ -1,3 +1,6 @@
 [flake8]
 max-line-length = 99
 import-order-style = pycharm
+inline-quotes = single
+multiline-quotes = single
+docstring-quotes = double

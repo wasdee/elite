@@ -15,7 +15,7 @@ class LoginItem(Action):
         # before starting
         from AppKit import NSBundle
         bundle_info = NSBundle.mainBundle().infoDictionary()
-        bundle_info["LSBackgroundOnly"] = True
+        bundle_info['LSBackgroundOnly'] = True
 
         # Obtain the System Events application
         system_events = SBApplication.applicationWithBundleIdentifier_('com.apple.systemevents')
