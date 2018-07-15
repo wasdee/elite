@@ -3,6 +3,7 @@
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
+*.py[cod]
 
 # Distribution / packaging
 build/
@@ -12,6 +13,7 @@ dist/
 # Unit tests
 .cache/
 .pytest_cache/
+.tox/
 
 # Coverage reports
 htmlcov/

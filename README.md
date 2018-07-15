@@ -36,7 +36,7 @@ and developed to specifically address the following points:
 ## Installation
 
 ```bash
-pip install git+ssh://git@gitlab.com/macbuild/elite.git
+pip install git+ssh://git@gitlab.com/fgimian/elite.git
 ```
 
 ## Quick Start
