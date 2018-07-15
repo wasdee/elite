@@ -87,7 +87,7 @@ def main():
 
             # Restart the Dock to get a freshly built database to work from
             print(f'{BLUE}Restarting the Dock to build a fresh Launchpad databases{ENDC}')
-            subprocess.call(['killall', 'Dock'])
+            subprocess.call(['/usr/bin/killall', 'Dock'])
             sleep(3)
 
         print(f'{BLUE}Rebuilding the Launchpad database{ENDC}')
@@ -120,7 +120,7 @@ def main():
 
         # Restart the Dock to that Launchpad can read our new and updated database
         print(f'{BLUE}Restarting the Dock to apply the new database{ENDC}')
-        subprocess.call(['killall', 'Dock'])
+        subprocess.call(['/usr/bin/killall', 'Dock'])
 
         print(
             f'{GREEN}Successfully build the Launchpad layout defined in {args.config_path}{ENDC}'

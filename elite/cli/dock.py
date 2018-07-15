@@ -76,7 +76,7 @@ def main():
 
         # Restart the Dock so that the new plist file can be utilised
         print(f'{BLUE}Restarting the Dock to apply the new plist{ENDC}')
-        subprocess.call(['killall', 'Dock'])
+        subprocess.call(['/usr/bin/killall', 'Dock'])
 
         print(
             f'{GREEN}Successfully build the Dock layout defined in {args.config_path}{ENDC}'

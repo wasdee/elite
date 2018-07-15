@@ -107,4 +107,4 @@ def batch(items, batch_size):
 
 def generate_uuid():
     """Generate a UUID using uuidgen."""
-    return subprocess.check_output('uuidgen', encoding='utf-8').rstrip()
+    return subprocess.check_output('/usr/bin/uuidgen', encoding='utf-8').rstrip()
