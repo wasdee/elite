@@ -190,18 +190,14 @@ class LaunchpadBuilder:
             group_id += 1
 
             cursor.execute('''
-                INSERT INTO items
-                (rowid, uuid, flags, type, parent_id, ordering)
-                VALUES
-                (?, ?, 2, ?, ?, ?)
+                INSERT INTO items (rowid, uuid, flags, type, parent_id, ordering)
+                VALUES (?, ?, 2, ?, ?, ?)
             ''', (group_id, generate_uuid(), Types.PAGE, root_parent_id, page_ordering + 1)
             )
 
             cursor.execute('''
-                INSERT INTO groups
-                (item_id, category_id, title)
-                VALUES
-                (?, null, null)
+                INSERT INTO groups (item_id, category_id, title)
+                VALUES (?, NULL, NULL)
             ''', (group_id,)
             )
             self.conn.commit()
@@ -221,21 +217,17 @@ class LaunchpadBuilder:
                     group_id += 1
 
                     cursor.execute('''
-                        INSERT INTO items
-                        (rowid, uuid, flags, type, parent_id, ordering)
-                        VALUES
-                        (?, ?, 0, ?, ?, ?)
+                        INSERT INTO items (rowid, uuid, flags, type, parent_id, ordering)
+                        VALUES (?, ?, 0, ?, ?, ?)
                     ''', (
                         group_id, generate_uuid(), Types.FOLDER_ROOT, page_parent_id,
                         item_ordering)
                     )
 
                     cursor.execute('''
-                        INSERT INTO groups
-                        (item_id, category_id, title)
-                        VALUES
-                        (?, null, ?)
-                        ''', (group_id, folder_title)
+                        INSERT INTO groups (item_id, category_id, title)
+                        VALUES (?, NULL, ?)
+                    ''', (group_id, folder_title)
                     )
                     self.conn.commit()
 
@@ -250,20 +242,16 @@ class LaunchpadBuilder:
                         group_id += 1
 
                         cursor.execute('''
-                            INSERT INTO items
-                            (rowid, uuid, flags, type, parent_id, ordering)
-                            VALUES
-                            (?, ?, 2, ?, ?, ?)
+                            INSERT INTO items (rowid, uuid, flags, type, parent_id, ordering)
+                            VALUES (?, ?, 2, ?, ?, ?)
                         ''', (
                             group_id, generate_uuid(), Types.PAGE, folder_root_parent_id,
                             folder_page_ordering)
                         )
 
                         cursor.execute('''
-                            INSERT INTO groups
-                            (item_id, category_id, title)
-                            VALUES
-                            (?, null, null)
+                            INSERT INTO groups (item_id, category_id, title)
+                            VALUES (?, NULL, NULL)
                         ''', (group_id,)
                         )
                         self.conn.commit()
@@ -274,20 +262,9 @@ class LaunchpadBuilder:
                             item_id, uuid, flags = mapping[title]
                             cursor.execute('''
                                 UPDATE items
-                                SET uuid = ?,
-                                    flags = ?,
-                                    type = ?,
-                                    parent_id = ?,
-                                    ordering = ?
+                                SET uuid = ?, flags = ?, type = ?, parent_id = ?, ordering = ?
                                 WHERE rowid = ?
-                            ''', (
-                                    uuid,
-                                    flags,
-                                    type_,
-                                    group_id,
-                                    folder_item_ordering,
-                                    item_id
-                                )
+                            ''', (uuid, flags, type_, group_id, folder_item_ordering, item_id)
                             )
                             self.conn.commit()
 
@@ -299,20 +276,9 @@ class LaunchpadBuilder:
                     item_id, uuid, flags = mapping[title]
                     cursor.execute('''
                         UPDATE items
-                        SET uuid = ?,
-                            flags = ?,
-                            type = ?,
-                            parent_id = ?,
-                            ordering = ?
+                        SET uuid = ?, flags = ?, type = ?, parent_id = ?, ordering = ?
                         WHERE rowid = ?
-                    ''', (
-                            uuid,
-                            flags,
-                            type_,
-                            page_parent_id,
-                            item_ordering,
-                            item_id
-                        )
+                    ''', (uuid, flags, type_, page_parent_id, item_ordering, item_id)
                     )
                     self.conn.commit()
 
@@ -379,16 +345,13 @@ class LaunchpadBuilder:
             (6, 'HOLDINGPAGE_VERS', Types.PAGE, 5)
         ]:
             cursor.execute('''
-                INSERT INTO items
-                (rowid, uuid, flags, type, parent_id, ordering)
-                VALUES (?, ?, null, ?, ?, 0)
+                INSERT INTO items (rowid, uuid, flags, type, parent_id, ordering)
+                VALUES (?, ?, NULL, ?, ?, 0)
             ''', (rowid, uuid, type_, parent_id))
 
             cursor.execute('''
-                INSERT INTO groups
-                (item_id, category_id, title)
-                VALUES
-                (?, null, null)
+                INSERT INTO groups (item_id, category_id, title)
+                VALUES (?, NULL, NULL)
             ''', (rowid,))
 
             self.conn.commit()
