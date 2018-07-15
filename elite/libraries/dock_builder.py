@@ -52,7 +52,13 @@ SHOW_AS_MAPPING_REV = {
 
 
 class DockBuilder:
-    def __init__(self, dock_plist_path, app_layout=[], other_layout=[]):
+    def __init__(self, dock_plist_path, app_layout=None, other_layout=None):
+        if app_layout is None:
+            app_layout = []
+
+        if other_layout is None:
+            other_layout = []
+
         # The Dock plist location
         self.dock_plist_path = dock_plist_path
 

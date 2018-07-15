@@ -29,7 +29,13 @@ class LaunchpadValidationError(Exception):
 
 
 class LaunchpadBuilder:
-    def __init__(self, launchpad_db_path, widget_layout=[], app_layout=[]):
+    def __init__(self, launchpad_db_path, widget_layout=None, app_layout=None):
+        if widget_layout is None:
+            widget_layout = []
+
+        if app_layout is None:
+            app_layout = []
+
         # The Launchpad database location
         self.launchpad_db_path = launchpad_db_path
 
@@ -99,7 +105,7 @@ class LaunchpadBuilder:
                     folder_layout = item['folder_layout']
 
                     # Iterate through folder pages
-                    for folder_page_ordering, folder_page in enumerate(folder_layout):
+                    for folder_page in folder_layout:
 
                         # Iterate through folder items
                         for title in folder_page:
@@ -414,8 +420,7 @@ class LaunchpadBuilder:
 
                         # Iterate through folder items
                         for (
-                            folder_item_id, folder_item_type, folder_item_app_title,
-                            folder_widget_title, folder_group_title
+                            _, folder_item_type, folder_item_app_title, folder_widget_title, _
                         ) in parent_mapping[folder_page_id]:
 
                             # An app has been encountered which is being added to the folder page

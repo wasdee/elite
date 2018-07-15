@@ -7,7 +7,10 @@ from .utils import build_absolute_path
 from . import ansi
 
 
-def main(config_path, action_search_paths=[]):
+def main(config_path, action_search_paths=None):
+    if action_search_paths is None:
+        action_search_paths = []
+
     def decorator(main):
         @wraps(main)
         def decorated_function():

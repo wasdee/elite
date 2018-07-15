@@ -32,7 +32,10 @@ class Elite:
                                 addition to Elite's core library.  Actions must be placed in the
                                 sub-directory "actions" in the path provided.
     """
-    def __init__(self, printer, action_search_paths=[]):
+    def __init__(self, printer, action_search_paths=None):
+        if action_search_paths is None:
+            action_search_paths = []
+
         # Capture user parameters.
         self.printer = printer
         self.action_search_paths = action_search_paths
@@ -67,7 +70,7 @@ class Elite:
             sys.path.append(library_parent_dir)
 
             # Go through all files in the <module-name>/actions directory
-            for root, dirs, files in os.walk(os.path.join(library_dir, 'actions')):
+            for root, _, files in os.walk(os.path.join(library_dir, 'actions')):
                 for filename in files:
                     # Obtain the file's name (which is the action name) and the extension
                     action_name, extension = os.path.splitext(filename)
@@ -93,7 +96,7 @@ class Elite:
 
         :return: The respective function that implements that action.
         """
-        def _call_action(sudo=False, ok=None, changed=None, ignore_failed=False, env={}, **args):
+        def _call_action(sudo=False, ok=None, changed=None, ignore_failed=False, env=None, **args):
             """
             A sub-method that calls the requested action with the provided raw parameters and
             arguments.
@@ -105,6 +108,9 @@ class Elite:
 
             :return: A named tuple containing the results of the action run.
             """
+            if env is None:
+                env = {}
+
             # Run the progress callback to indicate we have started running the task
             self.printer.progress(EliteState.RUNNING, action, args, result=None)
 
