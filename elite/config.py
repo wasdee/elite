@@ -2,15 +2,12 @@ import os
 import pathlib
 from collections import namedtuple
 
+# pylint: disable=no-name-in-module
 from AppKit import NSFont
 # Strangely NSKeyedArchiver won't import without ScriptingBridge
-import ScriptingBridge  # noqa: F401,I100
+import ScriptingBridge  # noqa: F401,I100, pylint: disable=unused-import
 from Foundation import NSCalibratedRGBColor, NSKeyedArchiver
 from ruamel.yaml import YAML, YAMLError
-
-
-# Configure YAML parsing to be safe by default
-yaml = YAML(typ='safe', pure=True)
 
 
 def include(loader, node):
@@ -31,8 +28,8 @@ def first_existing_dir(loader, node):
     for path in seq:
         if os.path.isdir(os.path.expanduser(path)):
             return path
-    else:
-        return None
+
+    return None
 
 
 def macos_font(loader, node):
@@ -80,19 +77,19 @@ def compose_document_without_anchor_reset(self):
     return node
 
 
-yaml.Composer.compose_document = compose_document_without_anchor_reset
-yaml.Constructor.add_constructor('!include', include)
-yaml.Constructor.add_constructor('!join_path', join_path)
-yaml.Constructor.add_constructor('!first_existing_dir', first_existing_dir)
-yaml.Constructor.add_constructor('!macos_font', macos_font)
-yaml.Constructor.add_constructor('!macos_color', macos_color)
-
-
 class ConfigError(Exception):
     """An error raised when problem is encountered reading a config file or variable"""
 
 
 def load_config(config_path):
+    yaml = YAML(typ='safe', pure=True)
+    yaml.Composer.compose_document = compose_document_without_anchor_reset
+    yaml.Constructor.add_constructor('!include', include)
+    yaml.Constructor.add_constructor('!join_path', join_path)
+    yaml.Constructor.add_constructor('!first_existing_dir', first_existing_dir)
+    yaml.Constructor.add_constructor('!macos_font', macos_font)
+    yaml.Constructor.add_constructor('!macos_color', macos_color)
+
     try:
         config = yaml.load(pathlib.Path(config_path))
     except OSError:

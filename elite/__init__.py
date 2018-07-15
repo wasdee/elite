@@ -1,1 +1,1 @@
-from .decorators import main  # noqa: F401
+from .decorators import automate  # noqa: F401

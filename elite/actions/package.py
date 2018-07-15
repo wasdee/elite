@@ -4,17 +4,24 @@ import tempfile
 import urllib.parse
 from xml.etree import ElementTree
 
-from . import Action, Argument
+from . import Action, ActionError
 
 
 class Package(Action):
-    def process(self, path, choices, target):
+    __action_name__ = 'package'
+
+    def __init__(self, path, choices=None, target='/'):
+        self.path = path
+        self.choices = choices
+        self.target = target
+
+    def process(self):
         # Ensure that home directories are taken into account
-        path = os.path.expanduser(path)
+        path = os.path.expanduser(self.path)
 
         # Check that the path exists
         if not os.path.isfile(path):
-            self.fail('unable to find a file with the path provided')
+            raise ActionError('unable to find a file with the path provided')
 
         # Create a temporary directory to store our package metadata in
         package_extract_dir = tempfile.mkdtemp()
@@ -31,6 +38,7 @@ class Package(Action):
         )
 
         # Distribution file was found which points to multiple other packages
+        # pylint: disable=line-too-long
         # https://developer.apple.com/library/content/documentation/DeveloperTools/Reference/DistributionDefinitionRef/Chapters/Distribution_XML_Ref.html
         if os.path.exists(os.path.join(package_extract_dir, 'Distribution')):
             # Create a list to store all identifiers found
@@ -44,7 +52,7 @@ class Package(Action):
                 tree = ElementTree.parse(distribution)
                 root = tree.getroot()
             except ElementTree.ParseError:
-                self.fail('unable to parse the Distribution XML contained in the package')
+                raise ActionError('unable to parse the Distribution XML contained in the package')
 
             for pkg_ref in root.iter('pkg-ref'):
                 # Ensure that we strip whitespace which ocassionally can be present in
@@ -82,16 +90,18 @@ class Package(Action):
                     tree = ElementTree.parse(package_info)
                     root = tree.getroot()
                 except ElementTree.ParseError:
-                    self.fail('unable to parse the PackageInfo XML contained in the package')
+                    raise ActionError(
+                        'unable to parse the PackageInfo XML contained in the package'
+                    )
 
                 # Append the associated bundle id (identifier) to our list of identifiers
                 try:
                     identifiers.append(root.attrib['identifier'])
                 except KeyError:
-                    self.fail('unable to determine bundle id identifier for package')
+                    raise ActionError('unable to determine bundle id identifier for package')
 
             if not identifiers:
-                self.fail('unable to find any installable components for this package')
+                raise ActionError('unable to find any installable components for this package')
 
         elif os.path.exists(os.path.join(package_extract_dir, 'PackageInfo')):
             # Determine the full path of the PackageInfo file being referenced
@@ -102,15 +112,15 @@ class Package(Action):
                 tree = ElementTree.parse(package_info)
                 root = tree.getroot()
             except ElementTree.ParseError:
-                self.fail('unable to parse the PackageInfo XML contained in the package')
+                raise ActionError('unable to parse the PackageInfo XML contained in the package')
 
             # Set our identifiers to a list of one item containing the bundle id
             try:
                 identifiers = [root.attrib['identifier']]
             except KeyError:
-                self.fail('unable to determine bundle id identifier for package')
+                raise ActionError('unable to determine bundle id identifier for package')
         else:
-            self.fail(
+            raise ActionError(
                 'unable to find a Distribution or PackageInfo file in the root of the package'
             )
 
@@ -138,37 +148,28 @@ class Package(Action):
 
         # The package was fully installed on the system so we don't need to run the installer
         if package_installed:
-            self.ok()
+            return self.ok()
 
         # Ensure that the package is being installed with root priveleges
         if os.geteuid() != 0:
-            self.fail('package installers must be run with root privileges')
+            raise ActionError('package installers must be run with root privileges')
 
         installer_command = ['installer']
 
         # If choices have been provided, we must create a temporary plist file and pass
         # it to the installer
-        if choices:
+        if self.choices:
             # Create a temporary plist for use in providing choices to the installer
-            choices_plist_fd, choices_plist_name = tempfile.mkstemp()
+            _choices_plist_fd, choices_plist_name = tempfile.mkstemp()
             with open(choices_plist_name, 'wb') as f:
-                plistlib.dump(choices, f)
+                plistlib.dump(self.choices, f)
 
             # Pass the path of the choices plist to the installer command
             installer_command.extend(['-applyChoiceChangesXML', choices_plist_name])
 
         # Specify the package and target
-        installer_command.extend(['-package', path, '-target', target])
+        installer_command.extend(['-package', path, '-target', self.target])
 
         # Run the installer
         self.run(installer_command, fail_error='unable to install the requested package')
-        self.changed()
-
-
-if __name__ == '__main__':
-    package = Package(
-        Argument('path'),
-        Argument('choices', optional=True),
-        Argument('target', default='/')
-    )
-    package.invoke()
+        return self.changed()

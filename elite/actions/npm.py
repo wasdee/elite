@@ -23,9 +23,10 @@ class Npm(Action):
         self, name, version=None, state='present', executable=None, mode='local', path=None,
         options=None
     ):
-        # We must set these attributes so the initial setting of version works
         self._mode = None
+        self._version = None
         self._state = None
+        self._path = None
 
         self.name = name
         self.version = version
@@ -186,7 +187,7 @@ class Npm(Action):
                 )
                 return self.changed()
 
-        elif self.state == 'absent':
+        else:  # 'absent'
             if not npm_installed:
                 return self.ok()
             else:

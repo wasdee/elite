@@ -37,7 +37,7 @@ class Gem(Action):
     __action_name__ = 'gem'
 
     def __init__(self, name, version=None, state='present', executable=None, options=None):
-        # We must set this attribute so the initial setting of version works
+        self._version = None
         self._state = None
 
         self.name = name
@@ -147,7 +147,7 @@ class Gem(Action):
                 )
                 return self.changed()
 
-        elif self.state == 'absent':
+        else:  # 'absent'
             if not gem_installed:
                 return self.ok()
             elif self.version:

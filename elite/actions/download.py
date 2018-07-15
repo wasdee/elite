@@ -4,17 +4,24 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-from . import Action, Argument, FILE_ATTRIBUTE_ARGS
+from . import ActionError, FileAction
 
 
-class Download(Action):
-    def process(self, url, path, mode, owner, group, flags):
+class Download(FileAction):
+    __action_name__ = 'download'
+
+    def __init__(self, url, path, **kwargs):
+        self.url = url
+        self.path = path
+        super().__init__(**kwargs)
+
+    def process(self):
         # Ensure that home directories are taken into account
-        path = os.path.expanduser(path)
+        path = os.path.expanduser(self.path)
 
         # Download the requested URL to the destination path
         try:
-            with urllib.request.urlopen(url) as r:
+            with urllib.request.urlopen(self.url) as r:
                 # Determine if the user has provided a full filepath to download to
                 if not os.path.isdir(path) and not path.endswith(os.sep):
                     filepath = path
@@ -33,7 +40,7 @@ class Download(Action):
 
                     # No filename could be determined
                     if not filename:
-                        self.fail('unable to determine the filename of the download')
+                        raise ActionError('unable to determine the filename of the download')
 
                     # Build the full filepath using the path given and filename determined
                     filepath = os.path.join(path, filename)
@@ -41,7 +48,7 @@ class Download(Action):
                     # Check if the file already exists in the destination path
                     if os.path.exists(filepath):
                         changed = self.set_file_attributes(filepath)
-                        self.changed(path=filepath) if changed else self.ok()
+                        return self.changed(path=filepath) if changed else self.ok()
 
                 # Perform the download to a binary file in chunks
                 block_size = 1024 * 8
@@ -50,19 +57,10 @@ class Download(Action):
                         for block in iter(lambda: r.read(block_size), b''):
                             f.write(block)
                 except OSError:
-                    self.fail('unable to write the download to the path requester')
+                    raise ActionError('unable to write the download to the path requester')
 
         except urllib.error.URLError:
-            self.fail('unable to retrieve the download URL requested')
+            raise ActionError('unable to retrieve the download URL requested')
 
         self.set_file_attributes(filepath)
-        self.changed(path=filepath)
-
-
-if __name__ == '__main__':
-    download = Download(
-        Argument('url'),
-        Argument('path'),
-        *FILE_ATTRIBUTE_ARGS
-    )
-    download.invoke()
+        return self.changed(path=filepath)

@@ -14,6 +14,8 @@ class Cask(Action):
     __action_name__ = 'cask'
 
     def __init__(self, name, state='present', options=None):
+        self._state = None
+
         self.name = name
         self.state = state
         self.options = options
@@ -79,7 +81,7 @@ class Cask(Action):
                 )
                 return self.changed()
 
-        elif self.state == 'absent':
+        else:  # 'absent'
             if not cask_installed:
                 return self.ok()
             else:

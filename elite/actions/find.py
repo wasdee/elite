@@ -3,27 +3,39 @@ import os
 import pwd
 from fnmatch import fnmatch
 
-from . import Action, Argument, FILE_ATTRIBUTE_ARGS
+from . import ActionError, FileAction
 from ..constants import FLAGS
 
 
-class Find(Action):
-    def process(
-        self, path, mode, owner, group, flags, min_depth, max_depth, types, patterns, aliases
+class Find(FileAction):
+    __action_name__ = 'find'
+
+    def __init__(
+        self, path, min_depth=None, max_depth=None, types=None, patterns=None, aliases=True,
+        **kwargs
     ):
+        self.path = path
+        self.min_depth = min_depth
+        self.max_depth = max_depth
+        self.types = types
+        self.patterns = patterns
+        self.aliases = aliases
+        super().__init__(**kwargs)
+
+    def process(self):
         # Ensure that home directories are taken into account
-        path = os.path.expanduser(path)
+        path = os.path.expanduser(self.path)
 
         # Check that the path exists
         if not os.path.isdir(path):
-            self.fail('unable to find a directory with the path provided')
+            raise ActionError('unable to find a directory with the path provided')
 
         # Find all the paths with the filters provided and return them to the user
         paths = self.walk(
-            path, path.count(os.sep), mode, owner, group, flags, min_depth, max_depth, types,
-            patterns, aliases
+            path, path.count(os.sep), self.mode, self.owner, self.group, self.flags,
+            self.min_depth, self.max_depth, self.types, self.patterns, self.aliases
         )
-        self.ok(paths=paths)
+        return self.ok(paths=paths)
 
     def walk(
         self, path, root_depth, mode=None, owner=None, group=None, flags=None, min_depth=None,
@@ -31,7 +43,7 @@ class Find(Action):
     ):
         # Only import PyObjC libraries if necessary (as they take time)
         if aliases:
-            from Foundation import NSURL, NSURLIsAliasFileKey
+            from Foundation import NSURL, NSURLIsAliasFileKey  # pylint: disable=no-name-in-module
 
         # Create a list to store all the files found
         paths = []
@@ -54,7 +66,7 @@ class Find(Action):
                 elif aliases:
                     # Determine if the file is an alias
                     url = NSURL.fileURLWithPath_(item.path)
-                    ok, is_alias, error = url.getResourceValue_forKey_error_(
+                    ok, is_alias, _error = url.getResourceValue_forKey_error_(
                         None, NSURLIsAliasFileKey, None
                     )
                     file_type = 'alias' if ok and is_alias else 'file'
@@ -70,19 +82,19 @@ class Find(Action):
                     try:
                         uid = pwd.getpwnam(owner).pw_uid
                     except KeyError:
-                        self.fail('the owner requested was not found')
+                        raise ActionError('the owner requested was not found')
 
                 if group:
                     try:
                         gid = grp.getgrnam(group).gr_gid
                     except KeyError:
-                        self.fail('the group requested was not found')
+                        raise ActionError('the group requested was not found')
 
                 if flags:
                     flags_bin = 0
                     for flag in flags:
                         if flag not in FLAGS:
-                            self.fail('the specified flag is unsupported')
+                            raise ActionError('the specified flag is unsupported')
                         flags_bin |= FLAGS[flag]
 
                 stat = os.stat(item.path, follow_symlinks=False)
@@ -107,16 +119,3 @@ class Find(Action):
                 ))
 
         return paths
-
-
-if __name__ == '__main__':
-    find = Find(
-        Argument('path'),
-        *FILE_ATTRIBUTE_ARGS,
-        Argument('min_depth', optional=True),
-        Argument('max_depth', optional=True),
-        Argument('types', optional=True),
-        Argument('patterns', optional=True),
-        Argument('aliases', default=True)
-    )
-    find.invoke()

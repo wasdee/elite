@@ -1,6 +1,6 @@
 import os
 
-from . import Action, Argument, FILE_ATTRIBUTE_ARGS
+from . import ActionError, FileAction
 
 
 def convert_to_spotify_value(value):
@@ -12,11 +12,19 @@ def convert_to_spotify_value(value):
         return str(value)
 
 
-class SpotifyPref(Action):
-    def process(self, username, pref, value, mode, owner, group, flags):
+class SpotifyPref(FileAction):
+    __action_name__ = 'spotify_pref'
+
+    def __init__(self, pref, value, username=None, **kwargs):
+        self.username = username
+        self.pref = pref
+        self.value = value
+        super().__init__(**kwargs)
+
+    def process(self):
         # Determine the path of the Spotify prefs file
-        if username:
-            path = f'~/Library/Application Support/Spotify/Users/{username}-user/prefs'
+        if self.username:
+            path = f'~/Library/Application Support/Spotify/Users/{self.username}-user/prefs'
         else:
             path = f'~/Library/Application Support/Spotify/prefs'
 
@@ -30,17 +38,17 @@ class SpotifyPref(Action):
                     config_pref, config_value = config_pref_line.rstrip().split('=', 1)
                     prefs[config_pref] = config_value
         except ValueError:
-            self.fail('unable to parse existing Spotify configuration')
+            raise ActionError('unable to parse existing Spotify configuration')
         except OSError:
             pass
 
         # Check if the provided pref and value is the same as what's in the config file
-        if pref in prefs and prefs[pref] == convert_to_spotify_value(value):
+        if self.pref in prefs and prefs[self.pref] == convert_to_spotify_value(self.value):
             changed = self.set_file_attributes(path)
-            self.changed(path=path) if changed else self.ok()
+            return self.changed(path=path) if changed else self.ok()
 
         # Update the config with the pref and value provided
-        prefs[pref] = convert_to_spotify_value(value)
+        prefs[self.pref] = convert_to_spotify_value(self.value)
 
         # Write the updated Spotify config
         try:
@@ -49,16 +57,6 @@ class SpotifyPref(Action):
                     print(f'{current_pref}={current_value}', file=f)
 
             self.set_file_attributes(path)
-            self.changed(path=path)
+            return self.changed(path=path)
         except OSError:
-            self.fail('unable to update the Spotify config file file')
-
-
-if __name__ == '__main__':
-    spotify_pref = SpotifyPref(
-        Argument('username', optional=True),
-        Argument('pref'),
-        Argument('value'),
-        *FILE_ATTRIBUTE_ARGS
-    )
-    spotify_pref.invoke()
+            raise ActionError('unable to update the Spotify config file file')

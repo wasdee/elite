@@ -1,17 +1,24 @@
 import os
 
-from . import Action, Argument
+from . import Action
 from ..constants import FLAGS
 
 
 class FileInfo(Action):
-    def process(self, path, aliases):
+    __action_name__ = 'file_info'
+
+    def __init__(self, path, aliases=True):
+        self.path = path
+        self.aliases = aliases
+
+    def process(self):
         # Only import PyObjC libraries if necessary (as they take time)
-        if aliases:
+        if self.aliases:
+            # pylint: disable=no-name-in-module
             from Foundation import NSURL, NSURLBookmarkResolutionWithoutUI
 
         # Ensure that home directories are taken into account
-        path = os.path.expanduser(path)
+        path = os.path.expanduser(self.path)
 
         # Check if the filepath exists
         if os.path.exists(path):
@@ -24,16 +31,17 @@ class FileInfo(Action):
             elif os.path.isdir(path):
                 file_type = 'directory'
                 source = None
-            elif aliases:
+            elif self.aliases:
                 # Determine if the file is an alias
                 alias_url = NSURL.fileURLWithPath_(path)
-                bookmark_data, error = NSURL.bookmarkDataWithContentsOfURL_error_(
+                bookmark_data, _error = NSURL.bookmarkDataWithContentsOfURL_error_(
                     alias_url, None
                 )
 
                 if bookmark_data:
                     file_type = 'alias'
-                    source_url, is_stale, error = (
+                    source_url, _is_stale, _error = (
+                        # pylint: disable=line-too-long
                         NSURL.URLByResolvingBookmarkData_options_relativeToURL_bookmarkDataIsStale_error_(  # noqa: E501
                             bookmark_data, NSURLBookmarkResolutionWithoutUI, None, None, None
                         )
@@ -60,12 +68,4 @@ class FileInfo(Action):
             mount = None
             flags = None
 
-        self.ok(exists=exists, file_type=file_type, source=source, mount=mount, flags=flags)
-
-
-if __name__ == '__main__':
-    file_info = FileInfo(
-        Argument('path'),
-        Argument('aliases', default=True)
-    )
-    file_info.invoke()
+        return self.ok(exists=exists, file_type=file_type, source=source, mount=mount, flags=flags)

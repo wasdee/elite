@@ -15,6 +15,8 @@ class Brew(Action):
     __action_name__ = 'brew'
 
     def __init__(self, name, state='present', options=None):
+        self._state = None
+
         self.name = name
         self.state = state
         self.options = options
@@ -82,7 +84,7 @@ class Brew(Action):
                 )
                 return self.changed()
 
-        elif self.state == 'absent':
+        else:  # 'absent'
             if not brew_installed:
                 return self.ok()
             else:

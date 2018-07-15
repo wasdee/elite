@@ -7,7 +7,7 @@ from .printer import Printer
 from .utils import build_absolute_path
 
 
-def main(config_path, action_search_paths=None):
+def automate(config_path, action_search_paths=None):
     if action_search_paths is None:
         action_search_paths = []
 

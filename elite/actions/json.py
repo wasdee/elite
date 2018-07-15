@@ -1,14 +1,22 @@
 import json as jsonlib
 import os
 
-from . import Action, Argument, FILE_ATTRIBUTE_ARGS
+from . import ActionError, FileAction
 from ..utils import deep_equal, deep_merge
 
 
-class Json(Action):
-    def process(self, path, values, indent, mode, owner, group, flags):
+class Json(FileAction):
+    __action_name__ = 'json'
+
+    def __init__(self, path, values, indent=2, **kwargs):
+        self.path = path
+        self.values = values
+        self.indent = indent
+        super().__init__(**kwargs)
+
+    def process(self):
         # Ensure that home directories are taken into account
-        path = os.path.expanduser(path)
+        path = os.path.expanduser(self.path)
 
         # Load the JSON or create a fresh data structure if it doesn't exist
         try:
@@ -17,32 +25,22 @@ class Json(Action):
         except OSError:
             json = {}
         except jsonlib.JSONDecodeError:
-            self.fail('an invalid JSON file already exists')
+            raise ActionError('an invalid JSON file already exists')
 
         # Check if the current JSON is the same as the values provided
-        if deep_equal(values, json):
+        if deep_equal(self.values, json):
             changed = self.set_file_attributes(path)
-            self.changed(path=path) if changed else self.ok()
+            return self.changed(path=path) if changed else self.ok()
 
         # Update the JSON with the values provided
-        deep_merge(values, json)
+        deep_merge(self.values, json)
 
         # Write the updated JSON file
         try:
             with open(path, 'w') as f:
-                jsonlib.dump(json, f, indent=indent)
+                jsonlib.dump(json, f, indent=self.indent)
 
             self.set_file_attributes(path)
-            self.changed(path=path)
+            return self.changed(path=path)
         except OSError:
-            self.fail('unable to update the requested JSON file')
-
-
-if __name__ == '__main__':
-    json = Json(
-        Argument('path', optional=True),
-        Argument('values'),
-        Argument('indent', default=2),
-        *FILE_ATTRIBUTE_ARGS
-    )
-    json.invoke()
+            raise ActionError('unable to update the requested JSON file')

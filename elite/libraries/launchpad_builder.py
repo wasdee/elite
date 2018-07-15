@@ -78,11 +78,11 @@ class LaunchpadBuilder:
         return mapping, max_id
 
     def _validate_layout(self, type_, layout, mapping):
-        """
+        r"""
         Validates the provided layout to confirm that all items exist and that folders are
         correctly structured.
 
-        :param type_: The type of item being validated (usually Types.APP or Types.WIDGET)
+        :param type\_: The type of item being validated (usually Types.APP or Types.WIDGET)
         :param layout: The layout requested by the user provided as a list (pages) of lists (items)
                        whereby items are strings.  If the item is a folder, then it is to be a dict
                        with a folder_title and folder_items key and associated values.
@@ -173,10 +173,10 @@ class LaunchpadBuilder:
         return extra_items
 
     def _setup_items(self, type_, layout, mapping, group_id, root_parent_id):
-        """
+        r"""
         Manipulates the appropriate database table to layout the items as requested by the user.
 
-        :param type_: The type of item being manipulated (usually Types.APP or Types.WIDGET)
+        :param type\_: The type of item being manipulated (usually Types.APP or Types.WIDGET)
         :param layout: The layout requested by the user provided as a list (pages) of lists (items)
                        whereby items are strings.  If the item is a folder, then it is to be a dict
                        with a folder_title and folder_items key and associated values.
@@ -393,7 +393,7 @@ class LaunchpadBuilder:
         layout = []
 
         # Iterate through pages
-        for page_id, _, _, _, _ in parent_mapping[root]:
+        for page_id, *_ in parent_mapping[root]:
             page_items = []
 
             # Iterate through items
@@ -415,12 +415,13 @@ class LaunchpadBuilder:
                     }
 
                     # Iterate through folder pages
-                    for folder_page_id, _, _, _, _ in parent_mapping[row_id]:
+                    for folder_page_id, *_ in parent_mapping[row_id]:
                         folder_page_items = []
 
                         # Iterate through folder items
                         for (
-                            _, folder_item_type, folder_item_app_title, folder_widget_title, _
+                            _folder_item_id, folder_item_type, folder_item_app_title,
+                            folder_widget_title, _folder_group_title
                         ) in parent_mapping[folder_page_id]:
 
                             # An app has been encountered which is being added to the folder page

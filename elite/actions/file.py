@@ -2,28 +2,57 @@ import hashlib
 import os
 import shutil
 
-from . import Action, Argument, FILE_ATTRIBUTE_ARGS
+from . import ActionError, FileAction
 
 
-class File(Action):
-    def validate_args(self, path, source, state, mode, owner, group, flags):
-        if source and state == 'absent':
-            self.fail("the 'source' argument may not be provided when 'state' is 'absent'")
+class File(FileAction):
+    __action_name__ = 'file'
 
-        if not source and state == 'symlink':
-            self.fail("the 'source' argument must be provided when 'state' is 'symlink'")
+    def __init__(self, path, source=None, state='file', **kwargs):
+        self._source = None
+        self._state = None
 
-    def process(self, path, source, state, mode, owner, group, flags):
+        self.path = path
+        self.source = source
+        self.state = state
+        super().__init__(**kwargs)
+
+    @property
+    def source(self):
+        return self._source
+
+    @source.setter
+    def source(self, source):
+        if source and self.state == 'absent':
+            raise ValueError("the 'source' argument may not be provided when 'state' is 'absent'")
+        if not source and self.state == 'symlink':
+            raise ValueError("the 'source' argument must be provided when 'state' is 'symlink'")
+        self._source = source
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if state not in ['file', 'directory', 'alias', 'symlink', 'absent']:
+            raise ValueError('state must be file, directory, alias, symlink or absent')
+        if self.source and state == 'absent':
+            raise ValueError("the 'source' argument may not be provided when 'state' is 'absent'")
+        if not self.source and state == 'symlink':
+            raise ValueError("the 'source' argument must be provided when 'state' is 'symlink'")
+        self._state = state
+
+    def process(self):
         # Ensure that home directories are taken into account
-        path = os.path.expanduser(path)
-        if source:
-            source = os.path.expanduser(source)
+        path = os.path.expanduser(self.path)
+        source = os.path.expanduser(self.source) if self.source else None
 
-        if state == 'file':
+        if self.state == 'file':
             if source:
                 # The source provided does not exist or is not a file
                 if not os.path.isfile(source):
-                    self.fail('the source provided could not be found or is not a file')
+                    raise ActionError('the source provided could not be found or is not a file')
 
                 # If the destination provided is a path, then we place the file in it
                 if os.path.isdir(path):
@@ -34,28 +63,28 @@ class File(Action):
                 exists = os.path.isfile(path)
                 if exists and self.md5(source) == self.md5(path):
                     changed = self.set_file_attributes(path)
-                    self.changed(path=path) if changed else self.ok()
+                    return self.changed(path=path) if changed else self.ok()
 
                 # Copy the source to the destination
                 self.copy(source, path)
 
                 self.set_file_attributes(path)
-                self.changed(path=path)
+                return self.changed(path=path)
             else:
                 # An existing file at the destination path was found
                 if os.path.isfile(path):
                     changed = self.set_file_attributes(path)
-                    self.changed(path=path) if changed else self.ok()
+                    return self.changed(path=path) if changed else self.ok()
 
                 # Create an empty file at the destination path
                 self.create_empty(path)
 
                 self.set_file_attributes(path)
-                self.changed(path=path)
+                return self.changed(path=path)
 
-        elif state == 'directory':
+        elif self.state == 'directory':
             if source:
-                self.fail(
+                raise ActionError(
                     "the file action doesn't support copyng one directory to another, use the "
                     'rsync action instead'
                 )
@@ -63,7 +92,7 @@ class File(Action):
                 # An existing directory was found
                 if os.path.isdir(path):
                     changed = self.set_file_attributes(path)
-                    self.changed(path=path) if changed else self.ok()
+                    return self.changed(path=path) if changed else self.ok()
 
                 # Clean any existing item in the path requested
                 self.remove(path)
@@ -72,13 +101,14 @@ class File(Action):
                 try:
                     os.mkdir(path)
                 except OSError:
-                    self.fail('the requested directory could not be created')
+                    raise ActionError('the requested directory could not be created')
 
                 self.set_file_attributes(path)
-                self.changed(path=path)
+                return self.changed(path=path)
 
-        elif state == 'alias':
+        elif self.state == 'alias':
             # Only import PyObjC libraries if necessary (as they take time)
+            # pylint: disable=no-name-in-module
             from Foundation import (
                 NSURL, NSURLBookmarkCreationSuitableForBookmarkFile,
                 NSURLBookmarkResolutionWithoutUI
@@ -91,7 +121,7 @@ class File(Action):
             # When creating an alias, the source must be an absolute path and exist
             source = os.path.abspath(source)
             if not os.path.exists(source):
-                self.fail('the source file provided does not exist')
+                raise ActionError('the source file provided does not exist')
 
             # An existing alias at the destination path was found so we compare them
             # and avoid making changes if they're identical
@@ -99,17 +129,18 @@ class File(Action):
             path_url = NSURL.fileURLWithPath_(path)
 
             if exists:
-                bookmark_data, error = NSURL.bookmarkDataWithContentsOfURL_error_(path_url, None)
+                bookmark_data, _error = NSURL.bookmarkDataWithContentsOfURL_error_(path_url, None)
 
                 if bookmark_data:
-                    source_url, is_stale, error = (
+                    source_url, _is_stale, _error = (
+                        # pylint: disable=line-too-long
                         NSURL.URLByResolvingBookmarkData_options_relativeToURL_bookmarkDataIsStale_error_(  # noqa: E501
                             bookmark_data, NSURLBookmarkResolutionWithoutUI, None, None, None
                         )
                     )
                     if source_url.path() == source:
                         changed = self.set_file_attributes(path)
-                        self.changed(path=path) if changed else self.ok()
+                        return self.changed(path=path) if changed else self.ok()
 
             # Delete any existing file or symlink at the path
             self.remove(path)
@@ -118,7 +149,8 @@ class File(Action):
             source_url = NSURL.fileURLWithPath_(source)
 
             # Build the bookmark for the alias
-            bookmark_data, error = (
+            bookmark_data, _error = (
+                # pylint: disable=line-too-long
                 source_url.bookmarkDataWithOptions_includingResourceValuesForKeys_relativeToURL_error_(  # noqa: E501
                     NSURLBookmarkCreationSuitableForBookmarkFile, None, None, None
                 )
@@ -126,16 +158,16 @@ class File(Action):
 
             # Write the alias using the bookmark data
             if bookmark_data:
-                success, error = NSURL.writeBookmarkData_toURL_options_error_(
+                _success, _error = NSURL.writeBookmarkData_toURL_options_error_(
                     bookmark_data, path_url, NSURLBookmarkCreationSuitableForBookmarkFile, None
                 )
             else:
-                self.fail('unable to create alias')
+                raise ActionError('unable to create alias')
 
             self.set_file_attributes(path)
-            self.changed(path=path)
+            return self.changed(path=path)
 
-        elif state == 'symlink':
+        elif self.state == 'symlink':
             # If the destination provided is a path, then we place the file in it
             if os.path.isdir(path) and not os.path.islink(path):
                 path = os.path.join(path, os.path.basename(source))
@@ -145,7 +177,7 @@ class File(Action):
             exists = os.path.islink(path)
             if exists and os.readlink(path) == source:
                 changed = self.set_file_attributes(path)
-                self.changed(path=path) if changed else self.ok()
+                return self.changed(path=path) if changed else self.ok()
 
             # Delete any existing file or symlink at the path
             self.remove(path)
@@ -154,14 +186,14 @@ class File(Action):
             try:
                 os.symlink(source, path)
             except OSError:
-                self.fail('the requested symlink could not be created')
+                raise ActionError('the requested symlink could not be created')
 
             self.set_file_attributes(path)
-            self.changed(path=path)
+            return self.changed(path=path)
 
-        elif state == 'absent':
+        else:  # 'absent'
             removed = self.remove(path)
-            self.changed(path=path) if removed else self.ok()
+            return self.changed(path=path) if removed else self.ok()
 
     def copy(self, source, path, buffer_size=1024 * 8):
         try:
@@ -170,16 +202,16 @@ class File(Action):
                     for buffer in iter(lambda: fsource.read(buffer_size), b''):
                         fpath.write(buffer)
         except OSError:
-            self.fail('unable to copy source file to path requested')
+            raise ActionError('unable to copy source file to path requested')
 
     def create_empty(self, path):
         try:
             with open(path, 'w'):
                 pass
         except IsADirectoryError:
-            self.fail('the destination path is a directory')
+            raise ActionError('the destination path is a directory')
         except OSError:
-            self.fail('unable to create an empty file at the path requested')
+            raise ActionError('unable to create an empty file at the path requested')
 
     def remove(self, path):
         if not os.path.exists(path) and not os.path.islink(path):
@@ -189,19 +221,19 @@ class File(Action):
             try:
                 os.remove(path)
             except OSError:
-                self.fail('existing file could not be removed')
+                raise ActionError('existing file could not be removed')
 
         elif os.path.isdir(path):
             try:
                 shutil.rmtree(path)
             except OSError:
-                self.fail('existing directory could not be recursively removed')
+                raise ActionError('existing directory could not be recursively removed')
 
         elif os.path.islink(path):
             try:
                 os.remove(path)
             except OSError:
-                self.fail('existing symlink could not be removed')
+                raise ActionError('existing symlink could not be removed')
 
         return True
 
@@ -213,18 +245,6 @@ class File(Action):
                 for buffer in iter(lambda: f.read(block_size), b''):
                     hash_md5.update(buffer)
         except OSError:
-            self.fail('unable to determine checksum of file')
+            raise ActionError('unable to determine checksum of file')
 
         return hash_md5.hexdigest()
-
-
-if __name__ == '__main__':
-    file = File(
-        Argument('path'),
-        Argument('source', optional=True),
-        Argument(
-            'state', choices=['file', 'directory', 'alias', 'symlink', 'absent'], default='file'
-        ),
-        *FILE_ATTRIBUTE_ARGS
-    )
-    file.invoke()

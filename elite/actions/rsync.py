@@ -3,29 +3,38 @@ import os
 import shlex
 import shutil
 
-from . import Action, Argument
+from . import Action, ActionError
 
 
 class Rsync(Action):
-    def process(self, path, source, executable, archive, options):
+    __action_name__ = 'rsync'
+
+    def __init__(self, path, source, executable=None, archive=True, options=None):
+        self.path = path
+        self.source = source
+        self.executable = executable
+        self.archive = archive
+        self.options = options
+
+    def process(self):
         # Ensure that home directories are taken into account
-        path = os.path.expanduser(path)
-        source = os.path.expanduser(source)
+        path = os.path.expanduser(self.path)
+        source = os.path.expanduser(self.source)
 
         # Determine the rsync executable
-        if not executable:
+        if not self.executable:
             executable = shutil.which('rsync')
             if not executable:
-                self.fail('unable to find rsync executable to use')
+                raise ActionError('unable to find rsync executable to use')
 
         # Create a list to store our rsync options
         options_list = []
 
-        if archive:
+        if self.archive:
             options_list.append('--archive')
 
         # Add any additional user provided options
-        options_list.extend(shlex.split(options) if options else [])
+        options_list.extend(shlex.split(self.options) if self.options else [])
 
         # The output we want from rsync is a tuple containing the operation and filename of
         # each affected file
@@ -40,19 +49,8 @@ class Rsync(Action):
         # Obtain rsync output and check to see if any changes were made
         rsync_output = rsync_proc.stdout.strip()
         if not rsync_output:
-            self.ok()
+            return self.ok()
 
         # Changes were found and must be reported to the user
         changes = [ast.literal_eval(c) for c in rsync_output.split('\n')]
-        self.changed(changes=changes)
-
-
-if __name__ == '__main__':
-    rsync = Rsync(
-        Argument('path'),
-        Argument('source'),
-        Argument('executable', optional=True),
-        Argument('archive', default=True),
-        Argument('options', optional=True)
-    )
-    rsync.invoke()
+        return self.changed(changes=changes)

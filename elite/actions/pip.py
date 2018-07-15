@@ -22,8 +22,9 @@ class Pip(Action):
     def __init__(
         self, name, version=None, state='present', executable=None, virtualenv=None, options=None
     ):
-        # We must set these attributes so the initial setting of version works
         self._state = None
+        self._version = None
+        self._executable = None
         self._virtualenv = None
 
         self.name = name
@@ -182,7 +183,7 @@ class Pip(Action):
                 )
                 return self.changed()
 
-        elif self.state == 'absent':
+        else:  # 'absent'
             if not pip_installed:
                 return self.ok()
             else:

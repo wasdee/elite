@@ -70,7 +70,7 @@ class Elite:
             sys.path.append(library_parent_dir)
 
             # Go through all files in the <module-name>/actions directory
-            for root, _, files in os.walk(os.path.join(library_dir, 'actions')):
+            for root, _dirs, files in os.walk(os.path.join(library_dir, 'actions')):
                 for filename in files:
                     # Obtain the file's name (which is the action name) and the extension
                     action_name, extension = os.path.splitext(filename)
@@ -96,13 +96,12 @@ class Elite:
 
         :return: The respective function that implements that action.
         """
-        def _call_action(sudo=False, ok=None, changed=None, ignore_failed=False, env=None, **args):
+        def _call_action(sudo=False, changed=None, ignore_failed=False, env=None, **args):
             """
             A sub-method that calls the requested action with the provided raw parameters and
             arguments.
 
             :param sudo: Whether or not to run the action via sudo.
-            :param ok: A boolean which overrides the success of an action regardless.
             :param change: A boolean that overrides whether an action changed regardless.
             :param args: Action arguments to be sent to the action.
 

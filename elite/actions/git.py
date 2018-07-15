@@ -1,12 +1,19 @@
 import os
 
-from . import Action, Argument
+from . import Action
 
 
 class Git(Action):
-    def process(self, repo, path, branch):
+    __action_name__ = 'git'
+
+    def __init__(self, repo, path, branch='master'):
+        self.repo = repo
+        self.path = path
+        self.branch = branch
+
+    def process(self):
         # Ensure that home directories are taken into account
-        path = os.path.expanduser(path)
+        path = os.path.expanduser(self.path)
 
         # Check if the repository already exists in the destination path
         if os.path.exists(os.path.join(path, '.git', 'config')):
@@ -17,33 +24,24 @@ class Git(Action):
             )
 
             # Currently checked out repo is on the correct branch
-            if git_branch_proc.stdout.rstrip() == branch:
-                self.ok()
+            if git_branch_proc.stdout.rstrip() == self.branch:
+                return self.ok()
             # Checked out repo is on the wrong branch and must be switched
             else:
                 self.run(
-                    ['git', 'checkout', branch], cwd=path,
+                    ['git', 'checkout', self.branch], cwd=path,
                     fail_error='unable to checkout requested branch'
                 )
-                self.changed()
+                return self.changed()
 
         # Build the clone command
         git_command = ['git', 'clone', '--quiet']
-        if branch:
-            git_command.extend(['-b', branch])
-        git_command.extend([repo, path])
+        if self.branch:
+            git_command.extend(['-b', self.branch])
+        git_command.extend([self.repo, path])
 
         # Run the command and check for failures
         self.run(git_command, fail_error='unable to clone git repository')
 
         # Clone was successful
-        self.changed()
-
-
-if __name__ == '__main__':
-    git = Git(
-        Argument('repo'),
-        Argument('path'),
-        Argument('branch', default='master')
-    )
-    git.invoke()
+        return self.changed()

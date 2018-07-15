@@ -1,65 +1,87 @@
+# pylint: disable=no-name-in-module
 from Foundation import NSBundle
 from LaunchServices import (
     LSCopyDefaultHandlerForURLScheme, LSCopyDefaultRoleHandlerForContentType,
     LSSetDefaultHandlerForURLScheme, LSSetDefaultRoleHandlerForContentType, kLSRolesAll
 )
 
-from . import Action, Argument
+from . import Action, ActionError
 
 
 class Handler(Action):
-    def validate_args(self, path, content_type, url_scheme):
-        if not content_type and not url_scheme:
-            self.fail("you must specify one of 'content_type' or 'url_scheme'")
+    __action_name__ = 'handler'
 
-        if content_type and url_scheme:
-            self.fail("you may only specify one of 'content_type' or 'url_scheme'")
+    def __init__(self, path, content_type=None, url_scheme=None):
+        self._content_type = None
+        self._url_scheme = None
 
-    def process(self, path, content_type, url_scheme):
+        self.path = path
+        self.content_type = content_type
+        self.url_scheme = url_scheme
+
+    @property
+    def content_type(self):
+        return self._content_type
+
+    @content_type.setter
+    def content_type(self, content_type):
+        if not content_type and not self.url_scheme:
+            raise ValueError("you must specify one of 'content_type' or 'url_scheme'")
+        if content_type and self.url_scheme:
+            raise ValueError("you may only specify one of 'content_type' or 'url_scheme'")
+        self._content_type = content_type
+
+    @property
+    def url_scheme(self):
+        return self._url_scheme
+
+    @url_scheme.setter
+    def url_scheme(self, url_scheme):
+        if not self.content_type and not url_scheme:
+            raise ValueError("you must specify one of 'content_type' or 'url_scheme'")
+        if self.content_type and url_scheme:
+            raise ValueError("you may only specify one of 'content_type' or 'url_scheme'")
+        self._url_scheme = url_scheme
+
+    def process(self):
         # Determine the bundle_id of the app path provided
-        bundle = NSBundle.bundleWithPath_(path)
+        bundle = NSBundle.bundleWithPath_(self.path)
         if not bundle:
-            self.fail('unable to locate the bundle id of the app path provided')
+            raise ActionError('unable to locate the bundle id of the app path provided')
 
         bundle_id = bundle.bundleIdentifier()
 
         # The user is trying to change the default application for a content type
-        if content_type:
+        if self.content_type:
             # Get the default bundle id for the specified content type
-            default_bundle_id = LSCopyDefaultRoleHandlerForContentType(content_type, kLSRolesAll)
+            # pylint: disable=line-too-long
+            default_bundle_id = LSCopyDefaultRoleHandlerForContentType(
+                self.content_type, kLSRolesAll
+            )
             if not default_bundle_id:
-                self.fail('the content type provided could not be found')
+                raise ActionError('the content type provided could not be found')
 
             # The current default application matches the one requested
             if default_bundle_id.lower() == bundle_id.lower():
-                self.ok()
+                return self.ok()
 
             # Change the default application for the specified content type
             LSSetDefaultRoleHandlerForContentType(
-                content_type, kLSRolesAll, bundle_id
+                self.content_type, kLSRolesAll, bundle_id
             )
-            self.changed()
+            return self.changed()
 
         # The user is trying to change the default application for a URL scheme
         else:
             # Get the default bundle id for the specified url scheme
-            default_bundle_id = LSCopyDefaultHandlerForURLScheme(url_scheme)
+            default_bundle_id = LSCopyDefaultHandlerForURLScheme(self.url_scheme)
             if not default_bundle_id:
-                self.fail('the url scheme provided could not be found')
+                raise ActionError('the url scheme provided could not be found')
 
             # The current default application matches the one requested
             if default_bundle_id.lower() == bundle_id.lower():
-                self.ok()
+                return self.ok()
 
             # Change the default application for the specified url scheme
-            LSSetDefaultHandlerForURLScheme(url_scheme, bundle_id)
-            self.changed()
-
-
-if __name__ == '__main__':
-    handler = Handler(
-        Argument('path'),
-        Argument('content_type', optional=True),
-        Argument('url_scheme', optional=True)
-    )
-    handler.invoke()
+            LSSetDefaultHandlerForURLScheme(self.url_scheme, bundle_id)
+            return self.changed()

@@ -2,20 +2,25 @@ import os
 import plistlib
 import tempfile
 
-from . import Action, Argument
+from . import Action, ActionError
 
 
 class PackageChoices(Action):
-    def process(self, path):
+    __action_name__ = 'package_choices'
+
+    def __init__(self, path):
+        self.path = path
+
+    def process(self):
         # Ensure that home directories are taken into account
-        path = os.path.expanduser(path)
+        path = os.path.expanduser(self.path)
 
         # Check that the path exists
         if not os.path.isfile(path):
-            self.fail('unable to find a file with the path provided')
+            raise ActionError('unable to find a file with the path provided')
 
         # Create a temporary plist for use in determining the installer choices
-        empty_plist_fd, empty_plist_name = tempfile.mkstemp()
+        _empty_plist_fd, empty_plist_name = tempfile.mkstemp()
         with open(empty_plist_name, 'wb') as f:
             plistlib.dump([], f)
 
@@ -50,13 +55,6 @@ class PackageChoices(Action):
             # Parse the plist provided
             choices = plistlib.loads(choices_plist.encode('utf-8'))
         except (ValueError, IndexError, plistlib.InvalidFileException):
-            self.fail('unable to parse installer command output')
+            raise ActionError('unable to parse installer command output')
 
-        self.ok(choices=choices)
-
-
-if __name__ == '__main__':
-    package_choices = PackageChoices(
-        Argument('path')
-    )
-    package_choices.invoke()
+        return self.ok(choices=choices)

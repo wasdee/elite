@@ -12,6 +12,8 @@ class Tap(Action):
     __action_name__ = 'tap'
 
     def __init__(self, name, state='present', url=None):
+        self._state = None
+
         self.name = name
         self.state = state
         self.url = url
@@ -54,7 +56,7 @@ class Tap(Action):
                 )
                 return self.changed()
 
-        elif self.state == 'absent':
+        else:  # 'absent'
             if not tapped:
                 return self.ok()
             else:
