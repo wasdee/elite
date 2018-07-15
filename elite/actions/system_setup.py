@@ -26,39 +26,39 @@ class SystemSetup(Action):
 
         # Coonfigure the timezone
         if self.timezone:
-            current_timezone = self.run('systemsetup -gettimezone', stdout=True)
+            current_timezone = self.run(['systemsetup', '-gettimezone'], stdout=True)
             if f'Time Zone: {self.timezone}' != current_timezone.stdout.rstrip():
-                self.run(f'systemsetup -settimezone {self.timezone}')
+                self.run(['systemsetup', '-settimezone', self.timezone])
                 changed = True
 
         # Configure the computer sleep time
         if self.computer_sleep_time:
-            computer_sleep = self.run('systemsetup -getcomputersleep', stdout=True)
+            computer_sleep = self.run(['systemsetup', '-getcomputersleep'], stdout=True)
             if (
                 f'Computer Sleep: {self.computer_sleep_time}' !=
                 computer_sleep.stdout.rstrip().replace('after ', '').replace(' minutes', '')
             ):
-                self.run(f'systemsetup -setcomputersleep {self.computer_sleep_time}')
+                self.run(['systemsetup', '-setcomputersleep', self.computer_sleep_time])
                 changed = True
 
         # Configure the display sleep
         if self.display_sleep_time:
-            display_sleep = self.run('systemsetup -getdisplaysleep', stdout=True)
+            display_sleep = self.run(['systemsetup', '-getdisplaysleep'], stdout=True)
             if (
                 f'Display Sleep: {self.display_sleep_time}' !=
                 display_sleep.stdout.rstrip().replace('after ', '').replace(' minutes', '')
             ):
-                self.run(f'systemsetup -setdisplaysleep {self.display_sleep_time}')
+                self.run(['systemsetup', '-setdisplaysleep', self.display_sleep_time])
                 changed = True
 
         # Configure the hard disk sleep
         if self.hard_disk_sleep_time:
-            display_sleep = self.run('systemsetup -getharddisksleep', stdout=True)
+            display_sleep = self.run(['systemsetup', '-getharddisksleep'], stdout=True)
             if (
                 f'Hard Disk Sleep: {self.hard_disk_sleep_time}' !=
                 display_sleep.stdout.rstrip().replace('after ', '').replace(' minutes', '')
             ):
-                self.run(f'systemsetup -setharddisksleep {self.hard_disk_sleep_time}')
+                self.run(['systemsetup', '-setharddisksleep', self.hard_disk_sleep_time])
                 changed = True
 
         return self.changed() if changed else self.ok()

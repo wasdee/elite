@@ -19,7 +19,7 @@ class Run(Action):
     __action_name__ = 'run'
 
     def __init__(
-        self, command, working_dir=None, shell='/bin/bash', unless=None, creates=None,
+        self, command, working_dir=None, shell=None, unless=None, creates=None,
         removes=None
     ):
         self.command = command

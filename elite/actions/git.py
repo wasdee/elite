@@ -19,7 +19,7 @@ class Git(Action):
         if os.path.exists(os.path.join(path, '.git', 'config')):
             # Verify that the existing repo is on the correct branch
             git_branch_proc = self.run(
-                'git symbolic-ref --short HEAD', cwd=path, stdout=True,
+                ['git', 'symbolic-ref', '--short', 'HEAD'], cwd=path, stdout=True,
                 fail_error='unable to check existing repository branch'
             )
 

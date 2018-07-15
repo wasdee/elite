@@ -1,7 +1,6 @@
 import grp
 import os
 import pwd
-import shlex
 import subprocess
 from collections import namedtuple
 
@@ -27,10 +26,6 @@ class Action:
         return ActionResponse(changed=True, data=data)
 
     def run(self, command, ignore_fail=False, fail_error=None, **kwargs):
-        # Allow for the user to send in a string instead of a list for the command
-        if isinstance(command, str) and not kwargs.get('shell'):
-            command = shlex.split(command)
-
         # Allow for the user to simply set stdout to a bool to enable them
         if kwargs.get('stdout'):
             kwargs['stdout'] = subprocess.PIPE

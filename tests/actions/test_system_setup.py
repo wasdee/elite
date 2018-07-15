@@ -9,7 +9,7 @@ def test_timezone_same(monkeypatch):
         fixture_subpath='system_setup',
         command_mappings=[
             CommandMapping(
-                command='systemsetup -gettimezone',
+                command=['systemsetup', '-gettimezone'],
                 stdout_filename='systemsetup_timezone_same.stdout'
             )
         ]
@@ -24,11 +24,11 @@ def test_timezone_different(monkeypatch):
         fixture_subpath='system_setup',
         command_mappings=[
             CommandMapping(
-                command='systemsetup -gettimezone',
+                command=['systemsetup', '-gettimezone'],
                 stdout_filename='systemsetup_timezone_different.stdout'
             ),
             CommandMapping(
-                command='systemsetup -settimezone Australia/Brisbane'
+                command=['systemsetup', '-settimezone', 'Australia/Brisbane']
             )
         ]
     ))
@@ -42,7 +42,7 @@ def test_computer_sleep_time_same(monkeypatch):
         fixture_subpath='system_setup',
         command_mappings=[
             CommandMapping(
-                command='systemsetup -getcomputersleep',
+                command=['systemsetup', '-getcomputersleep'],
                 stdout_filename='systemsetup_computer_sleep_same.stdout'
             )
         ]
@@ -57,11 +57,11 @@ def test_computer_sleep_time_different(monkeypatch):
         fixture_subpath='system_setup',
         command_mappings=[
             CommandMapping(
-                command='systemsetup -getcomputersleep',
+                command=['systemsetup', '-getcomputersleep'],
                 stdout_filename='systemsetup_computer_sleep_different.stdout'
             ),
             CommandMapping(
-                command='systemsetup -setcomputersleep 5'
+                command=['systemsetup', '-setcomputersleep', 5]
             )
         ]
     ))
@@ -75,7 +75,7 @@ def test_display_sleep_time_same(monkeypatch):
         fixture_subpath='system_setup',
         command_mappings=[
             CommandMapping(
-                command='systemsetup -getdisplaysleep',
+                command=['systemsetup', '-getdisplaysleep'],
                 stdout_filename='systemsetup_display_sleep_same.stdout'
             )
         ]
@@ -90,11 +90,11 @@ def test_display_sleep_time_different(monkeypatch):
         fixture_subpath='system_setup',
         command_mappings=[
             CommandMapping(
-                command='systemsetup -getdisplaysleep',
+                command=['systemsetup', '-getdisplaysleep'],
                 stdout_filename='systemsetup_display_sleep_different.stdout'
             ),
             CommandMapping(
-                command='systemsetup -setdisplaysleep 10'
+                command=['systemsetup', '-setdisplaysleep', 10]
             )
         ]
     ))
@@ -108,7 +108,7 @@ def test_hard_disk_sleep_time_same(monkeypatch):
         fixture_subpath='system_setup',
         command_mappings=[
             CommandMapping(
-                command='systemsetup -getharddisksleep',
+                command=['systemsetup', '-getharddisksleep'],
                 stdout_filename='systemsetup_hard_disk_sleep_same.stdout'
             )
         ]
@@ -123,11 +123,11 @@ def test_hard_disk_sleep_time_different(monkeypatch):
         fixture_subpath='system_setup',
         command_mappings=[
             CommandMapping(
-                command='systemsetup -getharddisksleep',
+                command=['systemsetup', '-getharddisksleep'],
                 stdout_filename='systemsetup_hard_disk_sleep_different.stdout'
             ),
             CommandMapping(
-                command='systemsetup -setharddisksleep 15'
+                command=['systemsetup', '-setharddisksleep', 15]
             )
         ]
     ))

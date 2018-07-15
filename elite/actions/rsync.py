@@ -1,6 +1,5 @@
 import ast
 import os
-import shlex
 import shutil
 
 from . import Action, ActionError
@@ -34,7 +33,7 @@ class Rsync(Action):
             options_list.append('--archive')
 
         # Add any additional user provided options
-        options_list.extend(shlex.split(self.options) if self.options else [])
+        options_list.extend(self.options if self.options else [])
 
         # The output we want from rsync is a tuple containing the operation and filename of
         # each affected file

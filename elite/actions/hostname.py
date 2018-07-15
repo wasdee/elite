@@ -19,16 +19,16 @@ class Hostname(Action):
 
         # Coonfigure the local host name
         if self.local_host_name:
-            current_local_host_name = self.run('scutil --get LocalHostName', stdout=True)
+            current_local_host_name = self.run(['scutil', '--get', 'LocalHostName'], stdout=True)
             if self.local_host_name != current_local_host_name.stdout.rstrip():
-                self.run(f'scutil --set LocalHostName "{self.local_host_name}"')
+                self.run(['scutil', '--set', 'LocalHostName', self.local_host_name])
                 changed = True
 
         # Configure the computer name
         if self.computer_name:
-            current_computer_name = self.run('scutil --get ComputerName', stdout=True)
+            current_computer_name = self.run(['scutil', '--get', 'ComputerName'], stdout=True)
             if self.computer_name != current_computer_name.stdout.rstrip():
-                self.run(f'scutil --set ComputerName "{self.computer_name}"')
+                self.run(['scutil', '--set', 'ComputerName', self.computer_name])
                 changed = True
 
         return self.changed() if changed else self.ok()

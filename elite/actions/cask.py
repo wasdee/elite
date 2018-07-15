@@ -1,5 +1,3 @@
-import shlex
-
 from . import Action, ActionError
 
 
@@ -32,7 +30,7 @@ class Cask(Action):
 
     def process(self):
         # Obtain information about installed packages
-        cask_list_proc = self.run('brew cask list', stdout=True, ignore_fail=True)
+        cask_list_proc = self.run(['brew', 'cask', 'list'], stdout=True, ignore_fail=True)
 
         # Check whether the package is installed using only its short name
         # (e.g. fgimian/general/cog will check for a cask called cog)
@@ -43,7 +41,7 @@ class Cask(Action):
             cask_installed = self.name.split('/')[-1] in cask_list
 
         # Prepare any user provided options
-        options_list = shlex.split(self.options) if self.options else []
+        options_list = self.options if self.options else []
 
         # Install or remove the package as requested
         if self.state == 'present':
@@ -61,7 +59,9 @@ class Cask(Action):
                 # Determine if the installed package is outdated
                 cask_outdated = False
 
-                cask_outdated_proc = self.run('brew cask outdated', stdout=True, ignore_fail=True)
+                cask_outdated_proc = self.run(
+                    ['brew', 'cask', 'outdated'], stdout=True, ignore_fail=True
+                )
                 if cask_outdated_proc.returncode == 0:
                     cask_list = cask_outdated_proc.stdout.rstrip().split('\n')
                     cask_outdated = self.name.split('/')[-1] in cask_list

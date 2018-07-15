@@ -33,7 +33,7 @@ class Tap(Action):
         name = self.name.lower()
 
         # Obtain information about installed taps
-        tap_list_proc = self.run('brew tap', stdout=True, ignore_fail=True)
+        tap_list_proc = self.run(['brew', 'tap'], stdout=True, ignore_fail=True)
 
         # Check whether the package is installed
         if tap_list_proc.returncode != 0:

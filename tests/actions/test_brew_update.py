@@ -9,7 +9,7 @@ def test_up_to_date(monkeypatch):
         fixture_subpath='brew_update',
         command_mappings=[
             CommandMapping(
-                command='brew update',
+                command=['brew', 'update'],
                 stdout_filename='brew_update_up_to_date.stdout'
             )
         ]
@@ -24,7 +24,7 @@ def test_outdated(monkeypatch):
         fixture_subpath='brew_update',
         command_mappings=[
             CommandMapping(
-                command='brew update',
+                command=['brew', 'update'],
                 stdout_filename='brew_update_outdated.stdout'
             )
         ]

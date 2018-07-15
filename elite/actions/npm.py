@@ -1,5 +1,4 @@
 import json
-import shlex
 import shutil
 
 from . import Action, ActionError
@@ -140,7 +139,7 @@ class Npm(Action):
                 raise ActionError('unable to parse package information')
 
         # Prepare any user provided options
-        options_list = shlex.split(self.options) if self.options else []
+        options_list = self.options if self.options else []
 
         # Install, upgrade or remove the package as requested
         if self.state == 'present':

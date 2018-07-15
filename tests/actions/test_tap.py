@@ -15,7 +15,7 @@ def test_invalid_command(monkeypatch):
         fixture_subpath='tap',
         command_mappings=[
             CommandMapping(
-                command='brew tap',
+                command=['brew', 'tap'],
                 returncode=2
             )
         ]
@@ -31,7 +31,7 @@ def test_present_installed(monkeypatch):
         fixture_subpath='tap',
         command_mappings=[
             CommandMapping(
-                command='brew tap',
+                command=['brew', 'tap'],
                 stdout_filename='brew_tap_tapped.stdout'
             )
         ]
@@ -46,7 +46,7 @@ def test_present_not_installed(monkeypatch):
         fixture_subpath='tap',
         command_mappings=[
             CommandMapping(
-                command='brew tap',
+                command=['brew', 'tap'],
                 stdout_filename='brew_tap_untapped.stdout'
             ),
             CommandMapping(
@@ -64,7 +64,7 @@ def test_absent_not_installed(monkeypatch):
         fixture_subpath='tap',
         command_mappings=[
             CommandMapping(
-                command='brew tap',
+                command=['brew', 'tap'],
                 stdout_filename='brew_tap_untapped.stdout'
             ),
             CommandMapping(
@@ -82,7 +82,7 @@ def test_absent_installed(monkeypatch):
         fixture_subpath='tap',
         command_mappings=[
             CommandMapping(
-                command='brew tap',
+                command=['brew', 'tap'],
                 stdout_filename='brew_tap_tapped.stdout'
             ),
             CommandMapping(

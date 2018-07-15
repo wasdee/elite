@@ -9,7 +9,7 @@ def test_local_host_name_same(monkeypatch):
         fixture_subpath='hostname',
         command_mappings=[
             CommandMapping(
-                command='scutil --get LocalHostName',
+                command=['scutil', '--get', 'LocalHostName'],
                 stdout_filename='systemsetup_local_host_name_same.stdout'
             )
         ]
@@ -24,11 +24,11 @@ def test_local_host_name_different(monkeypatch):
         fixture_subpath='hostname',
         command_mappings=[
             CommandMapping(
-                command='scutil --get LocalHostName',
+                command=['scutil', '--get', 'LocalHostName'],
                 stdout_filename='systemsetup_local_host_name_different.stdout'
             ),
             CommandMapping(
-                command='scutil --set LocalHostName "Fotsies-MacBook-Pro"'
+                command=['scutil', '--set', 'LocalHostName', 'Fotsies-MacBook-Pro']
             )
         ]
     ))
@@ -42,7 +42,7 @@ def test_computer_name_same(monkeypatch):
         fixture_subpath='hostname',
         command_mappings=[
             CommandMapping(
-                command='scutil --get ComputerName',
+                command=['scutil', '--get', 'ComputerName'],
                 stdout_filename='systemsetup_computer_name_same.stdout'
             )
         ]
@@ -57,11 +57,11 @@ def test_computer_name_different(monkeypatch):
         fixture_subpath='hostname',
         command_mappings=[
             CommandMapping(
-                command='scutil --get ComputerName',
+                command=['scutil', '--get', 'ComputerName'],
                 stdout_filename='systemsetup_computer_name_different.stdout'
             ),
             CommandMapping(
-                command='scutil --set ComputerName "Fotsies MacBook Pro"'
+                command=['scutil', '--set', 'ComputerName', 'Fotsies MacBook Pro']
             )
         ]
     ))
