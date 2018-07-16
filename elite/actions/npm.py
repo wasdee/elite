@@ -1,5 +1,4 @@
 import json
-import shutil
 
 from . import Action, ActionError
 
@@ -89,12 +88,7 @@ class Npm(Action):
 
     def process(self):
         # Determine the npm executable
-        if self.executable:
-            executable = self.executable
-        else:
-            executable = shutil.which('npm')
-            if not executable:
-                raise ActionError('unable to determine npm executable to use')
+        executable = self.executable if self.executable else 'npm'
 
         if self.mode == 'global':
             location_options = ['--global']

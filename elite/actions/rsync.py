@@ -1,6 +1,5 @@
 import ast
 import os
-import shutil
 
 from . import Action, ActionError
 
@@ -21,10 +20,7 @@ class Rsync(Action):
         source = os.path.expanduser(self.source)
 
         # Determine the rsync executable
-        if not self.executable:
-            executable = shutil.which('rsync')
-            if not executable:
-                raise ActionError('unable to find rsync executable to use')
+        executable = self.executable if self.executable else 'rsync'
 
         # Create a list to store our rsync options
         options_list = []

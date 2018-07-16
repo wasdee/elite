@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import ast
 import os
-import shutil
 import subprocess
 import sys
 from enum import Enum
@@ -118,7 +117,7 @@ class Elite:
             # -p '<prompt>' - the prompt to display
             # -u '<user>' - the user to sudo as
             action_module = self._elite_actions[action]
-            proc_args = [shutil.which('sudo'), '-n'] if sudo else []
+            proc_args = ['sudo', '-n'] if sudo else []
             proc_args.extend([sys.executable, '-m', action_module])
 
             # Build the final env by merging our existing environment with provided overrides

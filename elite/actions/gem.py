@@ -1,5 +1,3 @@
-import shutil
-
 from ruamel.yaml import YAML, YAMLError
 
 from . import Action, ActionError
@@ -73,12 +71,7 @@ class Gem(Action):
 
     def process(self):
         # Determine the gem executable
-        if self.executable:
-            executable = self.executable
-        else:
-            executable = shutil.which('gem')
-            if not executable:
-                raise ActionError('unable to find a gem executable to use')
+        executable = self.executable if self.executable else 'gem'
 
         # Obtain the specification of the requested package containing all installed versions
         # of the requested package

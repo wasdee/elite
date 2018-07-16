@@ -1,5 +1,3 @@
-import shutil
-
 import pytest
 from elite.actions import ActionError, ActionResponse
 from elite.actions.gem import Gem
@@ -45,15 +43,12 @@ def test_invalid_specification_output(monkeypatch):
         gem.process()
 
 
-def test_find_executable_found(monkeypatch):
-    monkeypatch.setattr(
-        shutil, 'which', lambda cmd: '/opt/ruby/bin/gem' if cmd == 'gem' else None
-    )
+def test_unspecified_executable(monkeypatch):
     monkeypatch.setattr(Gem, 'run', build_run(
         fixture_subpath='gem',
         command_mappings=[
             CommandMapping(
-                command=['/opt/ruby/bin/gem', 'specification', '--all', 'rails'],
+                command=['gem', 'specification', '--all', 'rails'],
                 stdout_filename='gem_specification_all_installed.stdout'
             )
         ]
@@ -61,23 +56,6 @@ def test_find_executable_found(monkeypatch):
 
     gem = Gem(name='rails', state='present')
     assert gem.process() == ActionResponse(changed=False)
-
-
-def test_find_executable_not_found(monkeypatch):
-    monkeypatch.setattr(shutil, 'which', lambda cmd: None)
-    monkeypatch.setattr(Gem, 'run', build_run(
-        fixture_subpath='gem',
-        command_mappings=[
-            CommandMapping(
-                command=['/opt/ruby/bin/gem', 'specification', '--all', 'rails'],
-                stdout_filename='gem_specification_all_installed.stdout'
-            )
-        ]
-    ))
-
-    gem = Gem(name='rails', state='present')
-    with pytest.raises(ActionError):
-        gem.process()
 
 
 def test_present_installed(monkeypatch):

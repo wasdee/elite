@@ -1,5 +1,3 @@
-import shutil
-
 import pytest
 from elite.actions import ActionError, ActionResponse
 from elite.actions.npm import Npm
@@ -89,17 +87,14 @@ def test_invalid_list_output(monkeypatch):
         npm.process()
 
 
-def test_find_executable_found(monkeypatch):
-    monkeypatch.setattr(
-        shutil, 'which', lambda cmd: '/opt/nodejs/bin/npm' if cmd == 'npm' else None
-    )
+def test_unspecified_executable(monkeypatch):
     monkeypatch.setattr(Npm, 'run', build_run(
         fixture_subpath='npm',
         command_mappings=[
             CommandMapping(
                 command=[
-                    '/opt/nodejs/bin/npm', 'list', '--json', '--depth 0', '--prefix',
-                    '/Users/fots/project', 'express'
+                    'npm', 'list', '--json', '--depth 0', '--prefix', '/Users/fots/project',
+                    'express'
                 ],
                 stdout_filename='npm_list_installed.stdout'
             )
@@ -108,26 +103,6 @@ def test_find_executable_found(monkeypatch):
 
     npm = Npm(name='express', state='present', path='/Users/fots/project')
     assert npm.process() == ActionResponse(changed=False)
-
-
-def test_find_executable_not_found(monkeypatch):
-    monkeypatch.setattr(shutil, 'which', lambda cmd: None)
-    monkeypatch.setattr(Npm, 'run', build_run(
-        fixture_subpath='npm',
-        command_mappings=[
-            CommandMapping(
-                command=[
-                    '/opt/nodejs/bin/npm', 'list', '--json', '--depth 0', '--prefix',
-                    '/Users/fots/project', 'express'
-                ],
-                stdout_filename='npm_list_installed.stdout'
-            )
-        ]
-    ))
-
-    npm = Npm(name='express', state='present', path='/Users/fots/project')
-    with pytest.raises(ActionError):
-        npm.process()
 
 
 def test_global_install(monkeypatch):
