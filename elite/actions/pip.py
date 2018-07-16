@@ -110,31 +110,31 @@ class Pip(Action):
         # Check whether the package is installed and whether it is outdated
         if pip_list_proc.returncode != 0:
             raise ActionError('unable to obtain a list of pip packages')
-        else:
-            # Determine if the package is installed and/or outdated
-            try:
-                pip_list_multiple = json.loads(pip_list_proc.stdout)
-                pip_list = {p['name'].lower(): p['version'] for p in pip_list_multiple}
 
-                pip_installed = name in pip_list
+        # Determine if the package is installed and/or outdated
+        try:
+            pip_list_multiple = json.loads(pip_list_proc.stdout)
+            pip_list = {p['name'].lower(): p['version'] for p in pip_list_multiple}
 
-                if pip_installed:
-                    pip_version = pip_list[name]
+            pip_installed = name in pip_list
 
-                if pip_installed and self.state == 'latest':
-                    pip_list_outdated_proc = self.run(
-                        [executable, 'list', '--format', 'json', '--outdated'],
-                        stdout=True, ignore_fail=True
-                    )
+            if pip_installed:
+                pip_version = pip_list[name]
 
-                    pip_list_outdated_multiple = json.loads(pip_list_outdated_proc.stdout)
-                    pip_list_outdated_names = [
-                        p['name'].lower() for p in pip_list_outdated_multiple
-                    ]
+            if pip_installed and self.state == 'latest':
+                pip_list_outdated_proc = self.run(
+                    [executable, 'list', '--format', 'json', '--outdated'],
+                    stdout=True, ignore_fail=True
+                )
 
-                    pip_outdated = name in pip_list_outdated_names
-            except (json.JSONDecodeError, IndexError, KeyError):
-                raise ActionError('unable to parse installed package listing')
+                pip_list_outdated_multiple = json.loads(pip_list_outdated_proc.stdout)
+                pip_list_outdated_names = [
+                    p['name'].lower() for p in pip_list_outdated_multiple
+                ]
+
+                pip_outdated = name in pip_list_outdated_names
+        except (json.JSONDecodeError, IndexError, KeyError):
+            raise ActionError('unable to parse installed package listing')
 
         # Prepare any user provided options
         options_list = self.options if self.options else []

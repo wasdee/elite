@@ -38,9 +38,9 @@ class Tap(Action):
         # Check whether the package is installed
         if tap_list_proc.returncode != 0:
             raise ActionError('unable to obtain a list of taps')
-        else:
-            tap_list = tap_list_proc.stdout.rstrip().split('\n')
-            tapped = name in tap_list
+
+        tap_list = tap_list_proc.stdout.rstrip().split('\n')
+        tapped = name in tap_list
 
         # Prepare the URL if provided options
         url_list = [self.url] if self.url else []

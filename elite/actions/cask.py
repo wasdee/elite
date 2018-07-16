@@ -36,9 +36,9 @@ class Cask(Action):
         # (e.g. fgimian/general/cog will check for a cask called cog)
         if cask_list_proc.returncode != 0:
             raise ActionError('unable to obtain a list of cask packages')
-        else:
-            cask_list = cask_list_proc.stdout.rstrip().split('\n')
-            cask_installed = self.name.split('/')[-1] in cask_list
+
+        cask_list = cask_list_proc.stdout.rstrip().split('\n')
+        cask_installed = self.name.split('/')[-1] in cask_list
 
         # Prepare any user provided options
         options_list = self.options if self.options else []

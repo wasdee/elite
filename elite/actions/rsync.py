@@ -1,7 +1,7 @@
 import ast
 import os
 
-from . import Action, ActionError
+from . import Action
 
 
 class Rsync(Action):

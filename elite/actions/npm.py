@@ -90,10 +90,8 @@ class Npm(Action):
         # Determine the npm executable
         executable = self.executable if self.executable else 'npm'
 
-        if self.mode == 'global':
-            location_options = ['--global']
-        else:
-            location_options = ['--prefix', self.path]
+        # Determine the options to add based on whether this is a global or local install
+        location_options = ['--global'] if self.mode == 'global' else ['--prefix', self.path]
 
         # We'll work in lowercase as npm is case insensitive
         name = self.name.lower()
@@ -107,30 +105,30 @@ class Npm(Action):
         # Check whether the package is installed and whether it is outdated
         if npm_list_proc.returncode != 0:
             raise ActionError('unable to obtain a list of npm packages')
-        else:
-            # Determine if the package is installed and/or outdated
-            try:
-                npm_list_multiple = json.loads(npm_list_proc.stdout)
-                npm_list = {
-                    p.lower(): i['version']
-                    for p, i in npm_list_multiple.get('dependencies', {}).items()
-                }
 
-                npm_installed = name in npm_list
+        # Determine if the package is installed and/or outdated
+        try:
+            npm_list_multiple = json.loads(npm_list_proc.stdout)
+            npm_list = {
+                p.lower(): i['version']
+                for p, i in npm_list_multiple.get('dependencies', {}).items()
+            }
 
-                if npm_installed:
-                    npm_version = npm_list[name]
+            npm_installed = name in npm_list
 
-                if npm_installed and self.state == 'latest':
-                    npm_view_proc = self.run(
-                        [executable, 'view', '--json', name], stdout=True, ignore_fail=True
-                    )
+            if npm_installed:
+                npm_version = npm_list[name]
 
-                    npm_view = json.loads(npm_view_proc.stdout)
+            if npm_installed and self.state == 'latest':
+                npm_view_proc = self.run(
+                    [executable, 'view', '--json', name], stdout=True, ignore_fail=True
+                )
 
-                    npm_outdated = npm_version != npm_view['version']
-            except (json.JSONDecodeError, IndexError, KeyError):
-                raise ActionError('unable to parse package information')
+                npm_view = json.loads(npm_view_proc.stdout)
+
+                npm_outdated = npm_version != npm_view['version']
+        except (json.JSONDecodeError, IndexError, KeyError):
+            raise ActionError('unable to parse package information')
 
         # Prepare any user provided options
         options_list = self.options if self.options else []
