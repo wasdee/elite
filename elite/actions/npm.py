@@ -3,7 +3,7 @@ import json
 from . import Action, ActionError
 
 
-class Npm(Action):
+class NPM(Action):
     """
     Provides the ability to manage packages using the Node.js npm package manager.
 
