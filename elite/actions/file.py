@@ -63,7 +63,7 @@ class File(FileAction):
                 exists = os.path.isfile(path)
                 if exists and self.md5(source) == self.md5(path):
                     changed = self.set_file_attributes(path)
-                    return self.changed(path=path) if changed else self.ok()
+                    return self.changed(path=path) if changed else self.ok(path=path)
 
                 # Copy the source to the destination
                 self.copy(source, path)
@@ -74,7 +74,7 @@ class File(FileAction):
                 # An existing file at the destination path was found
                 if os.path.isfile(path):
                     changed = self.set_file_attributes(path)
-                    return self.changed(path=path) if changed else self.ok()
+                    return self.changed(path=path) if changed else self.ok(path=path)
 
                 # Create an empty file at the destination path
                 self.create_empty(path)
@@ -92,7 +92,7 @@ class File(FileAction):
                 # An existing directory was found
                 if os.path.isdir(path):
                     changed = self.set_file_attributes(path)
-                    return self.changed(path=path) if changed else self.ok()
+                    return self.changed(path=path) if changed else self.ok(path=path)
 
                 # Clean any existing item in the path requested
                 self.remove(path)
@@ -140,7 +140,7 @@ class File(FileAction):
                     )
                     if source_url.path() == source:
                         changed = self.set_file_attributes(path)
-                        return self.changed(path=path) if changed else self.ok()
+                        return self.changed(path=path) if changed else self.ok(path=path)
 
             # Delete any existing file or symlink at the path
             self.remove(path)
@@ -177,7 +177,7 @@ class File(FileAction):
             exists = os.path.islink(path)
             if exists and os.readlink(path) == source:
                 changed = self.set_file_attributes(path)
-                return self.changed(path=path) if changed else self.ok()
+                return self.changed(path=path) if changed else self.ok(path=path)
 
             # Delete any existing file or symlink at the path
             self.remove(path)
@@ -193,7 +193,7 @@ class File(FileAction):
 
         else:  # 'absent'
             removed = self.remove(path)
-            return self.changed(path=path) if removed else self.ok()
+            return self.changed(path=path) if removed else self.ok(path=path)
 
     def copy(self, source, path, buffer_size=1024 * 8):
         try:

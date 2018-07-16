@@ -5,7 +5,7 @@ from . import ActionError, FileAction
 from ..utils import deep_equal, deep_merge
 
 
-class Json(FileAction):
+class JSON(FileAction):
     __action_name__ = 'json'
 
     def __init__(self, path, values, indent=2, **kwargs):
@@ -30,7 +30,7 @@ class Json(FileAction):
         # Check if the current JSON is the same as the values provided
         if deep_equal(self.values, json):
             changed = self.set_file_attributes(path)
-            return self.changed(path=path) if changed else self.ok()
+            return self.changed(path=path) if changed else self.ok(path=path)
 
         # Update the JSON with the values provided
         deep_merge(self.values, json)
@@ -39,6 +39,8 @@ class Json(FileAction):
         try:
             with open(path, 'w') as f:
                 jsonlib.dump(json, f, indent=self.indent)
+                # Add a new line at the end of the file
+                print(file=f)
 
             self.set_file_attributes(path)
             return self.changed(path=path)

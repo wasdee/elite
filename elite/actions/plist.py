@@ -103,7 +103,7 @@ class Plist(FileAction):
         # Check if the current plist is the same as the values provided
         if deep_equal(values, plist):
             changed = self.set_file_attributes(path)
-            return self.changed(path=path) if changed else self.ok()
+            return self.changed(path=path) if changed else self.ok(path=path)
 
         # Update the plist with the values provided
         deep_merge(values, plist)
