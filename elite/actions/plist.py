@@ -8,16 +8,20 @@ from ..utils import deep_equal, deep_merge
 class Plist(FileAction):
     __action_name__ = 'plist'
 
-    def __init__(self, values, domain=None, container=None, path=None, source=None, **kwargs):
+    def __init__(
+        self, values, domain=None, container=None, path=None, source=None, fmt='xml', **kwargs
+    ):
         self._domain = None
         self._container = None
         self._path = None
+        self._fmt = None
 
+        self.values = values
         self.domain = domain
         self.container = container
         self.path = path
         self.source = source
-        self.values = values
+        self.fmt = fmt
         super().__init__(**kwargs)
 
     @property
@@ -64,6 +68,16 @@ class Plist(FileAction):
             raise ValueError("you may only provide one of the 'domain' or 'path' arguments")
         self._path = path
 
+    @property
+    def fmt(self):
+        return self._fmt
+
+    @fmt.setter
+    def fmt(self, fmt):
+        if fmt not in ['xml', 'binary']:
+            raise ValueError('fmt must be xml or binary')
+        self._fmt = fmt
+
     def determine_plist_path(self):
         """Determine the path of the plist using the domain or container provided."""
         if self.domain:
@@ -82,6 +96,10 @@ class Plist(FileAction):
     def process(self):
         # Ensure that home directories are taken into account
         path = os.path.expanduser(self.determine_plist_path())
+
+        # Set the fmt of the output file
+        # pylint: disable=no-member
+        fmt = plistlib.FMT_XML if self.fmt == 'xml' else plistlib.FMT_BINARY
 
         # Load the plist or create a fresh data structure if it doesn't exist
         try:
@@ -118,7 +136,7 @@ class Plist(FileAction):
         # Write the updated plist
         try:
             with open(path, 'wb') as f:
-                plistlib.dump(plist, f)
+                plistlib.dump(plist, f, fmt=fmt)
 
             self.set_file_attributes(path)
             return self.changed(path=path)
