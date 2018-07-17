@@ -9,7 +9,7 @@ class Plist(FileAction):
     __action_name__ = 'plist'
 
     def __init__(
-        self, values, domain=None, container=None, path=None, source=None, fmt='xml', **kwargs
+        self, values, path=None, domain=None, container=None, source=None, fmt='xml', **kwargs
     ):
         self._domain = None
         self._container = None
@@ -17,9 +17,9 @@ class Plist(FileAction):
         self._fmt = None
 
         self.values = values
+        self.path = path
         self.domain = domain
         self.container = container
-        self.path = path
         self.source = source
         self.fmt = fmt
         super().__init__(**kwargs)
@@ -46,7 +46,7 @@ class Plist(FileAction):
 
     @container.setter
     def container(self, container):
-        if not self.domain:
+        if container and not self.domain:
             raise ValueError(
                 "the 'domain' argument is required when specifying the container argument"
             )
@@ -109,6 +109,8 @@ class Plist(FileAction):
             plist = {}
         except plistlib.InvalidFileException:
             raise ActionError('an invalid plist already exists')
+
+        values = self.values
 
         # When a source has been defined, we merge values with the source
         if self.source:
