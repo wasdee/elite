@@ -11,9 +11,6 @@ class ReversibleDict(UserDict):
         self.reversed_data = {}
         super().__init__(*args, **kwargs)
 
-        if len(self.data.values()) != len(set(self.data.values())):
-            raise ValueError('all values in this data structure must be unique')
-
     def __delitem__(self, key):
         value = self.data[key]
         del self.reversed_data[value]
@@ -63,14 +60,14 @@ def deep_equal(source, destination):
 
     :return: a boolean indicating whether the source is contained in the destination
     """
-    if isinstance(destination, dict) and isinstance(source, dict):
+    if isinstance(source, dict) and isinstance(destination, dict):
         for key, value in source.items():
             if not deep_equal(value, destination.get(key)):
                 return False
+
+        return True
     else:
         return source == destination
-
-    return True
 
 
 def deep_merge(source, destination):
