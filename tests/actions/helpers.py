@@ -35,6 +35,6 @@ def build_run(fixture_subpath, command_mappings):
                 stdout=expected_stdout, stderr=expected_stderr
             )
 
-        raise Exception(f'Unexpected command {command} encountered')
+        raise Exception(f'unexpected command {command} encountered')
 
     return run
