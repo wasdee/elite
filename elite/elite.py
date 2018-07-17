@@ -12,6 +12,7 @@ class EliteState(Enum):
     """
     Denotes the current state of an Elite action.
     """
+
     RUNNING = 1
     OK = 2
     CHANGED = 3
@@ -31,6 +32,7 @@ class Elite:
                                 addition to Elite's core library.  Actions must be placed in the
                                 sub-directory "actions" in the path provided.
     """
+
     def __init__(self, printer, action_search_paths=None):
         if action_search_paths is None:
             action_search_paths = []
@@ -57,9 +59,7 @@ class Elite:
         """
 
         # Start our list of library directories with the elite library
-        library_dirs = self.action_search_paths + [
-            os.path.join(os.path.dirname(__file__))
-        ]
+        library_dirs = self.action_search_paths + [os.path.join(os.path.dirname(__file__))]
 
         # Search through all action paths for actions
         for library_dir in library_dirs:
@@ -95,6 +95,7 @@ class Elite:
 
         :return: The respective function that implements that action.
         """
+
         def _call_action(sudo=False, changed=None, ignore_failed=False, env=None, **args):
             """
             A sub-method that calls the requested action with the provided raw parameters and

@@ -36,9 +36,7 @@ def automate(config_path, action_search_paths=None):
             # A config issue was encountered
             except ConfigError as e:
                 print()
-                print(
-                    f'{ansi.RED}Config Error: {e}{ansi.ENDC}'
-                )
+                print(f'{ansi.RED}Config Error: {e}{ansi.ENDC}')
 
             # A task failed to run
             except EliteError:

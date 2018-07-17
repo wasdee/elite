@@ -7,6 +7,7 @@ class ReversibleDict(UserDict):
     """
     A dict which maintains a reverse mapping between values and keys for easy reverse lookups.
     """
+
     def __init__(self, *args, **kwargs):
         self.reversed_data = {}
         super().__init__(*args, **kwargs)

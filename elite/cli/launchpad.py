@@ -122,9 +122,7 @@ def main():
         print(f'{BLUE}Restarting the Dock to apply the new database{ENDC}')
         subprocess.call(['/usr/bin/killall', 'Dock'])
 
-        print(
-            f'{GREEN}Successfully build the Launchpad layout defined in {args.config_path}{ENDC}'
-        )
+        print(f'{GREEN}Successfully build the Launchpad layout defined in {args.config_path}{ENDC}')
 
     # Extract
     elif args.command == 'extract':
