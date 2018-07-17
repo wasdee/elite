@@ -16,11 +16,11 @@ class Run(Action):
     :param creates: a path whose existence indicates that nothing has changed
     :param removes: a path whose lack of existence indicates that nothing has changed
     """
+
     __action_name__ = 'run'
 
     def __init__(
-        self, command, working_dir=None, shell=None, unless=None, creates=None,
-        removes=None
+        self, command, working_dir=None, shell=None, unless=None, creates=None, removes=None
     ):
         self.command = command
         self.working_dir = working_dir

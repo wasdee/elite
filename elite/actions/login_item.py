@@ -33,6 +33,7 @@ class LoginItem(Action):
         # The scripting bridge pops up in the Dock, so we must explicitly hide the app
         # before starting
         from AppKit import NSBundle  # pylint: disable=no-name-in-module
+
         bundle_info = NSBundle.mainBundle().infoDictionary()
         bundle_info['LSBackgroundOnly'] = True
 

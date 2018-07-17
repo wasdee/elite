@@ -31,6 +31,7 @@ class Gem(Action):
     :param executable: the gem executable to use
     :param options: additional command line options to pass to the gem command
     """
+
     __action_name__ = 'gem'
 
     def __init__(self, name, version=None, state='present', executable=None, options=None):

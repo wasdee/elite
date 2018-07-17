@@ -8,6 +8,7 @@ class Hostname(Action):
     :param local_host_name: the local host name of the system (without spaces)
     :param computer_name: the computer name of the system (may include spaces)
     """
+
     __action_name__ = 'hostname'
 
     def __init__(self, local_host_name=None, computer_name=None):

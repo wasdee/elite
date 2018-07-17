@@ -10,6 +10,7 @@ class SystemSetup(Action):
     :param display_sleep_time: the amount of idle time until display sleeps
     :param hard_disk_sleep_time: the amount of idle time until hard disk sleeps
     """
+
     __action_name__ = 'system_setup'
 
     def __init__(

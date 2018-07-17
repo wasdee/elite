@@ -2,9 +2,8 @@ from . import Action
 
 
 class BrewUpdate(Action):
-    """
-    Updates all Homebrew package formulas to their latest versions.
-    """
+    """Updates all Homebrew package formulas to their latest versions."""
+
     __action_name__ = 'brew_update'
 
     def process(self):

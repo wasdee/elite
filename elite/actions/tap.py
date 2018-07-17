@@ -9,6 +9,7 @@ class Tap(Action):
     :param state: the state that the tap must be in
     :param url: the url containing the tap
     """
+
     __action_name__ = 'tap'
 
     def __init__(self, name, state='present', url=None):

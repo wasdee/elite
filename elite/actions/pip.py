@@ -16,6 +16,7 @@ class Pip(Action):
     :param virtualenv: the path of a virtualenv to install packages into
     :param options: additional command line options to pass to the pip command
     """
+
     __action_name__ = 'pip'
 
     def __init__(
@@ -128,9 +129,7 @@ class Pip(Action):
                 )
 
                 pip_list_outdated_multiple = json.loads(pip_list_outdated_proc.stdout)
-                pip_list_outdated_names = [
-                    p['name'].lower() for p in pip_list_outdated_multiple
-                ]
+                pip_list_outdated_names = [p['name'].lower() for p in pip_list_outdated_multiple]
 
                 pip_outdated = name in pip_list_outdated_names
         except (json.JSONDecodeError, IndexError, KeyError):

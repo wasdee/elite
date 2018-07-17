@@ -15,6 +15,7 @@ class NPM(Action):
     :param path: the path in which to install the package (when mode is local)
     :param options: additional command line options to pass to the npm command
     """
+
     __action_name__ = 'npm'
 
     def __init__(
@@ -69,9 +70,7 @@ class NPM(Action):
         if mode not in ['local', 'global']:
             raise ValueError('mode must be local or global')
         if mode == 'local' and not self.path:
-            raise ValueError(
-                "you must specify the 'path' parameter when 'mode' is set to 'local'"
-            )
+            raise ValueError("you must specify the 'path' parameter when 'mode' is set to 'local'")
         self._mode = mode
 
     @property
@@ -81,9 +80,7 @@ class NPM(Action):
     @path.setter
     def path(self, path):
         if self.mode == 'local' and not path:
-            raise ValueError(
-                "you must specify the 'path' parameter when 'mode' is set to 'local'"
-            )
+            raise ValueError("you must specify the 'path' parameter when 'mode' is set to 'local'")
         self._path = path
 
     def process(self):

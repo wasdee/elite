@@ -7,6 +7,7 @@ class Info(Action):
 
     :param message: the info message to display
     """
+
     __action_name__ = 'info'
 
     def __init__(self, message):

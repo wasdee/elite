@@ -34,9 +34,7 @@ class FileInfo(Action):
             elif self.aliases:
                 # Determine if the file is an alias
                 alias_url = NSURL.fileURLWithPath_(path)
-                bookmark_data, _error = NSURL.bookmarkDataWithContentsOfURL_error_(
-                    alias_url, None
-                )
+                bookmark_data, _error = NSURL.bookmarkDataWithContentsOfURL_error_(alias_url, None)
 
                 if bookmark_data:
                     file_type = 'alias'

@@ -11,6 +11,7 @@ class Brew(Action):
     :param state: the state that the package must be in
     :param options: additional command line options to pass to the brew command
     """
+
     __action_name__ = 'brew'
 
     def __init__(self, name, state='present', options=None):

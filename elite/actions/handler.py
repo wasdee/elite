@@ -66,9 +66,7 @@ class Handler(Action):
                 return self.ok()
 
             # Change the default application for the specified content type
-            LSSetDefaultRoleHandlerForContentType(
-                self.content_type, kLSRolesAll, bundle_id
-            )
+            LSSetDefaultRoleHandlerForContentType(self.content_type, kLSRolesAll, bundle_id)
             return self.changed()
 
         # The user is trying to change the default application for a URL scheme
