@@ -20,19 +20,20 @@ class Pip(Action):
     __action_name__ = 'pip'
 
     def __init__(
-        self, name, version=None, state='present', executable=None, virtualenv=None, options=None
+        self, name, version=None, state='present', executable=None, virtualenv=None, options=None,
+        **kwargs
     ):
         self._state = None
         self._version = None
         self._executable = None
         self._virtualenv = None
-
         self.name = name
         self.version = version
         self.state = state
         self.executable = executable
         self.virtualenv = virtualenv
         self.options = options
+        super().__init__(**kwargs)
 
     @property
     def version(self):

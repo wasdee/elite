@@ -20,7 +20,8 @@ class Run(Action):
     __action_name__ = 'run'
 
     def __init__(
-        self, command, working_dir=None, shell=None, unless=None, creates=None, removes=None
+        self, command, working_dir=None, shell=None, unless=None, creates=None, removes=None,
+        **kwargs
     ):
         self.command = command
         self.working_dir = working_dir
@@ -28,6 +29,7 @@ class Run(Action):
         self.unless = unless
         self.creates = creates
         self.removes = removes
+        super().__init__(**kwargs)
 
     def process(self):
         # Ensure that home directories are taken into account

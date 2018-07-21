@@ -7,9 +7,10 @@ from ..constants import FLAGS
 class FileInfo(Action):
     __action_name__ = 'file_info'
 
-    def __init__(self, path, aliases=True):
+    def __init__(self, path, aliases=True, **kwargs):
         self.path = path
         self.aliases = aliases
+        super().__init__(**kwargs)
 
     def process(self):
         # Only import PyObjC libraries if necessary (as they take time)

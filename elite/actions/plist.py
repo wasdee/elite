@@ -15,7 +15,6 @@ class Plist(FileAction):
         self._container = None
         self._path = None
         self._fmt = None
-
         self.values = values
         self.path = path
         self.domain = domain

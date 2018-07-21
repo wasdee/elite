@@ -1,17 +1,58 @@
 #!/usr/bin/env python3
-import ast
 import os
-import subprocess
-import sys
+import pwd
+from collections import namedtuple
 from enum import Enum
 
+from .actions import ActionError
+from .actions.archive import Archive
+from .actions.brew import Brew
+from .actions.brew_update import BrewUpdate
+from .actions.cask import Cask
+from .actions.dock import Dock
+from .actions.download import Download
+from .actions.fail import Fail
+from .actions.file import File
+from .actions.file_info import FileInfo
+from .actions.find import Find
+from .actions.gem import Gem
+from .actions.git import Git
+from .actions.handler import Handler
+from .actions.hostname import Hostname
+from .actions.info import Info
+from .actions.json import JSON
+from .actions.launchpad import Launchpad
+from .actions.login_item import LoginItem
+from .actions.npm import NPM
+from .actions.package import Package
+from .actions.package_choices import PackageChoices
+from .actions.pip import Pip
+from .actions.plist import Plist
+from .actions.rsync import Rsync
+from .actions.run import Run
+from .actions.spotify import Spotify
+from .actions.system_setup import SystemSetup
+from .actions.tap import Tap
 from .utils import dict_to_namedtuple
 
 
+Options = namedtuple('Options', ['uid', 'gid', 'changed', 'ignore_failed'])
+
+
+def demote(uid, gid):
+    def demoter():
+        os.setegid(0)
+        os.seteuid(0)
+        os.setgid(gid)
+        os.setuid(uid)
+        os.setegid(gid)
+        os.seteuid(uid)
+
+    return demoter
+
+
 class EliteState(Enum):
-    """
-    Denotes the current state of an Elite action.
-    """
+    """Denotes the current state of an Elite action."""
 
     RUNNING = 1
     OK = 2
@@ -28,66 +69,143 @@ class Elite:
     Provides a way to run the requested Elite action with the appropriate arguments.
 
     :param printer: A printer object that will be used to display output.
-    :param action_search_paths: The paths to search for actions that should be made available in
-                                addition to Elite's core library.  Actions must be placed in the
-                                sub-directory "actions" in the path provided.
     """
 
-    def __init__(self, printer, action_search_paths=None):
-        if action_search_paths is None:
-            action_search_paths = []
-
-        # Capture user parameters.
+    def __init__(self, printer):
         self.printer = printer
-        self.action_search_paths = action_search_paths
+        self.actions = {}
 
-        # Available Elite actions and their location.
-        self._elite_actions = {}
-        self._find_elite_actions()
+        if (
+            'SUDO_USER' not in os.environ or
+            'SUDO_UID' not in os.environ or
+            'SUDO_GID' not in os.environ or
+            os.environ['SUDO_USER'] == 'root' or
+            os.environ['SUDO_UID'] == '0' or
+            os.environ['SUDO_GID'] == '0' or
+            (os.getuid() != 0 and os.getgid() != 0)
+        ):
+            raise RuntimeError('elite must be run using sudo via a regular user account')
+
+        try:
+            self.user_uid = int(os.environ['SUDO_UID'])
+            self.user_gid = int(os.environ['SUDO_GID'])
+        except ValueError:
+            raise RuntimeError('The sudo uid and/or gids contain an invalid value')
+
+        self.current_options = Options(
+            uid=self.user_uid, gid=self.user_gid, changed=None, ignore_failed=None
+        )
+
+        # Copy root's environment variables for future use
+        self.root_env = os.environ.copy()
+
+        # Build the user's environment using various details
+        user = pwd.getpwuid(self.user_uid)
+        self.user_env = os.environ.copy()
+        self.user_env.update({
+            'USER': user.pw_name,
+            'LOGNAME': user.pw_name,
+            'HOME': user.pw_dir,
+            'SHELL': user.pw_shell,
+            'PWD': os.getcwd()
+        })
+        for key in ['OLDPWD', 'USERNAME', 'MAIL']:
+            self.user_env.pop(key, None)
+
+        # Set effective permissions and environment to that of the calling user (demotion)
+        self._switch_to_user()
+
+        # Register the core actions provided with Elite
+        self._register_core_actions()
 
         # Capture task information to show them in the summary.
-        self.ok_tasks = []
-        self.failed_tasks = []
-        self.changed_tasks = []
+        self.tasks = {
+            EliteState.OK: [],
+            EliteState.FAILED: [],
+            EliteState.CHANGED: []
+        }
 
-    def _find_elite_actions(self):
+    def register_action(self, action_name, action_class):
         """
-        Determine what Elite actions are available along with their full module name.  This method
-        updates self._elite_actions with a dict containing the action name as the key and the path
-        as the value.  It also updates sys.path to ensure that modules can be loaded via
-        python -m <full-module-name>.
+        Registers a new action given its name and class.
+
+        :param action_name: the action name to be registered
+        :param action_class: the class that implements the action being added
         """
 
-        # Start our list of library directories with the elite library
-        library_dirs = self.action_search_paths + [os.path.join(os.path.dirname(__file__))]
+        if action_name in self.actions:
+            raise ValueError(f'the action {action_name} is already registered')
 
-        # Search through all action paths for actions
-        for library_dir in library_dirs:
-            # Determine the library containing the library that we will add to our syspath so that
-            # Python can successfully run the module
-            library_parent_dir = os.path.dirname(library_dir)
-            sys.path.append(library_parent_dir)
+        self.actions[action_name] = action_class
 
-            # Go through all files in the <module-name>/actions directory
-            for root, _dirs, files in os.walk(os.path.join(library_dir, 'actions')):
-                for filename in files:
-                    # Obtain the file's name (which is the action name) and the extension
-                    action_name, extension = os.path.splitext(filename)
+    def _register_core_actions(self):
+        """Registers the core Elite actions that are included with the library."""
+        self.register_action('archive', Archive)
+        self.register_action('brew', Brew)
+        self.register_action('brew_update', BrewUpdate)
+        self.register_action('cask', Cask)
+        self.register_action('dock', Dock)
+        self.register_action('download', Download)
+        self.register_action('fail', Fail)
+        self.register_action('file', File)
+        self.register_action('file_info', FileInfo)
+        self.register_action('find', Find)
+        self.register_action('gem', Gem)
+        self.register_action('git', Git)
+        self.register_action('handler', Handler)
+        self.register_action('hostname', Hostname)
+        self.register_action('info', Info)
+        self.register_action('json', JSON)
+        self.register_action('launchpad', Launchpad)
+        self.register_action('login_item', LoginItem)
+        self.register_action('npm', NPM)
+        self.register_action('package', Package)
+        self.register_action('package_choices', PackageChoices)
+        self.register_action('pip', Pip)
+        self.register_action('plist', Plist)
+        self.register_action('rsync', Rsync)
+        self.register_action('run', Run)
+        self.register_action('spotify', Spotify)
+        self.register_action('system_setup', SystemSetup)
+        self.register_action('tap', Tap)
 
-                    # Skip any files that don't match *.py or start with an underscore
-                    if filename.startswith('_') or extension not in ['.py']:
-                        continue
+    def _switch_to_root(self):
+        os.environ.clear()
+        os.environ.update(self.root_env)
+        os.setegid(0)
+        os.seteuid(0)
 
-                    # Determine the full module name for the action based on the path we just added
-                    # to sys.path (e.g. <module-name>.actions.<action-name>)
-                    action_rel_name = os.path.join(
-                        os.path.relpath(root, library_parent_dir), action_name
-                    )
-                    action_module = action_rel_name.replace(os.sep, '.')
+    def _switch_to_user(self, currently_root=False):
+        os.environ.clear()
+        os.environ.update(self.user_env)
+        if currently_root:
+            os.setegid(self.user_gid)
+            os.seteuid(self.user_uid)
 
-                    self._elite_actions[action_name] = action_module
+    def options(self, sudo=False, changed=None, ignore_failed=None, env=None):
+        # Switch to root if necessary and update options to the current values
+        if sudo:
+            self._switch_to_root()
+            self.current_options = Options(
+                uid=0, gid=0, changed=changed, ignore_failed=ignore_failed
+            )
+        else:
+            self.current_options = Options(
+                uid=self.user_uid, gid=self.user_gid, changed=changed, ignore_failed=ignore_failed
+            )
 
-    def __getattr__(self, action):
+        # Add any additionally provided environment  variables
+        os.environ.update(env if env is not None else {})
+
+        yield
+
+        # Revert back to user permissions and reset options
+        self._switch_to_user(currently_root=sudo)
+        self.current_options = Options(
+            uid=self.user_uid, gid=self.user_gid, changed=None, ignore_failed=None
+        )
+
+    def __getattr__(self, action_name):
         """
         Provides an easy way to call any action as a method.
 
@@ -96,7 +214,7 @@ class Elite:
         :return: The respective function that implements that action.
         """
 
-        def _call_action(sudo=False, changed=None, ignore_failed=False, env=None, **args):
+        def _run_action(*args, **kwargs):
             """
             A sub-method that calls the requested action with the provided raw parameters and
             arguments.
@@ -107,85 +225,59 @@ class Elite:
 
             :return: A named tuple containing the results of the action run.
             """
-            if env is None:
-                env = {}
-
             # Run the progress callback to indicate we have started running the task
-            self.printer.progress(EliteState.RUNNING, action, args, result=None)
+            self.printer.progress(EliteState.RUNNING, action_name, kwargs, result=None)
 
             # Run the requested action
-            # -S - read password from stdin
-            # -p '<prompt>' - the prompt to display
-            # -u '<user>' - the user to sudo as
-            action_module = self._elite_actions[action]
-            proc_args = ['sudo', '-n'] if sudo else []
-            proc_args.extend([sys.executable, '-m', action_module])
-
-            # Build the final env by merging our existing environment with provided overrides
-            merged_env = os.environ.copy()
-            merged_env.update(env)
-
-            proc = subprocess.Popen(
-                proc_args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                env=merged_env
+            Action = self.actions[action_name]  # noqa: N806
+            action = Action(
+                *args, **kwargs,
+                preexec_callback=demote(self.current_options.uid, self.current_options.gid)
             )
-            stdout, stderr = proc.communicate(repr(args).encode('utf-8'))
 
-            # Parse the result upon successful command run
-            if proc.returncode != 0 and stderr:
+            try:
+                response = action.process()
+
+                if self.current_options.changed is None:
+                    changed = response.changed
+                else:
+                    changed = self.current_options.changed
+
+                result = {
+                    'ok': True,
+                    'changed': changed
+                }
+                state = EliteState.CHANGED if result['changed'] else EliteState.OK
+            except ActionError as e:
                 result = {
                     'ok': False,
-                    'message': stderr.decode('utf-8').rstrip(),
-                    'return_code': proc.returncode
+                    'message': str(e)
                 }
-            else:
-                try:
-                    result = ast.literal_eval(stdout.decode('utf-8'))
-                except SyntaxError:
-                    result = {
-                        'ok': False,
-                        'message': 'unable to parse the result returned by this action'
-                    }
-
-            if result['ok'] and changed is not None:
-                result['changed'] = changed
-
-            # Determine the final state of the task.
-            if not result['ok']:
                 state = EliteState.FAILED
-            elif result['changed']:
-                state = EliteState.CHANGED
-            else:
-                state = EliteState.OK
 
             # Run the progress callback with details of the completed task.
-            self.printer.progress(state, action, args, result)
+            self.printer.progress(state, action_name, kwargs, result)
 
-            # Update totals and task info based on the outcome
-            if state == EliteState.FAILED:
-                self.failed_tasks.append((action, args, result))
+            # Update task info based on the outcome
+            self.tasks[state].append((action_name, kwargs, result))
 
-                # If the task failed and was not to be ignored, we bail.
-                if not ignore_failed:
-                    raise EliteError(result['message'])
-            elif result['changed']:
-                self.changed_tasks.append((action, args, result))
-            else:
-                self.ok_tasks.append((action, args, result))
+            # If the task failed and was not to be ignored, we bail.
+            if state == EliteState.FAILED and not self.current_options.ignore_failed:
+                raise EliteError(result['message'])
 
             # Return a named tuple containing the result
             return dict_to_namedtuple('Result', result)
 
         # Check if the action requested exists
-        if action not in self._elite_actions:
-            raise AttributeError(f"the requested Elite action '{action}' does not exist")
+        if action_name not in self.actions:
+            raise AttributeError(f"the requested Elite action '{action_name}' does not exist")
 
         # Return the sub-method for the requested action
-        return _call_action
+        return _run_action
 
     def summary(self):
         """
         Call the summary printer object method with the appropriate totals and task info so the
         method may display the final summary to the user.
         """
-        self.printer.summary(self.ok_tasks, self.changed_tasks, self.failed_tasks)
+        self.printer.summary(self.tasks)

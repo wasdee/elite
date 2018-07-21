@@ -7,20 +7,14 @@ from .printer import Printer
 from .utils import build_absolute_path
 
 
-def automate(config_path, action_search_paths=None):
-    if action_search_paths is None:
-        action_search_paths = []
-
+def automate(config_path):
     def decorator(main):
         @wraps(main)
         def decorated_function():
             try:
-                # Setup Elite and our configuration
-                action_search_paths_abs = [build_absolute_path(msp) for msp in action_search_paths]
-
                 # Create our objects
                 printer = Printer()
-                elite = Elite(printer=printer, action_search_paths=action_search_paths_abs)
+                elite = Elite(printer=printer)
                 config = load_config(build_absolute_path(config_path))
 
                 # Header

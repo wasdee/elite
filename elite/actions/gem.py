@@ -34,15 +34,17 @@ class Gem(Action):
 
     __action_name__ = 'gem'
 
-    def __init__(self, name, version=None, state='present', executable=None, options=None):
+    def __init__(
+        self, name, version=None, state='present', executable=None, options=None, **kwargs
+    ):
         self._version = None
         self._state = None
-
         self.name = name
         self.version = version
         self.state = state
         self.executable = executable
         self.options = options
+        super().__init__(**kwargs)
 
     @property
     def version(self):

@@ -7,12 +7,13 @@ from . import Action
 class Rsync(Action):
     __action_name__ = 'rsync'
 
-    def __init__(self, path, source, executable=None, archive=True, options=None):
+    def __init__(self, path, source, executable=None, archive=True, options=None, **kwargs):
         self.path = path
         self.source = source
         self.executable = executable
         self.archive = archive
         self.options = options
+        super().__init__(**kwargs)
 
     def process(self):
         # Ensure that home directories are taken into account

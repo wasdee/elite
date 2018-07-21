@@ -19,6 +19,9 @@ ActionResponse = namedtuple('ActionResponse', ['changed', 'data'], defaults=({},
 
 
 class Action:
+    def __init__(self, preexec_callback=None):
+        self.preexec_callback = preexec_callback
+
     def ok(self, **data):
         return ActionResponse(changed=False, data=data)
 
@@ -41,28 +44,31 @@ class Action:
 
         # Run the command
         try:
-            proc = subprocess.run(command, encoding='utf-8', **kwargs)
+            process = subprocess.run(
+                command, encoding='utf-8', preexec_fn=self.preexec_callback, **kwargs
+            )
         except FileNotFoundError:
             raise ActionError(f'unable to find executable for command {command}')
 
         # Fail if the command returned a non-zero returrn code
-        if proc.returncode != 0 and not ignore_fail:
+        if process.returncode != 0 and not ignore_fail:
             if fail_error:
                 raise ActionError(fail_error)
-            elif proc.stderr:
-                raise ActionError(proc.stderr.rstrip())
+            elif process.stderr:
+                raise ActionError(process.stderr.rstrip())
             else:
                 raise ActionError(f'unable to execute command {command}')
 
-        return proc
+        return process
 
 
 class FileAction(Action):
-    def __init__(self, mode=None, owner=None, group=None, flags=None):
+    def __init__(self, mode=None, owner=None, group=None, flags=None, **kwargs):
         self.mode = mode
         self.owner = owner
         self.group = group
         self.flags = flags
+        super().__init__(**kwargs)
 
     def set_file_attributes(self, path):
         # No file attributes have been set, so we bail and advise that no changes were made

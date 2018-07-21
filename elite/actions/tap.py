@@ -12,12 +12,12 @@ class Tap(Action):
 
     __action_name__ = 'tap'
 
-    def __init__(self, name, state='present', url=None):
+    def __init__(self, name, state='present', url=None, **kwargs):
         self._state = None
-
         self.name = name
         self.state = state
         self.url = url
+        super().__init__(**kwargs)
 
     @property
     def state(self):

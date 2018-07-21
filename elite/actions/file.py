@@ -11,7 +11,6 @@ class File(FileAction):
     def __init__(self, path, source=None, state='file', **kwargs):
         self._source = None
         self._state = None
-
         self.path = path
         self.source = source
         self.state = state

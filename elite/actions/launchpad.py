@@ -9,9 +9,10 @@ from ..libraries.launchpad_builder import (
 class Launchpad(Action):
     __action_name__ = 'launchpad'
 
-    def __init__(self, widget_layout, app_layout):
+    def __init__(self, widget_layout, app_layout, **kwargs):
         self.widget_layout = widget_layout
         self.app_layout = app_layout
+        super().__init__(**kwargs)
 
     def process(self):
         # Determine the location of the SQLite Launchpad database

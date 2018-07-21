@@ -10,8 +10,9 @@ class Info(Action):
 
     __action_name__ = 'info'
 
-    def __init__(self, message):
+    def __init__(self, message, **kwargs):
         self.message = message
+        super().__init__(**kwargs)
 
     def process(self):
         return self.ok()

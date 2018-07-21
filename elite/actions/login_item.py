@@ -8,12 +8,12 @@ from . import Action, ActionError
 class LoginItem(Action):
     __action_name__ = 'login_item'
 
-    def __init__(self, path, state='present', hidden=None):
+    def __init__(self, path, state='present', hidden=None, **kwargs):
         self._state = None
-
         self.path = path
         self.state = state
         self.hidden = hidden
+        super().__init__(**kwargs)
 
     @property
     def state(self):

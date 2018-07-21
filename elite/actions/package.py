@@ -10,10 +10,11 @@ from . import Action, ActionError
 class Package(Action):
     __action_name__ = 'package'
 
-    def __init__(self, path, choices=None, target='/'):
+    def __init__(self, path, choices=None, target='/', **kwargs):
         self.path = path
         self.choices = choices
         self.target = target
+        super().__init__(**kwargs)
 
     def process(self):
         # Ensure that home directories are taken into account

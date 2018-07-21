@@ -20,13 +20,12 @@ class NPM(Action):
 
     def __init__(
         self, name, version=None, state='present', executable=None, mode='local', path=None,
-        options=None
+        options=None, **kwargs
     ):
         self._mode = None
         self._version = None
         self._state = None
         self._path = None
-
         self.name = name
         self.version = version
         self.state = state
@@ -34,6 +33,7 @@ class NPM(Action):
         self.mode = mode
         self.executable = executable
         self.options = options
+        super().__init__(**kwargs)
 
     @property
     def version(self):

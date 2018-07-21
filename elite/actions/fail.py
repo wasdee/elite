@@ -10,8 +10,9 @@ class Fail(Action):
 
     __action_name__ = 'fail'
 
-    def __init__(self, message):
+    def __init__(self, message, **kwargs):
         self.message = message
+        super().__init__(**kwargs)
 
     def process(self):
         raise ActionError

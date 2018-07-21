@@ -15,12 +15,13 @@ class SystemSetup(Action):
 
     def __init__(
         self, timezone=None, computer_sleep_time=None, display_sleep_time=None,
-        hard_disk_sleep_time=None
+        hard_disk_sleep_time=None, **kwargs
     ):
         self.timezone = timezone
         self.computer_sleep_time = computer_sleep_time
         self.display_sleep_time = display_sleep_time
         self.hard_disk_sleep_time = hard_disk_sleep_time
+        super().__init__(**kwargs)
 
     def process(self):
         changed = False

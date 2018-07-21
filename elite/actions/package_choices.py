@@ -8,8 +8,9 @@ from . import Action, ActionError
 class PackageChoices(Action):
     __action_name__ = 'package_choices'
 
-    def __init__(self, path):
+    def __init__(self, path, **kwargs):
         self.path = path
+        super().__init__(**kwargs)
 
     def process(self):
         # Ensure that home directories are taken into account

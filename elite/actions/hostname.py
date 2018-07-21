@@ -11,9 +11,10 @@ class Hostname(Action):
 
     __action_name__ = 'hostname'
 
-    def __init__(self, local_host_name=None, computer_name=None):
+    def __init__(self, local_host_name=None, computer_name=None, **kwargs):
         self.local_host_name = local_host_name
         self.computer_name = computer_name
+        super().__init__(**kwargs)
 
     def process(self):
         changed = False
