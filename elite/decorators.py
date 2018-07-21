@@ -2,7 +2,7 @@ from functools import wraps
 
 from . import ansi
 from .config import ConfigError
-from .elite import Elite, EliteError
+from .elite import Elite, EliteError, EliteRuntimeError
 from .printer import Printer
 
 
@@ -30,6 +30,10 @@ def automate():
                 print()
                 print(f'{ansi.RED}Config Error: {e}{ansi.ENDC}')
 
+            except EliteRuntimeError as e:
+                print()
+                print(f'{ansi.RED}Elite Runtime Error: {e}{ansi.ENDC}')
+
             # A task failed to run
             except EliteError:
                 # Summary
@@ -43,6 +47,9 @@ def automate():
                 print(
                     f'{ansi.RED}Processing aborted as requested by keyboard interrupt.{ansi.ENDC}'
                 )
+                # Summary
+                printer.heading('Summary')
+                elite.summary()
 
             # Footer
             finally:

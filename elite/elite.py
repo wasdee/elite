@@ -63,6 +63,10 @@ class EliteError(Exception):
     """An exception raised when an action fails to execute with the given arguments."""
 
 
+class EliteRuntimeError(EliteError):
+    pass
+
+
 class Elite:
     """
     Provides a way to run the requested Elite action with the appropriate arguments.
@@ -83,13 +87,13 @@ class Elite:
             os.environ['SUDO_GID'] == '0' or
             (os.getuid() != 0 and os.getgid() != 0)
         ):
-            raise RuntimeError('elite must be run using sudo via a regular user account')
+            raise EliteRuntimeError('elite must be run using sudo via a regular user account')
 
         try:
             self.user_uid = int(os.environ['SUDO_UID'])
             self.user_gid = int(os.environ['SUDO_GID'])
         except ValueError:
-            raise RuntimeError('The sudo uid and/or gids contain an invalid value')
+            raise EliteRuntimeError('The sudo uid and/or gids contain an invalid value')
 
         self.current_options = Options(
             uid=self.user_uid, gid=self.user_gid, changed=None, ignore_failed=None
