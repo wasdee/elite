@@ -26,7 +26,7 @@ class Printer:
         :param text: the text to display
         """
         print()
-        print(f'{ansi.BOLD}{ansi.UNDERLINE}{text}{ansi.ENDC}')
+        print(ansi.BOLD + ansi.UNDERLINE + text + ansi.ENDC)
 
     def info(self, text):
         """
@@ -35,7 +35,7 @@ class Printer:
         :param text: the text to display
         """
         print()
-        print(f'{ansi.BOLD}{text}{ansi.ENDC}')
+        print(ansi.BOLD + text + ansi.ENDC)
         print()
 
     def progress(self, state, action, args, result):
@@ -55,29 +55,42 @@ class Printer:
 
         :param tasks: a dict containing a state to task list mapping
         """
-        # Display any tasks that caused changes.
-        if tasks[EliteState.CHANGED]:
-            self.info('Changed task info:')
-            for action, args, result in tasks[EliteState.CHANGED]:
-                self._print_task(EliteState.CHANGED, action, args, result)
+        # Display any tasks that caused changes or failed.
+        for state, text in [
+            (EliteState.CHANGED, 'Changed task info:'),
+            (EliteState.FAILED, 'Failed task info:')
+        ]:
+            if not tasks[state]:
+                continue
 
-        # Display any failed tasks.
-        if tasks[EliteState.FAILED]:
-            self.info('Failed task info:')
-            for action, args, result in tasks[EliteState.FAILED]:
-                self._print_task(EliteState.FAILED, action, args, result)
+            self.info(text)
+            for action, args, result in tasks[state]:
+                self._print_task(state, action, args, result)
 
         # Display all totals
-        total_tasks = (
+        self.info('Totals:')
+        for state in [EliteState.OK, EliteState.CHANGED, EliteState.FAILED]:
+            state_name = state.name.lower()
+            state_colour = self._state_colour(state)
+            total = len(tasks[state])
+            print(state_colour + f'{state_name:^10}' + ansi.ENDC + f'{total:4}')
+
+        grand_total = (
             len(tasks[EliteState.OK]) +
             len(tasks[EliteState.CHANGED]) +
             len(tasks[EliteState.FAILED])
         )
-        self.info('Totals:')
-        print(f"{ansi.GREEN}{'ok':^10}{ansi.ENDC}{len(tasks[EliteState.OK]):4}")
-        print(f"{ansi.YELLOW}{'changed':^10}{ansi.ENDC}{len(tasks[EliteState.CHANGED]):4}")
-        print(f"{ansi.RED}{'failed':^10}{ansi.ENDC}{len(tasks[EliteState.FAILED]):4}")
-        print(f"{'total':^10}{total_tasks:4}")
+        print(f"{'total':^10}{grand_total:4}")
+
+    def _state_colour(self, state):
+        if state == EliteState.RUNNING:
+            return ansi.WHITE
+        elif state == EliteState.FAILED:
+            return ansi.RED
+        elif state == EliteState.CHANGED:
+            return ansi.YELLOW
+        else:
+            return ansi.GREEN
 
     def _print_task(self, state, action, args, result):
         """
@@ -89,23 +102,17 @@ class Printer:
         :param result: The result of the execution or None when the task is still running.
         """
         # Determine the output colour and state text
-        if state == EliteState.RUNNING:
-            print_colour = ansi.WHITE
-            print_state = 'running'
-        elif state == EliteState.FAILED:
-            print_colour = ansi.RED
-            print_state = 'failed'
-        elif state == EliteState.CHANGED:
-            print_colour = ansi.YELLOW
-            print_state = 'changed'
-        else:
-            print_colour = ansi.GREEN
-            print_state = 'ok'
+        state_name = state.name.lower()
+        state_colour = self._state_colour(state)
 
         # Prettify arguments and action for printing
-        print_args_strs = [f'{k}={repr(v)}' for k, v in args.items() if v is not None]
-        print_args = ' '.join(print_args_strs) if print_args_strs else ''
-        print_action = f'{action}: ' if print_args else action
+        print_args = ''
+        print_action = action
+
+        non_empty_args = {k: v for k, v in args.items() if v is not None}
+        if non_empty_args:
+            print_args = ' '.join(f'{k}={repr(v)}' for k, v in non_empty_args.items())
+            print_action += ': '
 
         # Determine the max characters we can print
         if state == EliteState.RUNNING:
@@ -116,7 +123,7 @@ class Printer:
             print_chars = 0
 
             for colour, text in [
-                (print_colour, f'{print_state:^10}'),
+                (state_colour, f'{state_name:^10}'),
                 (ansi.BLUE, print_action),
                 (ansi.YELLOW, print_args)
             ]:
@@ -126,10 +133,10 @@ class Printer:
                 # crop the text and stop processing further text.
                 if print_chars > max_chars:
                     chop_chars = print_chars - max_chars + 3
-                    print_status += f'{colour}{text[:-chop_chars]}...{ansi.ENDC}'
+                    print_status += colour + text[:-chop_chars] + '...' + ansi.ENDC
                     break
                 else:
-                    print_status += f'{colour}{text}{ansi.ENDC}'
+                    print_status += colour + text + ansi.ENDC
 
             print(print_status, end='', flush=True)
             self.overlap_lines = math.ceil(print_chars / terminal_size.columns) - 1
@@ -141,18 +148,18 @@ class Printer:
                 # Move up to the line we wish to start printing from
                 print(ansi.move_up(self.overlap_lines), end='', flush=True)
 
-            print_status = (
-                f'{print_colour}{print_state:^10}{ansi.ENDC}'
-                f'{ansi.BLUE}{print_action}{ansi.ENDC}'
-                f'{ansi.YELLOW}{print_args}{ansi.ENDC}'
+            print(
+                state_colour + f'{state_name:^10}' + ansi.ENDC +
+                ansi.BLUE + print_action + ansi.ENDC +
+                ansi.YELLOW + print_args + ansi.ENDC
             )
-            print(print_status)
 
             # Display the changed or failure message if necessary
             if state == EliteState.FAILED and result['message'] is not None:
                 print(
-                    f"{ansi.BLUE}{'':^10}message:{ansi.ENDC} "
-                    f"{ansi.YELLOW}{result['message']}{ansi.ENDC}"
+                    f"{'':^10}" +
+                    ansi.BLUE + 'message: ' + ansi.ENDC +
+                    ansi.YELLOW + result['message'] + ansi.ENDC
                 )
 
             # Reset the number of lines to overlap
