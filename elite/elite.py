@@ -1,10 +1,10 @@
-#!/usr/bin/env python3
 import os
 import pwd
 from collections import namedtuple
+from contextlib import contextmanager
 from enum import Enum
 
-from .actions import ActionError
+from .actions import ActionError, ActionResponse
 from .actions.archive import Archive
 from .actions.brew import Brew
 from .actions.brew_update import BrewUpdate
@@ -33,7 +33,6 @@ from .actions.run import Run
 from .actions.spotify import Spotify
 from .actions.system_setup import SystemSetup
 from .actions.tap import Tap
-from .utils import dict_to_namedtuple
 
 
 Options = namedtuple('Options', ['uid', 'gid', 'changed', 'ignore_failed'])
@@ -182,6 +181,7 @@ class Elite:
             os.setegid(self.user_gid)
             os.seteuid(self.user_uid)
 
+    @contextmanager
     def options(self, sudo=False, changed=None, ignore_failed=None, env=None):
         # Switch to root if necessary and update options to the current values
         if sudo:
@@ -249,9 +249,10 @@ class Elite:
                 }
                 state = EliteState.CHANGED if result['changed'] else EliteState.OK
             except ActionError as e:
+                response = ActionResponse(changed=False, ok=False)
                 result = {
                     'ok': False,
-                    'message': str(e)
+                    'message': str(e) if e.args else None
                 }
                 state = EliteState.FAILED
 
@@ -265,8 +266,7 @@ class Elite:
             if state == EliteState.FAILED and not self.current_options.ignore_failed:
                 raise EliteError(result['message'])
 
-            # Return a named tuple containing the result
-            return dict_to_namedtuple('Result', result)
+            return response
 
         # Check if the action requested exists
         if action_name not in self.actions:

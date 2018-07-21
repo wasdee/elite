@@ -22,10 +22,10 @@ class NPM(Action):
         self, name, version=None, state='present', executable=None, mode='local', path=None,
         options=None, **kwargs
     ):
-        self._mode = None
-        self._version = None
-        self._state = None
-        self._path = None
+        self._mode = mode
+        self._version = version
+        self._state = state
+        self._path = path
         self.name = name
         self.version = version
         self.state = state

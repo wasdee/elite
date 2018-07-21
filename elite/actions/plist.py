@@ -11,10 +11,10 @@ class Plist(FileAction):
     def __init__(
         self, values, path=None, domain=None, container=None, source=None, fmt='xml', **kwargs
     ):
-        self._domain = None
-        self._container = None
-        self._path = None
-        self._fmt = None
+        self._path = path
+        self._domain = domain
+        self._container = container
+        self._fmt = fmt
         self.values = values
         self.path = path
         self.domain = domain

@@ -1,6 +1,5 @@
 import os
 import pathlib
-from collections import namedtuple
 
 # pylint: disable=no-name-in-module
 from AppKit import NSFont
@@ -81,24 +80,34 @@ class ConfigError(Exception):
     """An error raised when problem is encountered reading a config file or variable"""
 
 
-def load_config(config_path):
-    yaml = YAML(typ='safe', pure=True)
-    yaml.Composer.compose_document = compose_document_without_anchor_reset
-    yaml.Constructor.add_constructor('!include', include)
-    yaml.Constructor.add_constructor('!join_path', join_path)
-    yaml.Constructor.add_constructor('!first_existing_dir', first_existing_dir)
-    yaml.Constructor.add_constructor('!macos_font', macos_font)
-    yaml.Constructor.add_constructor('!macos_color', macos_color)
+class Config:
+    def __init__(self, config_path):
+        self.yaml = YAML(typ='safe', pure=True)
+        self.yaml.Composer.compose_document = compose_document_without_anchor_reset
 
-    try:
-        config = yaml.load(pathlib.Path(config_path))
-    except OSError:
-        raise ConfigError(f"the path specified {config_path} doesn't exist")
-    except YAMLError:
-        raise ConfigError(f'unable to parse the config file at path {config_path}')
+        self._register_core_tags()
 
-    if not isinstance(config, dict):
-        raise ConfigError('the top level of your config must contain key-value pairs')
+        try:
+            config = self.yaml.load(pathlib.Path(config_path))
+        except OSError:
+            raise ConfigError(f"the path specified {config_path} doesn't exist")
+        except YAMLError:
+            raise ConfigError(f'unable to parse the config file at path {config_path}')
 
-    Config = namedtuple('Config', config.keys())
-    return Config(**config)
+        if not isinstance(config, dict):
+            raise ConfigError('the top level of your config must contain key-value pairs')
+
+        self.config = config
+
+    def register_tag(self, tag_name, tag_function):
+        self.yaml.Constructor.add_constructor(tag_name, tag_function)
+
+    def _register_core_tags(self):
+        self.register_tag('!include', include)
+        self.register_tag('!join_path', join_path)
+        self.register_tag('!first_existing_dir', first_existing_dir)
+        self.register_tag('!macos_font', macos_font)
+        self.register_tag('!macos_color', macos_color)
+
+    def __getattr__(self, config_item):
+        return self.config[config_item]

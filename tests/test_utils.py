@@ -3,8 +3,7 @@ import subprocess
 
 import pytest
 from elite.utils import (
-    ReversibleDict, batch, build_absolute_path, deep_equal, deep_merge, dict_to_namedtuple,
-    generate_uuid
+    ReversibleDict, batch, build_absolute_path, deep_equal, deep_merge, generate_uuid
 )
 
 
@@ -65,18 +64,6 @@ def test_reversible_dict_set_item():
     assert data.lookup(2) == 'value2'
     assert data.lookup(3) == 'value3'
     assert data.lookup(4) == 'value4'
-
-
-def test_dict_to_namedtuple():
-    data = dict_to_namedtuple('Thing', {
-        'name': 'Bobo',
-        'age': 10,
-        'cool': False
-    })
-    assert repr(data) == "Thing(name='Bobo', age=10, cool=False)"
-    assert data.name == 'Bobo'
-    assert data.age == 10
-    assert data.cool is False
 
 
 def test_build_absolute_path():

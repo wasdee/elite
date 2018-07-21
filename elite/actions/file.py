@@ -9,8 +9,8 @@ class File(FileAction):
     __action_name__ = 'file'
 
     def __init__(self, path, source=None, state='file', **kwargs):
-        self._source = None
-        self._state = None
+        self._source = source
+        self._state = state
         self.path = path
         self.source = source
         self.state = state

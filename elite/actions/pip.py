@@ -23,10 +23,10 @@ class Pip(Action):
         self, name, version=None, state='present', executable=None, virtualenv=None, options=None,
         **kwargs
     ):
-        self._state = None
-        self._version = None
-        self._executable = None
-        self._virtualenv = None
+        self._state = state
+        self._version = version
+        self._executable = executable
+        self._virtualenv = virtualenv
         self.name = name
         self.version = version
         self.state = state

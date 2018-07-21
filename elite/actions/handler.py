@@ -12,8 +12,8 @@ class Handler(Action):
     __action_name__ = 'handler'
 
     def __init__(self, path, content_type=None, url_scheme=None, **kwargs):
-        self._content_type = None
-        self._url_scheme = None
+        self._content_type = content_type
+        self._url_scheme = url_scheme
         self.path = path
         self.content_type = content_type
         self.url_scheme = url_scheme

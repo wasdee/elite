@@ -1,13 +1,12 @@
 from functools import wraps
 
 from . import ansi
-from .config import ConfigError, load_config
+from .config import ConfigError
 from .elite import Elite, EliteError
 from .printer import Printer
-from .utils import build_absolute_path
 
 
-def automate(config_path):
+def automate():
     def decorator(main):
         @wraps(main)
         def decorated_function():
@@ -15,13 +14,12 @@ def automate(config_path):
                 # Create our objects
                 printer = Printer()
                 elite = Elite(printer=printer)
-                config = load_config(build_absolute_path(config_path))
 
                 # Header
                 printer.header()
 
                 # Run the main Elite entrypoint
-                main(elite, config, printer)
+                main(elite, printer)
 
                 # Summary
                 printer.heading('Summary')

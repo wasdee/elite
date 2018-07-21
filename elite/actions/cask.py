@@ -13,7 +13,7 @@ class Cask(Action):
     __action_name__ = 'cask'
 
     def __init__(self, name, state='present', options=None, **kwargs):
-        self._state = None
+        self._state = state
         self.name = name
         self.state = state
         self.options = options

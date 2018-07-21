@@ -49,33 +49,34 @@ class Printer:
         """
         self._print_task(state, action, args, result)
 
-    def summary(self, ok_tasks, changed_tasks, failed_tasks):
+    def summary(self, tasks):
         """
         Displays a final summary after execution of all tasks have completed.
 
-        :param ok_tasks: A list of tuples containing information relating on successful tasks.
-        :param changed_tasks: A list of tuples containing information relating on each
-                              changes made.
-        :param failed_tasks: A list of tuples containing information relating to each failed task.
+        :param tasks: a dict containing a state to task list mapping
         """
         # Display any tasks that caused changes.
-        if changed_tasks:
+        if tasks[EliteState.CHANGED]:
             self.info('Changed task info:')
-            for action, args, result in changed_tasks:
+            for action, args, result in tasks[EliteState.CHANGED]:
                 self._print_task(EliteState.CHANGED, action, args, result)
 
         # Display any failed tasks.
-        if failed_tasks:
+        if tasks[EliteState.FAILED]:
             self.info('Failed task info:')
-            for action, args, result in failed_tasks:
+            for action, args, result in tasks[EliteState.FAILED]:
                 self._print_task(EliteState.FAILED, action, args, result)
 
         # Display all totals
-        total_tasks = len(ok_tasks) + len(changed_tasks) + len(failed_tasks)
+        total_tasks = (
+            len(tasks[EliteState.OK]) +
+            len(tasks[EliteState.CHANGED]) +
+            len(tasks[EliteState.FAILED])
+        )
         self.info('Totals:')
-        print(f"{ansi.GREEN}{'ok':^10}{ansi.ENDC}{len(ok_tasks):4}")
-        print(f"{ansi.YELLOW}{'changed':^10}{ansi.ENDC}{len(changed_tasks):4}")
-        print(f"{ansi.RED}{'failed':^10}{ansi.ENDC}{len(failed_tasks):4}")
+        print(f"{ansi.GREEN}{'ok':^10}{ansi.ENDC}{len(tasks[EliteState.OK]):4}")
+        print(f"{ansi.YELLOW}{'changed':^10}{ansi.ENDC}{len(tasks[EliteState.CHANGED]):4}")
+        print(f"{ansi.RED}{'failed':^10}{ansi.ENDC}{len(tasks[EliteState.FAILED]):4}")
         print(f"{'total':^10}{total_tasks:4}")
 
     def _print_task(self, state, action, args, result):

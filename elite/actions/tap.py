@@ -13,7 +13,7 @@ class Tap(Action):
     __action_name__ = 'tap'
 
     def __init__(self, name, state='present', url=None, **kwargs):
-        self._state = None
+        self._state = state
         self.name = name
         self.state = state
         self.url = url

@@ -15,7 +15,7 @@ class ActionError(Exception):
     pass
 
 
-ActionResponse = namedtuple('ActionResponse', ['changed', 'data'], defaults=({},))
+ActionResponse = namedtuple('ActionResponse', ['changed', 'ok', 'data'], defaults=(True, {}))
 
 
 class Action:

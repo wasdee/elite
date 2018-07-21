@@ -37,8 +37,8 @@ class Gem(Action):
     def __init__(
         self, name, version=None, state='present', executable=None, options=None, **kwargs
     ):
-        self._version = None
-        self._state = None
+        self._version = version
+        self._state = state
         self.name = name
         self.version = version
         self.state = state
