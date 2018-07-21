@@ -1,4 +1,3 @@
-import os
 import subprocess
 from collections import UserDict
 
@@ -26,17 +25,6 @@ class ReversibleDict(UserDict):
 
     def lookup(self, value):
         return self.reversed_data[value]
-
-
-def build_absolute_path(path):
-    """
-    Builds an absolute path based on the root of the current project.
-
-    :param path: The path to process.
-
-    :return: The absolute path of the provided path.
-    """
-    return os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, path))
 
 
 def deep_equal(source, destination):

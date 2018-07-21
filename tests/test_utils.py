@@ -1,10 +1,7 @@
-import os
 import subprocess
 
 import pytest
-from elite.utils import (
-    ReversibleDict, batch, build_absolute_path, deep_equal, deep_merge, generate_uuid
-)
+from elite.utils import ReversibleDict, batch, deep_equal, deep_merge, generate_uuid
 
 
 def test_reversible_dict_lookup():
@@ -64,11 +61,6 @@ def test_reversible_dict_set_item():
     assert data.lookup(2) == 'value2'
     assert data.lookup(3) == 'value3'
     assert data.lookup(4) == 'value4'
-
-
-def test_build_absolute_path():
-    path = os.path.abspath(os.path.join('.', 'fruits.txt'))
-    build_absolute_path('fruits.txt') == path
 
 
 def test_deep_equal_same():
