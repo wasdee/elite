@@ -38,16 +38,16 @@ class Printer:
         print(ansi.BOLD + text + ansi.ENDC)
         print()
 
-    def progress(self, state, action, args, result):
+    def progress(self, state, action, args, response):
         """
         Displays task progress while tasks are both running and completing execution.
 
         :param state: The state of the task which is an enum of type EliteStatus.
         :param action: The action being called.
         :param args: The arguments sent to the action.
-        :param result: The result of the execution or None when the task is still running.
+        :param response: The response of the execution or None when the task is still running.
         """
-        self._print_task(state, action, args, result)
+        self._print_task(state, action, args, response)
 
     def summary(self, tasks):
         """
@@ -64,8 +64,8 @@ class Printer:
                 continue
 
             self.info(text)
-            for action, args, result in tasks[state]:
-                self._print_task(state, action, args, result)
+            for action, args, response in tasks[state]:
+                self._print_task(state, action, args, response)
 
         # Display all totals
         self.info('Totals:')
@@ -92,14 +92,14 @@ class Printer:
         else:
             return ansi.GREEN
 
-    def _print_task(self, state, action, args, result):
+    def _print_task(self, state, action, args, response):
         """
         Displays a particular task along with the related message upon failure.
 
         :param state: The state of the task which is an enum of type EliteStatus.
         :param action: The action being called.
         :param args: The arguments sent to the action.
-        :param result: The result of the execution or None when the task is still running.
+        :param response: The response of the execution or None when the task is still running.
         """
         # Determine the output colour and state text
         state_name = state.name.lower()
@@ -155,11 +155,11 @@ class Printer:
             )
 
             # Display the changed or failure message if necessary
-            if state == EliteState.FAILED and result['message'] is not None:
+            if state == EliteState.FAILED and response.failed_message is not None:
                 print(
                     f"{'':^10}" +
                     ansi.BLUE + 'message: ' + ansi.ENDC +
-                    ansi.YELLOW + result['message'] + ansi.ENDC
+                    ansi.YELLOW + response.failed_message + ansi.ENDC
                 )
 
             # Reset the number of lines to overlap

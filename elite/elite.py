@@ -4,7 +4,7 @@ from collections import namedtuple
 from contextlib import contextmanager
 from enum import Enum
 
-from .actions import ActionError, ActionResponse
+from .actions import ActionError
 from .actions.archive import Archive
 from .actions.brew import Brew
 from .actions.brew_update import BrewUpdate
@@ -35,6 +35,9 @@ from .actions.system_setup import SystemSetup
 from .actions.tap import Tap
 
 
+EliteResponse = namedtuple(
+    'EliteResponse', ['changed', 'ok', 'data', 'failed_message'], defaults=(True, {}, None)
+)
 Options = namedtuple('Options', ['uid', 'gid', 'changed', 'ignore_failed'])
 
 
@@ -230,7 +233,7 @@ class Elite:
             :return: A named tuple containing the results of the action run.
             """
             # Run the progress callback to indicate we have started running the task
-            self.printer.progress(EliteState.RUNNING, action_name, kwargs, result=None)
+            self.printer.progress(EliteState.RUNNING, action_name, kwargs, response=None)
 
             # Run the requested action
             Action = self.actions[action_name]  # noqa: N806
@@ -240,37 +243,32 @@ class Elite:
             )
 
             try:
-                response = action.process()
+                action_response = action.process()
 
                 if self.current_options.changed is None:
-                    changed = response.changed
+                    changed = action_response.changed
                 else:
                     changed = self.current_options.changed
 
-                result = {
-                    'ok': True,
-                    'changed': changed
-                }
-                state = EliteState.CHANGED if result['changed'] else EliteState.OK
+                elite_response = EliteResponse(changed=changed, ok=True, data=action_response.data)
+                state = EliteState.CHANGED if changed else EliteState.OK
             except ActionError as e:
-                response = ActionResponse(changed=False, ok=False)
-                result = {
-                    'ok': False,
-                    'message': str(e) if e.args else None
-                }
+                elite_response = EliteResponse(
+                    changed=False, ok=False, failed_message=str(e) if e.args else None
+                )
                 state = EliteState.FAILED
 
             # Run the progress callback with details of the completed task.
-            self.printer.progress(state, action_name, kwargs, result)
+            self.printer.progress(state, action_name, kwargs, elite_response)
 
             # Update task info based on the outcome
-            self.tasks[state].append((action_name, kwargs, result))
+            self.tasks[state].append((action_name, kwargs, elite_response))
 
             # If the task failed and was not to be ignored, we bail.
             if state == EliteState.FAILED and not self.current_options.ignore_failed:
-                raise EliteError(result['message'])
+                raise EliteError(elite_response.failed_message)
 
-            return response
+            return elite_response
 
         # Check if the action requested exists
         if action_name not in self.actions:
