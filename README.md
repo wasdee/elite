@@ -1,8 +1,8 @@
 # Elite
 
-![Build Status](https://travis-ci.org/fgimian/elite.svg?branch=master)
-![Coverage Status](https://coveralls.io/repos/fgimian/elite/badge.svg)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+[![Build Status](https://travis-ci.org/fgimian/elite.svg?branch=master)](https://travis-ci.org/fgimian/elite)
+[![Coverage Status](https://codecov.io/gh/fgimian/elite/branch/master/graph/badge.svg)](https://codecov.io/gh/fgimian/elite)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/fgimian/elite/blob/master/LICENSE)
 
 ![Elite Logo](https://raw.githubusercontent.com/fgimian/elite/master/images/elite-logo.png)
 

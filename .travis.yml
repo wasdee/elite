@@ -10,13 +10,13 @@ before_install:
   - brew upgrade python
 
 install:
-  - pip3 install coveralls tox
+  - pip3 install codecov tox
 
 script:
   - tox
 
 after_success:
-  - coveralls
+  - codecov
 
 branches:
   only:
