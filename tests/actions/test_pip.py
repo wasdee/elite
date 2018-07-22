@@ -102,11 +102,11 @@ def test_virtualenv_executable_found(monkeypatch):
 
 def test_virtualenv_executable_not_found(monkeypatch):
     def exists(path):
-        return not (
-            path == '/Users/fots/.virtualenvs/myenv/bin/pip' or
-            path == '/Users/fots/.virtualenvs/myenv/bin/pip3' or
-            path == '/Users/fots/.virtualenvs/myenv/bin/pip2'
-        )
+        return path not in [
+            '/Users/fots/.virtualenvs/myenv/bin/pip',
+            '/Users/fots/.virtualenvs/myenv/bin/pip3',
+            '/Users/fots/.virtualenvs/myenv/bin/pip2'
+        ]
 
     monkeypatch.setattr(os.path, 'exists', exists)
     monkeypatch.setattr(Pip, 'run', build_run(

@@ -4,19 +4,19 @@ from elite.elite import EliteResponse, EliteState
 
 def test_header(capsys, printer):
     printer.header()
-    out, err = capsys.readouterr()
+    out, _err = capsys.readouterr()
     assert out == ansi.HIDE_CURSOR
 
 
 def test_footer(capsys, printer):
     printer.footer()
-    out, err = capsys.readouterr()
+    out, _err = capsys.readouterr()
     assert out == ansi.SHOW_CURSOR + '\n'
 
 
 def test_heading(capsys, printer):
     printer.heading('My Heading')
-    out, err = capsys.readouterr()
+    out, _err = capsys.readouterr()
     assert out == (
         '\n' +
         ansi.BOLD + ansi.UNDERLINE + 'My Heading' + ansi.ENDC + '\n'
@@ -25,7 +25,7 @@ def test_heading(capsys, printer):
 
 def test_info(capsys, printer):
     printer.info('My Info')
-    out, err = capsys.readouterr()
+    out, _err = capsys.readouterr()
     assert out == (
         '\n' +
         ansi.BOLD + 'My Info' + ansi.ENDC + '\n' +
@@ -35,7 +35,7 @@ def test_info(capsys, printer):
 
 def test_action_running(capsys, printer):
     printer.action(EliteState.RUNNING, 'brew', args={'name': 'htop', 'state': 'latest'})
-    out, err = capsys.readouterr()
+    out, _err = capsys.readouterr()
     assert out == (
         ansi.WHITE + ' running  ' + ansi.ENDC +
         ansi.BLUE + 'brew: ' + ansi.ENDC +
@@ -49,7 +49,7 @@ def test_action_ok(capsys, printer):
         EliteState.OK, 'brew', args={'name': 'htop', 'state': 'latest'},
         response=EliteResponse(changed=True, ok=True)
     )
-    out, err = capsys.readouterr()
+    out, _err = capsys.readouterr()
     assert out == (
         ansi.WHITE + ' running  ' + ansi.ENDC +
         ansi.BLUE + 'brew: ' + ansi.ENDC +
@@ -67,7 +67,7 @@ def test_action_changed(capsys, printer):
         EliteState.CHANGED, 'brew', args={'name': 'htop', 'state': 'latest'},
         response=EliteResponse(changed=True, ok=True)
     )
-    out, err = capsys.readouterr()
+    out, _err = capsys.readouterr()
     assert out == (
         ansi.WHITE + ' running  ' + ansi.ENDC +
         ansi.BLUE + 'brew: ' + ansi.ENDC +
@@ -87,7 +87,7 @@ def test_action_failed(capsys, printer):
         EliteState.FAILED, 'brew', args={'name': 'htop', 'state': 'latest'},
         response=EliteResponse(changed=False, ok=False, failed_message=failed_message)
     )
-    out, err = capsys.readouterr()
+    out, _err = capsys.readouterr()
     assert out == (
         ansi.WHITE + ' running  ' + ansi.ENDC +
         ansi.BLUE + 'brew: ' + ansi.ENDC +
@@ -113,7 +113,7 @@ def test_action_overlap(capsys, printer):
         EliteState.OK, 'info', args={'message': message},
         response=EliteResponse(changed=True, ok=True)
     )
-    out, err = capsys.readouterr()
+    out, _err = capsys.readouterr()
 
     # The final length of the line is as follows:
     # (status) 10 + (action name) 6 + (message) 230 = 246 => 4 lines (for an 80 x 24 terminal)
@@ -140,7 +140,7 @@ def test_action_output_larger_than_terminal(capsys, printer):
         EliteState.OK, 'info', args={'message': message},
         response=EliteResponse(changed=True, ok=True)
     )
-    out, err = capsys.readouterr()
+    out, _err = capsys.readouterr()
 
     # The first line of output also contains the status and action name, so we subtract those
     # from the width of the first line of the message:
@@ -186,7 +186,7 @@ def test_summary(capsys, printer):
     }
 
     printer.summary(actions)
-    out, err = capsys.readouterr()
+    out, _err = capsys.readouterr()
 
     assert out == (
         # Changed actions
@@ -239,7 +239,7 @@ def test_summary_no_changed(capsys, printer):
     }
 
     printer.summary(actions)
-    out, err = capsys.readouterr()
+    out, _err = capsys.readouterr()
 
     assert out == (
         # Totals
@@ -271,7 +271,7 @@ def test_summary_no_ok(capsys, printer):
     }
 
     printer.summary(actions)
-    out, err = capsys.readouterr()
+    out, _err = capsys.readouterr()
 
     assert out == (
         # Changed actions

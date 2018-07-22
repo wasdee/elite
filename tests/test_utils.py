@@ -37,8 +37,7 @@ def test_reversible_dict_delete_item():
     del data['value2']
 
     assert data['value1'] == 1
-    with pytest.raises(KeyError):
-        data['value2']
+    assert 'value2' not in data
     assert data['value3'] == 3
     assert data.lookup(1) == 'value1'
     with pytest.raises(KeyError):
