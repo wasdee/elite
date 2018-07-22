@@ -3,8 +3,8 @@ from setuptools import setup
 
 setup(
     name='elite',
-    version='0.1.0',
-    url='https://gitlab.com/fgimian/elite',
+    version='0.4.0',
+    url='https://github.com/fgimian/elite',
     license='MIT',
     author='Fotis Gimian',
     author_email='fgimiansoftware@gmail.com',
