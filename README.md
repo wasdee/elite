@@ -1,5 +1,7 @@
 # Elite
 
+![Build Status](https://travis-ci.org/fgimian/elite.svg?branch=master)
+![Coverage Status](https://coveralls.io/repos/fgimian/elite/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
 ![Elite Logo](https://raw.githubusercontent.com/fgimian/elite/master/images/elite-logo.png)
