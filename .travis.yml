@@ -1,0 +1,26 @@
+language: python
+
+matrix:
+  include:
+    - os: osx
+      language: generic
+      env: TOXENV=py37,lint
+
+before_install:
+  - brew upgrade python
+
+install:
+  - pip3 install coveralls tox
+
+script:
+  - tox
+
+after_success:
+  - coveralls
+
+branches:
+  only:
+    - master
+
+notifications:
+  email: false
