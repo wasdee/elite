@@ -30,57 +30,13 @@ class Printer:
 
     def info(self, text):
         """
-        Prints task information within a section.
+        Prints information within a section.
 
         :param text: the text to display
         """
         print()
         print(ansi.BOLD + text + ansi.ENDC)
         print()
-
-    def progress(self, state, action, args, response):
-        """
-        Displays task progress while tasks are both running and completing execution.
-
-        :param state: The state of the task which is an enum of type EliteStatus.
-        :param action: The action being called.
-        :param args: The arguments sent to the action.
-        :param response: The response of the execution or None when the task is still running.
-        """
-        self._print_task(state, action, args, response)
-
-    def summary(self, tasks):
-        """
-        Displays a final summary after execution of all tasks have completed.
-
-        :param tasks: a dict containing a state to task list mapping
-        """
-        # Display any tasks that caused changes or failed.
-        for state, text in [
-            (EliteState.CHANGED, 'Changed task info:'),
-            (EliteState.FAILED, 'Failed task info:')
-        ]:
-            if not tasks[state]:
-                continue
-
-            self.info(text)
-            for action, args, response in tasks[state]:
-                self._print_task(state, action, args, response)
-
-        # Display all totals
-        self.info('Totals:')
-        for state in [EliteState.OK, EliteState.CHANGED, EliteState.FAILED]:
-            state_name = state.name.lower()
-            state_colour = self._state_colour(state)
-            total = len(tasks[state])
-            print(state_colour + f'{state_name:^10}' + ansi.ENDC + f'{total:4}')
-
-        grand_total = (
-            len(tasks[EliteState.OK]) +
-            len(tasks[EliteState.CHANGED]) +
-            len(tasks[EliteState.FAILED])
-        )
-        print(f"{'total':^10}{grand_total:4}")
 
     def _state_colour(self, state):
         if state == EliteState.RUNNING:
@@ -92,14 +48,15 @@ class Printer:
         else:
             return ansi.GREEN
 
-    def _print_task(self, state, action, args, response):
+    def action(self, state, action, args, response=None):
         """
-        Displays a particular task along with the related message upon failure.
+        Displays progress while actions are running and also completing execution along with
+        related message upon failure.
 
-        :param state: The state of the task which is an enum of type EliteStatus.
-        :param action: The action being called.
-        :param args: The arguments sent to the action.
-        :param response: The response of the execution or None when the task is still running.
+        :param state: the state of the action which is an enum of type EliteStatus
+        :param action: the action being called
+        :param args: the arguments sent to the action
+        :param response: the response of the execution or None when the action is still running
         """
         # Determine the output colour and state text
         state_name = state.name.lower()
@@ -134,6 +91,7 @@ class Printer:
                 if print_chars > max_chars:
                     chop_chars = print_chars - max_chars + 3
                     print_status += colour + text[:-chop_chars] + '...' + ansi.ENDC
+                    print_chars = max_chars
                     break
                 else:
                     print_status += colour + text + ansi.ENDC
@@ -164,3 +122,36 @@ class Printer:
 
             # Reset the number of lines to overlap
             self.overlap_lines = None
+
+    def summary(self, actions):
+        """
+        Displays a final summary after execution of all actions have completed.
+
+        :param actions: a dict containing a state to action list mapping
+        """
+        # Display any actions that caused changes or failed.
+        for state, text in [
+            (EliteState.CHANGED, 'Changed Actions'),
+            (EliteState.FAILED, 'Failed Actions')
+        ]:
+            if not actions[state]:
+                continue
+
+            self.info(text)
+            for action, args, response in actions[state]:
+                self.action(state, action, args, response)
+
+        # Display all totals
+        self.info('Totals')
+        for state in [EliteState.OK, EliteState.CHANGED, EliteState.FAILED]:
+            state_name = state.name.lower()
+            state_colour = self._state_colour(state)
+            total = len(actions[state])
+            print(state_colour + f'{state_name:^10}' + ansi.ENDC + f'{total:4}')
+
+        grand_total = (
+            len(actions[EliteState.OK]) +
+            len(actions[EliteState.CHANGED]) +
+            len(actions[EliteState.FAILED])
+        )
+        print(f"{'total':^10}{grand_total:4}")

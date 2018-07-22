@@ -124,8 +124,8 @@ class Elite:
         # Register the core actions provided with Elite
         self._register_core_actions()
 
-        # Capture task information to show them in the summary.
-        self.tasks = {
+        # Capture action information for the final summary
+        self.actions = {
             EliteState.OK: [],
             EliteState.FAILED: [],
             EliteState.CHANGED: []
@@ -232,8 +232,8 @@ class Elite:
 
             :return: A named tuple containing the results of the action run.
             """
-            # Run the progress callback to indicate we have started running the task
-            self.printer.progress(EliteState.RUNNING, action_name, kwargs, response=None)
+            # Print progress to indicate we have started running the action
+            self.printer.action(EliteState.RUNNING, action_name, kwargs)
 
             # Run the requested action
             Action = self.actions[action_name]  # noqa: N806
@@ -258,13 +258,13 @@ class Elite:
                 )
                 state = EliteState.FAILED
 
-            # Run the progress callback with details of the completed task.
-            self.printer.progress(state, action_name, kwargs, elite_response)
+            # Display details of the completed action
+            self.printer.action(state, action_name, kwargs, elite_response)
 
-            # Update task info based on the outcome
-            self.tasks[state].append((action_name, kwargs, elite_response))
+            # Update action info based on the outcome
+            self.actions[state].append((action_name, kwargs, elite_response))
 
-            # If the task failed and was not to be ignored, we bail.
+            # If the action failed and was not to be ignored, we bail
             if state == EliteState.FAILED and not self.current_options.ignore_failed:
                 raise EliteError(elite_response.failed_message)
 
@@ -279,7 +279,7 @@ class Elite:
 
     def summary(self):
         """
-        Call the summary printer object method with the appropriate totals and task info so the
-        method may display the final summary to the user.
+        Call the summary printer object method with the actions that have been run and display
+        the final summary to the user.
         """
-        self.printer.summary(self.tasks)
+        self.printer.summary(self.actions)

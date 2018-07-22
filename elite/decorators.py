@@ -34,7 +34,7 @@ def automate():
                 print()
                 print(f'{ansi.RED}Elite Runtime Error: {e}{ansi.ENDC}')
 
-            # A task failed to run
+            # An action failed to run
             except EliteError:
                 # Summary
                 printer.heading('Summary')
