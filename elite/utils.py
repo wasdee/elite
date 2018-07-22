@@ -32,8 +32,8 @@ def deep_equal(source, destination):
     Deeply compares the source dict against the destination ensuring that all items contained
     in the source are also in and equal to the destination.
 
-    :param source: The source master dictionary to be used as a reference in the comparison
-    :param destination: The destination dictionary to compare against the source.
+    :param source: the source master dictionary to be used as a reference in the comparison
+    :param destination: the destination dictionary to compare against the source
 
     :return: a boolean indicating whether the source is contained in the destination
     """
@@ -51,8 +51,8 @@ def deep_merge(source, destination):
     """
     Deep merges the source dict into the destination.
 
-    :param source: The source dict to merge into the destination.
-    :param destination: The destination dict to merge the source into.
+    :param source: the source dict to merge into the destination
+    :param destination: the destination dict to merge the source into
 
     :return: the destination dict is returned (required for recursion) but the destination
              dict will be updated too

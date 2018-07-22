@@ -54,11 +54,11 @@ class LaunchpadBuilder:
         """
         Obtain a mapping between app titles and their ids.
 
-        :param table: The table to obtain a mapping for (should be apps, widgets or
+        :param table: the table to obtain a mapping for (should be apps, widgets or
                       downloading_apps)
 
-        :return: A tuple with two items.  The first value is a dict containing a mapping between
-                 the title and (id, uuid, flags) for each item.  The second item contains the
+        :return: a tuple with two items; the first value is a dict containing a mapping between
+                 the title and (id, uuid, flags) for each item and the second item contains the
                  maximum id of the items found.
         """
         mapping = {}
@@ -82,11 +82,11 @@ class LaunchpadBuilder:
         Validates the provided layout to confirm that all items exist and that folders are
         correctly structured.
 
-        :param type\_: The type of item being validated (usually Types.APP or Types.WIDGET)
-        :param layout: The layout requested by the user provided as a list (pages) of lists (items)
-                       whereby items are strings.  If the item is a folder, then it is to be a dict
-                       with a folder_title and folder_items key and associated values.
-        :param mapping: The title to data mapping for the respective items being validated.
+        :param type\_: the type of item being validated (usually Types.APP or Types.WIDGET)
+        :param layout: the layout requested by the user provided as a list (pages) of lists (items)
+                       whereby items are strings; if the item is a folder, then it is to be a dict
+                       with a folder_title and folder_items key and associated values
+        :param mapping: the title to data mapping for the respective items being validated
 
         :raises: A LaunchpadValidationError is raised with a suitable message if an issue is found
         """
@@ -140,8 +140,8 @@ class LaunchpadBuilder:
         Adds additional pages to the layout containing all items that the user forgot to specify
         in the provided layout.
 
-        :param layout: The layout of items.
-        :param mapping: The mapping of the respective items (as obtained by get_mapping).
+        :param layout: the layout of items
+        :param mapping: the mapping of the respective items (as obtained by get_mapping)
         """
         items_in_layout = []
 
@@ -176,15 +176,15 @@ class LaunchpadBuilder:
         r"""
         Manipulates the appropriate database table to layout the items as requested by the user.
 
-        :param type\_: The type of item being manipulated (usually Types.APP or Types.WIDGET)
-        :param layout: The layout requested by the user provided as a list (pages) of lists (items)
-                       whereby items are strings.  If the item is a folder, then it is to be a dict
-                       with a folder_title and folder_items key and associated values.
-        :param mapping: The title to data mapping for the respective items being setup.
-        :param group_id: The group id to continue from when adding groups.
-        :param root_parent_id: The root parent id to add child items to.
+        :param type\_: the type of item being manipulated (usually Types.APP or Types.WIDGET)
+        :param layout: the layout requested by the user provided as a list (pages) of lists (items)
+                       whereby items are strings; if the item is a folder, then it is to be a dict
+                       with a folder_title and folder_items key and associated values
+        :param mapping: the title to data mapping for the respective items being setup
+        :param group_id: the group id to continue from when adding groups
+        :param root_parent_id: the root parent id to add child items to
 
-        :return: The resultant group id after additions to continue working from.
+        :return: the resultant group id after additions to continue working from.
         """
         cursor = self.conn.cursor()
 
@@ -384,11 +384,11 @@ class LaunchpadBuilder:
         """
         Builds a data structure containing the layout for a particular type of data.
 
-        :param root: The root id of the tree being built.
-        :param parent_mapping: The mapping between parent_ids and items.
+        :param root: The root id of the tree being built
+        :param parent_mapping: The mapping between parent_ids and items
 
-        :returns: The layout data structure that was built as a tuple where the first item is the
-                  widget layout and the second item is the app layout.
+        :return: the layout data structure that was built as a tuple where the first item is the
+                 widget layout and the second item is the app layout.
         """
         layout = []
 

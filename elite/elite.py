@@ -74,7 +74,7 @@ class Elite:
     """
     Provides a way to run the requested Elite action with the appropriate arguments.
 
-    :param printer: A printer object that will be used to display output.
+    :param printer: a printer object that will be used to display output
     """
 
     def __init__(self, printer):
@@ -216,9 +216,9 @@ class Elite:
         """
         Provides an easy way to call any action as a method.
 
-        :param action: The action being requested.
+        :param action: the action being requested
 
-        :return: The respective function that implements that action.
+        :return: the respective function that implements that action
         """
 
         def _run_action(*args, **kwargs):
@@ -226,11 +226,11 @@ class Elite:
             A sub-method that calls the requested action with the provided raw parameters and
             arguments.
 
-            :param sudo: Whether or not to run the action via sudo.
-            :param change: A boolean that overrides whether an action changed regardless.
-            :param args: Action arguments to be sent to the action.
+            :param sudo: whether or not to run the action via sudo
+            :param change: a boolean that overrides whether an action changed regardless
+            :param args: action arguments to be sent to the action
 
-            :return: A named tuple containing the results of the action run.
+            :return: a named tuple containing the results of the action run
             """
             # Print progress to indicate we have started running the action
             self.printer.action(EliteState.RUNNING, action_name, kwargs)
