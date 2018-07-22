@@ -7,13 +7,24 @@ from AppKit import NSFont
 import ScriptingBridge  # noqa: F401,I100, pylint: disable=unused-import
 from Foundation import NSCalibratedRGBColor, NSKeyedArchiver
 from ruamel.yaml import YAML, YAMLError
+from ruamel.yaml.nodes import MappingNode
 
 
 def include(loader, node):
-    path = pathlib.Path(loader.loader.reader.stream.name).parent.joinpath(node.value)
     yaml = YAML(typ=loader.loader.typ, pure=loader.loader.pure)
     yaml.composer.anchors = loader.composer.anchors
-    return yaml.load(path)
+
+    if isinstance(node, MappingNode):
+        mapping = loader.construct_mapping(node, deep=True)
+        base_path = mapping['path']
+        extension = mapping['extension']
+        files = mapping['files']
+
+        path = pathlib.Path(loader.loader.reader.stream.name).parent.joinpath(base_path)
+        return [yaml.load(path.joinpath(f'{f}.{extension}')) for f in files]
+    else:
+        path = pathlib.Path(loader.loader.reader.stream.name).parent.joinpath(node.value)
+        return yaml.load(path)
 
 
 def join_path(loader, node):
