@@ -125,7 +125,7 @@ class Elite:
         self._register_core_actions()
 
         # Capture action information for the final summary
-        self.actions = {
+        self.completed_actions = {
             EliteState.OK: [],
             EliteState.FAILED: [],
             EliteState.CHANGED: []
@@ -262,7 +262,7 @@ class Elite:
             self.printer.action(state, action_name, kwargs, elite_response)
 
             # Update action info based on the outcome
-            self.actions[state].append((action_name, kwargs, elite_response))
+            self.completed_actions[state].append((action_name, kwargs, elite_response))
 
             # If the action failed and was not to be ignored, we bail
             if state == EliteState.FAILED and not self.current_options.ignore_failed:
@@ -282,4 +282,4 @@ class Elite:
         Call the summary printer object method with the actions that have been run and display
         the final summary to the user.
         """
-        self.printer.summary(self.actions)
+        self.printer.summary(self.completed_actions)
