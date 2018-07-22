@@ -9,8 +9,6 @@ class Hostname(Action):
     :param computer_name: the computer name of the system (may include spaces)
     """
 
-    __action_name__ = 'hostname'
-
     def __init__(self, local_host_name=None, computer_name=None, **kwargs):
         self.local_host_name = local_host_name
         self.computer_name = computer_name

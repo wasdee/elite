@@ -5,8 +5,6 @@ from . import Action
 
 
 class Rsync(Action):
-    __action_name__ = 'rsync'
-
     def __init__(self, path, source, executable=None, archive=True, options=None, **kwargs):
         self.path = path
         self.source = source

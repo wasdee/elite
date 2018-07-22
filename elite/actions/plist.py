@@ -6,8 +6,6 @@ from ..utils import deep_equal, deep_merge
 
 
 class Plist(FileAction):
-    __action_name__ = 'plist'
-
     def __init__(
         self, values, path=None, domain=None, container=None, source=None, fmt='xml', **kwargs
     ):

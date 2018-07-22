@@ -8,8 +8,6 @@ from . import Action, ActionError
 
 
 class Package(Action):
-    __action_name__ = 'package'
-
     def __init__(self, path, choices=None, target='/', **kwargs):
         self.path = path
         self.choices = choices

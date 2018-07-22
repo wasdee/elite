@@ -8,8 +8,6 @@ from ..constants import FLAGS
 
 
 class Find(FileAction):
-    __action_name__ = 'find'
-
     def __init__(
         self, path, min_depth=None, max_depth=None, types=None, patterns=None, aliases=True,
         **kwargs

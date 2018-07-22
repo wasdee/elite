@@ -6,8 +6,6 @@ from . import ActionError, FileAction
 
 
 class File(FileAction):
-    __action_name__ = 'file'
-
     def __init__(self, path, source=None, state='file', **kwargs):
         self._source = source
         self._state = state

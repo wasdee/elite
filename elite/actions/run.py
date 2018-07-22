@@ -17,8 +17,6 @@ class Run(Action):
     :param removes: a path whose lack of existence indicates that nothing has changed
     """
 
-    __action_name__ = 'run'
-
     def __init__(
         self, command, working_dir=None, shell=None, unless=None, creates=None, removes=None,
         **kwargs

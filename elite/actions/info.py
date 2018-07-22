@@ -8,8 +8,6 @@ class Info(Action):
     :param message: the info message to display
     """
 
-    __action_name__ = 'info'
-
     def __init__(self, message, **kwargs):
         self.message = message
         super().__init__(**kwargs)

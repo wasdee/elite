@@ -17,8 +17,6 @@ class Pip(Action):
     :param options: additional command line options to pass to the pip command
     """
 
-    __action_name__ = 'pip'
-
     def __init__(
         self, name, version=None, state='present', executable=None, virtualenv=None, options=None,
         **kwargs

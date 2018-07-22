@@ -6,8 +6,6 @@ from . import Action, ActionError
 
 
 class LoginItem(Action):
-    __action_name__ = 'login_item'
-
     def __init__(self, path, state='present', hidden=False, **kwargs):
         self._state = state
         self.path = path

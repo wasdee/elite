@@ -5,8 +5,6 @@ from ..constants import FLAGS
 
 
 class FileInfo(Action):
-    __action_name__ = 'file_info'
-
     def __init__(self, path, aliases=True, **kwargs):
         self.path = path
         self.aliases = aliases

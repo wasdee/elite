@@ -4,8 +4,6 @@ from . import Action
 class BrewUpdate(Action):
     """Updates all Homebrew package formulas to their latest versions."""
 
-    __action_name__ = 'brew_update'
-
     def process(self):
         # Obtain information about the requested package
         brew_update_proc = self.run(['brew', 'update'], stdout=True)

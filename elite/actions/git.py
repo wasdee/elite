@@ -4,8 +4,6 @@ from . import Action
 
 
 class Git(Action):
-    __action_name__ = 'git'
-
     def __init__(self, repo, path, branch='master', **kwargs):
         self.repo = repo
         self.path = path

@@ -11,8 +11,6 @@ class SystemSetup(Action):
     :param hard_disk_sleep_time: the amount of idle time until hard disk sleeps
     """
 
-    __action_name__ = 'system_setup'
-
     def __init__(
         self, timezone=None, computer_sleep_time=None, display_sleep_time=None,
         hard_disk_sleep_time=None, **kwargs

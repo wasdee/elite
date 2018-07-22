@@ -10,8 +10,6 @@ class Tap(Action):
     :param url: the url containing the tap
     """
 
-    __action_name__ = 'tap'
-
     def __init__(self, name, state='present', url=None, **kwargs):
         self._state = state
         self.name = name

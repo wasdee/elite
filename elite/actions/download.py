@@ -8,8 +8,6 @@ from . import ActionError, FileAction
 
 
 class Download(FileAction):
-    __action_name__ = 'download'
-
     def __init__(self, url, path, **kwargs):
         self.url = url
         self.path = path

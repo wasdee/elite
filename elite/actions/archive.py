@@ -8,8 +8,6 @@ from . import Action, ActionError
 
 
 class Archive(Action):
-    __action_name__ = 'archive'
-
     def __init__(
         self, path, source, preserve_mode=True, ignore_files=None, base_dir=None, **kwargs
     ):

@@ -10,8 +10,6 @@ class Cask(Action):
     :param options: additional command line options to pass to the brew cask command
     """
 
-    __action_name__ = 'cask'
-
     def __init__(self, name, state='present', options=None, **kwargs):
         self._state = state
         self.name = name

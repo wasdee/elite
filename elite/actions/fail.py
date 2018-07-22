@@ -8,8 +8,6 @@ class Fail(Action):
     :param message: the error message to display
     """
 
-    __action_name__ = 'fail'
-
     def __init__(self, message, **kwargs):
         self.message = message
         super().__init__(**kwargs)

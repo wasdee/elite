@@ -28,8 +28,6 @@ def convert_from_spotify_value(value):
 
 
 class Spotify(FileAction):
-    __action_name__ = 'spotify'
-
     def __init__(self, values, username=None, **kwargs):
         self.values = values
         self.username = username

@@ -3,8 +3,6 @@ from ..libraries.dock_builder import DockBuilder, get_dock_plist_path
 
 
 class Dock(FileAction):
-    __action_name__ = 'dock'
-
     def __init__(self, app_layout, other_layout, **kwargs):
         self.app_layout = app_layout
         self.other_layout = other_layout

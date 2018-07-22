@@ -16,8 +16,6 @@ class NPM(Action):
     :param options: additional command line options to pass to the npm command
     """
 
-    __action_name__ = 'npm'
-
     def __init__(
         self, name, version=None, state='present', executable=None, mode='local', path=None,
         options=None, **kwargs

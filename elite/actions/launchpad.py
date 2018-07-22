@@ -7,8 +7,6 @@ from ..libraries.launchpad_builder import (
 
 
 class Launchpad(Action):
-    __action_name__ = 'launchpad'
-
     def __init__(self, widget_layout, app_layout, **kwargs):
         self.widget_layout = widget_layout
         self.app_layout = app_layout

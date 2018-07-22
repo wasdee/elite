@@ -12,8 +12,6 @@ class Brew(Action):
     :param options: additional command line options to pass to the brew command
     """
 
-    __action_name__ = 'brew'
-
     def __init__(self, name, state='present', options=None, **kwargs):
         self._state = state
         self.name = name

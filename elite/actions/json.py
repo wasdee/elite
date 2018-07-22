@@ -6,8 +6,6 @@ from ..utils import deep_equal, deep_merge
 
 
 class JSON(FileAction):
-    __action_name__ = 'json'
-
     def __init__(self, path, values, indent=2, **kwargs):
         self.path = path
         self.values = values
