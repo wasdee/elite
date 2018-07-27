@@ -123,7 +123,7 @@ def main(elite, printer):
     # Load a configuration file
     config = Config('config/software.yaml')
 
-    # You may use the printer to print headings and sub-eadings
+    # You may use the printer to print headings and sub-headings
     printer.heading('Desktop Software')
     printer.info('Sublime Text')
 
