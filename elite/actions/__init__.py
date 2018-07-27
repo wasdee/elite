@@ -19,8 +19,8 @@ ActionResponse = namedtuple('ActionResponse', ['changed', 'data'], defaults=({},
 
 
 class Action:
-    def __init__(self, preexec_callback=None):
-        self.preexec_callback = preexec_callback
+    def __init__(self, preexec_fn=None):
+        self.preexec_fn = preexec_fn
 
     def ok(self, **data):
         return ActionResponse(changed=False, data=data)
@@ -45,7 +45,7 @@ class Action:
         # Run the command
         try:
             process = subprocess.run(
-                command, encoding='utf-8', preexec_fn=self.preexec_callback, **kwargs
+                command, encoding='utf-8', preexec_fn=self.preexec_fn, **kwargs
             )
         except FileNotFoundError:
             raise ActionError(f'unable to find executable for command {command}')

@@ -239,7 +239,7 @@ class Elite:
             Action = self.actions[action_name]  # noqa: N806
             action = Action(
                 *args, **kwargs,
-                preexec_callback=demote(self.current_options.uid, self.current_options.gid)
+                preexec_fn=demote(self.current_options.uid, self.current_options.gid)
             )
 
             try:
