@@ -1,6 +1,7 @@
 import grp
 import os
 import pwd
+import shutil
 import subprocess
 from collections import namedtuple
 
@@ -138,3 +139,27 @@ class FileAction(Action):
                     raise ActionError('unable to set the requested flags on the path specified')
 
         return changed
+
+    def remove(self, path):
+        if not os.path.exists(path) and not os.path.islink(path):
+            return False
+
+        if os.path.isfile(path):
+            try:
+                os.remove(path)
+            except OSError:
+                raise ActionError('existing file could not be removed')
+
+        elif os.path.isdir(path):
+            try:
+                shutil.rmtree(path)
+            except OSError:
+                raise ActionError('existing directory could not be recursively removed')
+
+        elif os.path.islink(path):
+            try:
+                os.remove(path)
+            except OSError:
+                raise ActionError('existing symlink could not be removed')
+
+        return True

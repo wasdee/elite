@@ -205,30 +205,6 @@ class File(FileAction):
             removed = self.remove(path)
             return self.changed(path=path) if removed else self.ok(path=path)
 
-    def remove(self, path):
-        if not os.path.exists(path) and not os.path.islink(path):
-            return False
-
-        if os.path.isfile(path):
-            try:
-                os.remove(path)
-            except OSError:
-                raise ActionError('existing file could not be removed')
-
-        elif os.path.isdir(path):
-            try:
-                shutil.rmtree(path)
-            except OSError:
-                raise ActionError('existing directory could not be recursively removed')
-
-        elif os.path.islink(path):
-            try:
-                os.remove(path)
-            except OSError:
-                raise ActionError('existing symlink could not be removed')
-
-        return True
-
     def md5(self, path, block_size=1024 * 8):
         hash_md5 = hashlib.md5()
 

@@ -1,13 +1,14 @@
 import os
 
-from . import Action
+from . import FileAction
 
 
-class Git(Action):
-    def __init__(self, repo, path, branch='master', **kwargs):
+class Git(FileAction):
+    def __init__(self, repo, path, branch='master', remote='origin', **kwargs):
         self.repo = repo
         self.path = path
         self.branch = branch
+        self.remote = remote
         super().__init__(**kwargs)
 
     def process(self):
@@ -16,31 +17,38 @@ class Git(Action):
 
         # Check if the repository already exists in the destination path
         if os.path.exists(os.path.join(path, '.git', 'config')):
-            # Verify that the existing repo is on the correct branch
-            git_branch_proc = self.run(
-                ['git', 'symbolic-ref', '--short', 'HEAD'], cwd=path, stdout=True,
-                fail_error='unable to check existing repository branch'
+            # Verify that the existing repo originates from the same remote
+            git_remote_proc = self.run(
+                ['git', 'remote', 'get-url', self.remote],
+                fail_error='unable to check existing remote'
             )
 
-            # Currently checked out repo is on the correct branch
-            if git_branch_proc.stdout.rstrip() == self.branch:
-                return self.ok()
-            # Checked out repo is on the wrong branch and must be switched
-            else:
-                self.run(
-                    ['git', 'checkout', self.branch], cwd=path,
-                    fail_error='unable to checkout requested branch'
+            if git_remote_proc.stdout.rstrip() == self.repo:
+                # Verify that the existing repo is on the correct branch
+                git_branch_proc = self.run(
+                    ['git', 'symbolic-ref', '--short', 'HEAD'], cwd=path, stdout=True,
+                    fail_error='unable to check existing repository branch'
                 )
-                return self.changed()
 
-        # Build the clone command
-        git_command = ['git', 'clone', '--quiet']
-        if self.branch:
-            git_command.extend(['-b', self.branch])
-        git_command.extend([self.repo, path])
+                # Currently checked out repo is on the correct branch
+                if git_branch_proc.stdout.rstrip() == self.branch:
+                    return self.ok()
+                # Checked out repo is on the wrong branch and must be switched
+                else:
+                    self.run(
+                        ['git', 'checkout', self.branch], cwd=path,
+                        fail_error='unable to checkout requested branch'
+                    )
+                    return self.changed()
+            else:
+                # The remote differs so we clean up the destination before cloning the repo
+                self.remove(path)
 
-        # Run the command and check for failures
-        self.run(git_command, fail_error='unable to clone git repository')
+        # Clone the requested repository and branch
+        self.run(
+            ['git', 'clone', '--quiet', '-b', self.branch, self.repo, path],
+            fail_error='unable to clone git repository'
+        )
 
         # Clone was successful
         return self.changed()
