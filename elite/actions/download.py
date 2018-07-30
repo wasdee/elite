@@ -51,9 +51,9 @@ class Download(FileAction):
                 # Perform the download to a binary file in chunks
                 block_size = 1024 * 8
                 try:
-                    with open(filepath, 'wb') as f:
+                    with open(filepath, 'wb') as fp:
                         for block in iter(lambda: r.read(block_size), b''):
-                            f.write(block)
+                            fp.write(block)
                 except OSError:
                     raise ActionError('unable to write the download to the path requester')
 

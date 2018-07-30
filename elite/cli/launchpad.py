@@ -72,8 +72,8 @@ def main():
 
     # Build
     if args.command == 'build':
-        with open(args.config_path) as f:
-            config = yaml.load(f)
+        with open(args.config_path) as fp:
+            config = yaml.load(fp)
 
         # Re-build the user's database if requested
         if not args.skip_db_rebuild:
@@ -134,18 +134,18 @@ def main():
             'app_layout': launchpad_builder.app_layout
         }
 
-        with open(args.config_path, 'w') as f:
+        with open(args.config_path, 'w') as fp:
             if args.format == 'yaml':
-                f.write(yaml.safe_dump(layout, default_flow_style=False, explicit_start=True))
+                fp.write(yaml.safe_dump(layout, default_flow_style=False, explicit_start=True))
             else:
-                json.dump(layout, f, indent=2)
+                json.dump(layout, fp, indent=2)
 
         print(f'{GREEN}Successfully wrote Launchpad config to {args.config_path}{ENDC}')
 
     # Compare
     elif args.command == 'compare':
-        with open(args.config_path) as f:
-            config = yaml.load(f)
+        with open(args.config_path) as fp:
+            config = yaml.load(fp)
 
         launchpad_builder = LaunchpadBuilder(launchpad_db_path)
         launchpad_builder.extract()

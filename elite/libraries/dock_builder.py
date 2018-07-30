@@ -69,8 +69,8 @@ class DockBuilder:
         self.normalise_other_layout()
 
         # Store the plist contents
-        with open(dock_plist_path, 'rb') as f:
-            self.plist = plistlib.load(f)
+        with open(dock_plist_path, 'rb') as fp:
+            self.plist = plistlib.load(fp)
 
     def build(self):
         # Please note that we must set _CFURLStringType to 0 (instead of the usual 15 value)
@@ -133,8 +133,8 @@ class DockBuilder:
         self.plist['persistent-others'] = persistent_others
 
         # Update the Dock plist file with the new layout
-        with open(self.dock_plist_path, 'wb') as f:
-            plistlib.dump(self.plist, f)
+        with open(self.dock_plist_path, 'wb') as fp:
+            plistlib.dump(self.plist, fp)
 
     def normalise_app_layout(self):
         normalised_app_layout = []

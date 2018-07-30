@@ -45,8 +45,8 @@ def main():
     try:
         try:
             plist_file = determine_plist_path(sys.argv[1])
-            with open(plist_file, 'rb') as f:
-                plist_data = plistlib.load(f)
+            with open(plist_file, 'rb') as fp:
+                plist_data = plistlib.load(fp)
         except IndexError:
             plist_file = '<stdin>'
             plist_data = plistlib.loads(sys.stdin.buffer.read())

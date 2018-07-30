@@ -47,8 +47,8 @@ class Spotify(FileAction):
         # Load the Spotify prefs or create a fresh data structure if it doesn't exist
         prefs = {}
         try:
-            with open(path, 'r') as f:
-                for line in f.readlines():
+            with open(path, 'r') as fp:
+                for line in fp.readlines():
                     pref, value = line.rstrip().split('=', 1)
                     prefs[pref] = convert_from_spotify_value(value)
         except ValueError:
@@ -66,9 +66,9 @@ class Spotify(FileAction):
 
         # Write the updated Spotify config
         try:
-            with open(path, 'w') as f:
+            with open(path, 'w') as fp:
                 for pref, value in prefs.items():
-                    print(f'{pref}={convert_to_spotify_value(value)}', file=f)
+                    print(f'{pref}={convert_to_spotify_value(value)}', file=fp)
 
             self.set_file_attributes(path)
             return self.changed(path=path)

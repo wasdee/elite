@@ -160,8 +160,8 @@ class Package(Action):
         if self.choices:
             # Create a temporary plist for use in providing choices to the installer
             _choices_plist_fd, choices_plist_path = tempfile.mkstemp()
-            with open(choices_plist_path, 'wb') as f:
-                plistlib.dump(self.choices, f)
+            with open(choices_plist_path, 'wb') as fp:
+                plistlib.dump(self.choices, fp)
 
             # Pass the path of the choices plist to the installer command
             installer_command.extend(['-applyChoiceChangesXML', choices_plist_path])

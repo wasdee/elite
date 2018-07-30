@@ -65,8 +65,8 @@ def main():
 
     # Build
     if args.command == 'build':
-        with open(args.config_path) as f:
-            config = yaml.load(f)
+        with open(args.config_path) as fp:
+            config = yaml.load(fp)
 
         print(f'{BLUE}Rebuilding the Dock plist{ENDC}')
         dock_builder = DockBuilder(
@@ -92,18 +92,18 @@ def main():
             'other_layout': dock_builder.other_layout
         }
 
-        with open(args.config_path, 'w') as f:
+        with open(args.config_path, 'w') as fp:
             if args.format == 'yaml':
-                f.write(yaml.safe_dump(layout, default_flow_style=False, explicit_start=True))
+                fp.write(yaml.safe_dump(layout, default_flow_style=False, explicit_start=True))
             else:
-                json.dump(layout, f, indent=2)
+                json.dump(layout, fp, indent=2)
 
         print(f'{GREEN}Successfully wrote Dock config to {args.config_path}{ENDC}')
 
     # Compare
     elif args.command == 'compare':
-        with open(args.config_path) as f:
-            config = yaml.load(f)
+        with open(args.config_path) as fp:
+            config = yaml.load(fp)
 
         dock_builder = DockBuilder(dock_plist_path)
         dock_builder.extract()

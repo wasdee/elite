@@ -18,8 +18,8 @@ class JSON(FileAction):
 
         # Load the JSON or create a fresh data structure if it doesn't exist
         try:
-            with open(path, 'r') as f:
-                json = jsonlib.load(f)
+            with open(path, 'r') as fp:
+                json = jsonlib.load(fp)
         except OSError:
             json = {}
         except jsonlib.JSONDecodeError:
@@ -35,10 +35,10 @@ class JSON(FileAction):
 
         # Write the updated JSON file
         try:
-            with open(path, 'w') as f:
-                jsonlib.dump(json, f, indent=self.indent)
+            with open(path, 'w') as fp:
+                jsonlib.dump(json, fp, indent=self.indent)
                 # Add a new line at the end of the file
-                print(file=f)
+                print(file=fp)
 
             self.set_file_attributes(path)
             return self.changed(path=path)

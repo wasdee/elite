@@ -100,8 +100,8 @@ class Plist(FileAction):
 
         # Load the plist or create a fresh data structure if it doesn't exist
         try:
-            with open(path, 'rb') as f:
-                plist = plistlib.load(f)
+            with open(path, 'rb') as fp:
+                plist = plistlib.load(fp)
         except OSError:
             plist = {}
         except plistlib.InvalidFileException:
@@ -115,8 +115,8 @@ class Plist(FileAction):
             source = os.path.expanduser(self.source)
 
             try:
-                with open(source, 'rb') as f:
-                    source_plist = plistlib.load(f)
+                with open(source, 'rb') as fp:
+                    source_plist = plistlib.load(fp)
                     source_plist.update(self.values)
                     values = source_plist
             except OSError:
@@ -134,8 +134,8 @@ class Plist(FileAction):
 
         # Write the updated plist
         try:
-            with open(path, 'wb') as f:
-                plistlib.dump(plist, f, fmt=fmt)
+            with open(path, 'wb') as fp:
+                plistlib.dump(plist, fp, fmt=fmt)
 
             self.set_file_attributes(path)
             return self.changed(path=path)

@@ -209,8 +209,8 @@ class File(FileAction):
         hash_md5 = hashlib.md5()
 
         try:
-            with open(path, 'rb') as f:
-                for block in iter(lambda: f.read(block_size), b''):
+            with open(path, 'rb') as fp:
+                for block in iter(lambda: fp.read(block_size), b''):
                     hash_md5.update(block)
         except OSError:
             raise ActionError('unable to determine checksum of file')
