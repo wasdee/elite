@@ -9,6 +9,7 @@ from ruamel.yaml import YAML
 
 # Configure YAML parsing to be safe by default
 yaml = YAML(typ='safe')
+yaml.default_flow_style = False
 
 # Colours
 BOLD = '\033[1m'
@@ -50,7 +51,7 @@ def main():
             plist_file = '<stdin>'
             plist_data = plistlib.loads(sys.stdin.buffer.read())
 
-        print(yaml.dump(plist_data, default_flow_style=False), end='')
+        print(yaml.dump(plist_data, sys.stdout), end='')
     except IOError:
         print(f'{RED}Error: The requested plist file {plist_file} was not found{ENDC}')
         sys.exit(1)
