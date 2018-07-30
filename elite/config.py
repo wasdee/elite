@@ -16,8 +16,8 @@ def include(loader, node):
 
     if isinstance(node, MappingNode):
         mapping = loader.construct_mapping(node, deep=True)
-        base_path = mapping['path']
-        extension = mapping['extension']
+        base_path = mapping.get('path', '.')
+        extension = mapping.get('extension', 'yaml')
         files = mapping['files']
 
         path = pathlib.Path(loader.loader.reader.stream.name).parent.joinpath(base_path)
@@ -104,6 +104,8 @@ class Config:
             raise ConfigError(f"the path specified {config_path} doesn't exist")
         except YAMLError:
             raise ConfigError(f'unable to parse the config file at path {config_path}')
+        except ValueError as e:
+            raise ConfigError(str(e))
 
         if not isinstance(config, dict):
             raise ConfigError('the top level of your config must contain key-value pairs')
