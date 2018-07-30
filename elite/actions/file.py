@@ -22,6 +22,11 @@ class File(FileAction):
     def source(self, source):
         if source and self.state == 'absent':
             raise ValueError("the 'source' argument may not be provided when 'state' is 'absent'")
+        if source and self.state == 'directory':
+            raise ValueError(
+                "the file action doesn't support copyng one directory to another, use the "
+                'rsync action instead'
+            )
         if not source and self.state == 'symlink':
             raise ValueError("the 'source' argument must be provided when 'state' is 'symlink'")
         self._source = source
@@ -36,6 +41,11 @@ class File(FileAction):
             raise ValueError('state must be file, directory, alias, symlink or absent')
         if self.source and state == 'absent':
             raise ValueError("the 'source' argument may not be provided when 'state' is 'absent'")
+        if self.source and state == 'directory':
+            raise ValueError(
+                "the file action doesn't support copyng one directory to another, use the "
+                'rsync action instead'
+            )
         if not self.source and state == 'symlink':
             raise ValueError("the 'source' argument must be provided when 'state' is 'symlink'")
         self._state = state
@@ -63,7 +73,10 @@ class File(FileAction):
                     return self.changed(path=path) if changed else self.ok(path=path)
 
                 # Copy the source to the destination
-                self.copy(source, path)
+                try:
+                    shutil.copyfile(source, path)
+                except OSError:
+                    raise ActionError('unable to copy source file to path requested')
 
                 self.set_file_attributes(path)
                 return self.changed(path=path)
@@ -74,34 +87,34 @@ class File(FileAction):
                     return self.changed(path=path) if changed else self.ok(path=path)
 
                 # Create an empty file at the destination path
-                self.create_empty(path)
+                try:
+                    with open(path, 'w'):
+                        pass
+                except IsADirectoryError:
+                    raise ActionError('the destination path is a directory')
+                except OSError:
+                    raise ActionError('unable to create an empty file at the path requested')
 
                 self.set_file_attributes(path)
                 return self.changed(path=path)
 
         elif self.state == 'directory':
-            if source:
-                raise ActionError(
-                    "the file action doesn't support copyng one directory to another, use the "
-                    'rsync action instead'
-                )
-            else:
-                # An existing directory was found
-                if os.path.isdir(path):
-                    changed = self.set_file_attributes(path)
-                    return self.changed(path=path) if changed else self.ok(path=path)
+            # An existing directory was found
+            if os.path.isdir(path):
+                changed = self.set_file_attributes(path)
+                return self.changed(path=path) if changed else self.ok(path=path)
 
-                # Clean any existing item in the path requested
-                self.remove(path)
+            # Clean any existing item in the path requested
+            self.remove(path)
 
-                # Create the directory requested
-                try:
-                    os.mkdir(path)
-                except OSError:
-                    raise ActionError('the requested directory could not be created')
+            # Create the directory requested
+            try:
+                os.mkdir(path)
+            except OSError:
+                raise ActionError('the requested directory could not be created')
 
-                self.set_file_attributes(path)
-                return self.changed(path=path)
+            self.set_file_attributes(path)
+            return self.changed(path=path)
 
         elif self.state == 'alias':
             # Only import PyObjC libraries if necessary (as they take time)
@@ -192,24 +205,6 @@ class File(FileAction):
             removed = self.remove(path)
             return self.changed(path=path) if removed else self.ok(path=path)
 
-    def copy(self, source, path, buffer_size=1024 * 8):
-        try:
-            with open(source, 'rb') as fsource:
-                with open(path, 'wb') as fpath:
-                    for buffer in iter(lambda: fsource.read(buffer_size), b''):
-                        fpath.write(buffer)
-        except OSError:
-            raise ActionError('unable to copy source file to path requested')
-
-    def create_empty(self, path):
-        try:
-            with open(path, 'w'):
-                pass
-        except IsADirectoryError:
-            raise ActionError('the destination path is a directory')
-        except OSError:
-            raise ActionError('unable to create an empty file at the path requested')
-
     def remove(self, path):
         if not os.path.exists(path) and not os.path.islink(path):
             return False
@@ -239,8 +234,8 @@ class File(FileAction):
 
         try:
             with open(path, 'rb') as f:
-                for buffer in iter(lambda: f.read(block_size), b''):
-                    hash_md5.update(buffer)
+                for block in iter(lambda: f.read(block_size), b''):
+                    hash_md5.update(block)
         except OSError:
             raise ActionError('unable to determine checksum of file')
 
