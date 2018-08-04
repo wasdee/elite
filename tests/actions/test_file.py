@@ -178,53 +178,53 @@ def test_symlink_not_writable():
 
 
 def test_symlink_destination_path_is_directory(tmpdir):
-    dp = tmpdir.mkdir('directory')
+    p = tmpdir.mkdir('directory')
 
-    file = File(path=dp.strpath, source='source.txt', state='symlink')
+    file = File(path=p.strpath, source='source.txt', state='symlink')
     assert file.process() == ActionResponse(
-        changed=True, data={'path': dp.join('source.txt').strpath}
+        changed=True, data={'path': p.join('source.txt').strpath}
     )
-    assert dp.join('source.txt').islink()
-    assert dp.join('source.txt').readlink() == 'source.txt'
+    assert p.join('source.txt').islink()
+    assert p.join('source.txt').readlink() == 'source.txt'
 
 
 def test_symlink_inexistent(tmpdir):
-    dp = tmpdir.join('testing.txt')
+    p = tmpdir.join('testing.txt')
 
-    file = File(path=dp.strpath, source='source.txt', state='symlink')
-    assert file.process() == ActionResponse(changed=True, data={'path': dp.strpath})
-    assert dp.islink()
-    assert dp.readlink() == 'source.txt'
+    file = File(path=p.strpath, source='source.txt', state='symlink')
+    assert file.process() == ActionResponse(changed=True, data={'path': p.strpath})
+    assert p.islink()
+    assert p.readlink() == 'source.txt'
 
 
 def test_symlink_exists_different(tmpdir):
-    dp = tmpdir.join('testing.txt')
-    dp.mksymlinkto('something.txt')
+    p = tmpdir.join('testing.txt')
+    p.mksymlinkto('something.txt')
 
-    file = File(path=dp.strpath, source='source.txt', state='symlink')
-    assert file.process() == ActionResponse(changed=True, data={'path': dp.strpath})
-    assert dp.islink()
-    assert dp.readlink() == 'source.txt'
+    file = File(path=p.strpath, source='source.txt', state='symlink')
+    assert file.process() == ActionResponse(changed=True, data={'path': p.strpath})
+    assert p.islink()
+    assert p.readlink() == 'source.txt'
 
 
 def test_symlink_exists_same(tmpdir):
-    dp = tmpdir.join('testing.txt')
-    dp.mksymlinkto('source.txt')
+    p = tmpdir.join('testing.txt')
+    p.mksymlinkto('source.txt')
 
-    file = File(path=dp.strpath, source='source.txt', state='symlink')
-    assert file.process() == ActionResponse(changed=False, data={'path': dp.strpath})
+    file = File(path=p.strpath, source='source.txt', state='symlink')
+    assert file.process() == ActionResponse(changed=False, data={'path': p.strpath})
 
 
 def test_absent_inexistent(tmpdir):
-    dp = tmpdir.join('testing.txt')
+    p = tmpdir.join('testing.txt')
 
-    file = File(path=dp.strpath, state='absent')
-    assert file.process() == ActionResponse(changed=False, data={'path': dp.strpath})
+    file = File(path=p.strpath, state='absent')
+    assert file.process() == ActionResponse(changed=False, data={'path': p.strpath})
 
 
 def test_absent_exists(tmpdir):
-    dp = tmpdir.join('testing.txt').ensure()
+    p = tmpdir.join('testing.txt').ensure()
 
-    file = File(path=dp.strpath, state='absent')
-    assert file.process() == ActionResponse(changed=True, data={'path': dp.strpath})
-    assert not dp.exists()
+    file = File(path=p.strpath, state='absent')
+    assert file.process() == ActionResponse(changed=True, data={'path': p.strpath})
+    assert not p.exists()
