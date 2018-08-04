@@ -177,3 +177,69 @@ def test_config_tag_first_existing_dir_inexistent(tmpdir):
 
     config = Config(p.strpath)
     assert config.path is None
+
+
+def test_config_tag_macos_font_exists(tmpdir):
+    p = tmpdir.join('config.yaml')
+    p.write(textwrap.dedent(f'''\
+        ---
+        font: !macos_font [Monaco, 16]
+    '''))
+
+    config = Config(p.strpath)
+    assert config.font.startswith(b'bplist00')
+
+
+def test_config_tag_macos_font_inexistent(tmpdir):
+    p = tmpdir.join('config.yaml')
+    p.write(textwrap.dedent(f'''\
+        ---
+        font: !macos_font [boo, 16]
+    '''))
+
+    with pytest.raises(ConfigError):
+        Config(p.strpath)
+
+
+def test_config_tag_macos_font_color_incorrect_number_of_arguments(tmpdir):
+    p = tmpdir.join('config.yaml')
+    p.write(textwrap.dedent(f'''\
+        ---
+        font: !macos_color [65, 65]
+    '''))
+
+    with pytest.raises(ConfigError):
+        Config(p.strpath)
+
+
+def test_config_tag_macos_font_color_invalid_colour(tmpdir):
+    p = tmpdir.join('config.yaml')
+    p.write(textwrap.dedent(f'''\
+        ---
+        font: !macos_color [65, 256, 65, 1.0]
+    '''))
+
+    with pytest.raises(ConfigError):
+        Config(p.strpath)
+
+
+def test_config_tag_macos_font_color_invalid_alpha(tmpdir):
+    p = tmpdir.join('config.yaml')
+    p.write(textwrap.dedent(f'''\
+        ---
+        font: !macos_color [65, 65, 65, 1.1]
+    '''))
+
+    with pytest.raises(ConfigError):
+        Config(p.strpath)
+
+
+def test_config_tag_macos_font_color(tmpdir):
+    p = tmpdir.join('config.yaml')
+    p.write(textwrap.dedent(f'''\
+        ---
+        font: !macos_color [65, 65, 255, 1.0]
+    '''))
+
+    config = Config(p.strpath)
+    assert config.font.startswith(b'bplist00')

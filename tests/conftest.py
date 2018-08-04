@@ -27,6 +27,7 @@ def elite(monkeypatch, printer):
     monkeypatch.setattr(os, 'getgid', lambda: 0)
     monkeypatch.setattr(os, 'getcwd', lambda: '/Users/fots/Documents/Development/macbuild/elite')
     monkeypatch.setattr(pwd, 'getpwuid', helpers.getpwuid)
+
     monkeypatch.setenv('SUDO_USER', 'fots')
     monkeypatch.setenv('SUDO_UID', '501')
     monkeypatch.setenv('SUDO_GID', '20')

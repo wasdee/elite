@@ -302,6 +302,44 @@ def test_file_action_set_file_attributes_change_group_not_writable(tmpdir, monke
         assert file_action.set_file_attributes(p.strpath)
 
 
+def test_file_action_set_file_attributes_change_flags_invalid(tmpdir):
+    p = tmpdir.join('test.txt').ensure()
+
+    file_action = FileAction(flags=['hmmm'])
+    with pytest.raises(ActionError):
+        file_action.set_file_attributes(p.strpath)
+
+
+def test_file_action_set_file_attributes_change_flags_different(tmpdir):
+    p = tmpdir.join('test.txt').ensure()
+
+    file_action = FileAction(flags=['hidden'])
+    assert file_action.set_file_attributes(p.strpath) is True
+    assert p.stat().flags == 0b1000000000000000
+
+
+def test_file_action_set_file_attributes_change_flags_same(tmpdir):
+    p = tmpdir.join('test.txt').ensure()
+    os.chflags(p.strpath, 0b1000000000000000)
+
+    file_action = FileAction(flags=['hidden'])
+    assert file_action.set_file_attributes(p.strpath) is False
+    assert p.stat().flags == 0b1000000000000000
+
+
+def test_file_action_set_file_attributes_change_flags_not_writable(tmpdir, monkeypatch):
+    p = tmpdir.join('test.txt').ensure()
+
+    # pylint: disable=unused-argument
+    def chflags(path, flags, follow_symlinks=True):
+        raise PermissionError(f"[Errno 1] Operation not permitted: '{p.strpath}'")
+    monkeypatch.setattr(os, 'chflags', chflags)
+
+    file_action = FileAction(flags=['hidden'])
+    with pytest.raises(ActionError):
+        assert file_action.set_file_attributes(p.strpath)
+
+
 def test_file_action_remove_inexistent(tmpdir):
     p = tmpdir.join('test')
 
