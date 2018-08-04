@@ -16,6 +16,6 @@ FLAGS = ReversibleDict({
     'user_append': 0b100,
     # user immutable flag (owner or super-user only)
     'user_immutable': 0b10,
-    # hidden flag [Hide item from GUI]
+    # hidden flag (hide item from GUI)
     'hidden': 0b1000000000000000
 })

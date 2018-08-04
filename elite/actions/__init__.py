@@ -77,7 +77,10 @@ class FileAction(Action):
             return False
 
         changed = False
-        stat = os.stat(path)
+        try:
+            stat = os.stat(path)
+        except OSError:
+            raise ActionError('unable to find the requested path specified')
 
         # Set the file mode if required
         if self.mode and oct(stat.st_mode)[-4:] != self.mode:
@@ -141,25 +144,23 @@ class FileAction(Action):
         return changed
 
     def remove(self, path):
-        if not os.path.exists(path) and not os.path.islink(path):
-            return False
-
         if os.path.isfile(path):
             try:
                 os.remove(path)
+                return True
             except OSError:
                 raise ActionError('existing file could not be removed')
-
-        elif os.path.isdir(path):
-            try:
-                shutil.rmtree(path)
-            except OSError:
-                raise ActionError('existing directory could not be recursively removed')
-
         elif os.path.islink(path):
             try:
                 os.remove(path)
+                return True
             except OSError:
                 raise ActionError('existing symlink could not be removed')
-
-        return True
+        elif os.path.isdir(path):
+            try:
+                shutil.rmtree(path)
+                return True
+            except OSError:
+                raise ActionError('existing directory could not be recursively removed')
+        else:
+            return False
