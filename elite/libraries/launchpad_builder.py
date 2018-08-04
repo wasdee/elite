@@ -482,4 +482,4 @@ class LaunchpadBuilder:
         self.widget_layout = self._build_layout(dashboard_root, parent_mapping)
         self.app_layout = self._build_layout(launchpad_root, parent_mapping)
 
-        return (self.widget_layout, self.app_layout)
+        return self.widget_layout, self.app_layout

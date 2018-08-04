@@ -215,4 +215,4 @@ class DockBuilder:
         self.app_layout = app_layout
         self.other_layout = other_layout
 
-        return (app_layout, other_layout)
+        return app_layout, other_layout
