@@ -46,7 +46,7 @@ class Download(FileAction):
                     # Check if the file already exists in the destination path
                     if os.path.exists(filepath):
                         changed = self.set_file_attributes(filepath)
-                        return self.changed(path=filepath) if changed else self.ok()
+                        return self.changed(path=filepath) if changed else self.ok(path=filepath)
 
                 # Perform the download to a binary file in chunks
                 block_size = 1024 * 8
