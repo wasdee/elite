@@ -36,7 +36,7 @@ class Git(FileAction):
                 # Checked out repo is on the wrong branch and must be switched
                 else:
                     self.run(
-                        ['git', 'checkout', self.branch], cwd=path,
+                        ['git', 'checkout', '--quiet', self.branch], cwd=path,
                         fail_error='unable to checkout requested branch'
                     )
                     return self.changed()
