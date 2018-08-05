@@ -107,6 +107,30 @@ def test_invalid_fmt_after_init():
         plist.fmt = 'boo'
 
 
+def test_plist_binary_fmt(tmpdir):
+    p = tmpdir.join('test.plist')
+    p.write(PLIST_HEADER + textwrap.dedent('''\
+        <plist version="1.0">
+        <dict>
+            <key>interests</key>
+            <array>
+                <string>chickens</string>
+                <string>coding</string>
+                <string>music</string>
+            </array>
+            <key>name</key>
+            <string>Fots</string>
+            <key>python_lover</key>
+            <true/>
+        </dict>
+        </plist>
+    '''))
+
+    plist = Plist(path=p.strpath, values={'python_lover': False}, fmt='binary')
+    assert plist.process() == ActionResponse(changed=True, data={'path': p.strpath})
+    assert p.read_binary().startswith(b'bplist00')
+
+
 def test_plist_same(tmpdir):
     p = tmpdir.join('test.plist')
     p.write(PLIST_HEADER + textwrap.dedent('''\
