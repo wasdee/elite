@@ -1,6 +1,13 @@
+import builtins
+import os
+import shutil
+
 import pytest
 from elite.actions import ActionError, ActionResponse
 from elite.actions.file import File
+
+
+FIXTURE_PATH = os.path.join(os.path.dirname(__file__), 'fixtures')
 
 
 def test_invalid_state():
@@ -87,6 +94,21 @@ def test_file_empty_exists(tmpdir):
 
     file = File(path=p.strpath, state='file')
     assert file.process() == ActionResponse(changed=False, data={'path': p.strpath})
+
+
+def test_file_source_not_readable(tmpdir, monkeypatch):
+    dp = tmpdir.join('testing.txt').ensure()
+    sp = tmpdir.join('source.txt').ensure()
+
+    # pylint: disable=unused-argument
+    def open_(file, mode='r'):
+        raise PermissionError(13, f"Permission denied: '{file}'")
+
+    monkeypatch.setattr(builtins, 'open', open_)
+
+    file = File(path=dp.strpath, source=sp.strpath, state='file')
+    with pytest.raises(ActionError):
+        file.process()
 
 
 def test_file_source_not_writable(tmpdir):
@@ -213,6 +235,75 @@ def test_symlink_exists_same(tmpdir):
 
     file = File(path=p.strpath, source='source.txt', state='symlink')
     assert file.process() == ActionResponse(changed=False, data={'path': p.strpath})
+
+
+def test_alias_not_writable(tmpdir):
+    sp = tmpdir.join('source.txt').ensure()
+
+    file = File(path='/alias', source=sp.strpath, state='alias')
+    with pytest.raises(ActionError):
+        file.process()
+
+
+def test_alias_destination_path_is_directory(tmpdir):
+    dp = tmpdir.mkdir('directory')
+    sp = tmpdir.join('source.txt').ensure()
+
+    file = File(path=dp.strpath, source=sp.strpath, state='alias')
+    assert file.process() == ActionResponse(
+        changed=True, data={'path': dp.join('source.txt').strpath}
+    )
+    assert dp.join('source.txt').isfile()
+    alias_data = dp.join('source.txt').read_binary()
+    assert alias_data.startswith(b'book')
+    assert b'source.txt' in alias_data
+
+
+def test_alias_inexistent_source(tmpdir):
+    p = tmpdir.join('testing.txt')
+
+    file = File(path=p.strpath, source='source.txt', state='alias')
+    with pytest.raises(ActionError):
+        file.process()
+
+
+def test_alias_inexistent_path(tmpdir):
+    dp = tmpdir.join('testing.txt')
+    sp = tmpdir.join('source.txt').ensure()
+
+    file = File(path=dp.strpath, source=sp.strpath, state='alias')
+    assert file.process() == ActionResponse(changed=True, data={'path': dp.strpath})
+    assert dp.isfile()
+    alias_data = dp.read_binary()
+    assert alias_data.startswith(b'book')
+    assert b'source.txt' in alias_data
+
+
+def test_alias_exists_different(tmpdir):
+    dp = tmpdir.join('test.alias')
+    shutil.copy(os.path.join(FIXTURE_PATH, 'file', 'test.alias'), dp.strpath)
+    sp = tmpdir.join('source.txt').ensure()
+
+    file = File(path=dp.strpath, source=sp.strpath, state='alias')
+    assert file.process() == ActionResponse(changed=True, data={'path': dp.strpath})
+    alias_data = dp.read_binary()
+    assert alias_data.startswith(b'book')
+    assert b'source.txt' in alias_data
+
+
+def test_alias_exists_same(tmpdir):
+    p = tmpdir.join('test.alias')
+
+    try:
+        # Create a file at the source path as it must exist for the alias to work
+        with open('/private/var/tmp/test.txt', 'w'):
+            pass
+        shutil.copy(os.path.join(FIXTURE_PATH, 'file', 'test.alias'), p.strpath)
+
+        file = File(path=p.strpath, source='/private/var/tmp/test.txt', state='alias')
+        assert file.process() == ActionResponse(changed=False, data={'path': p.strpath})
+    finally:
+        os.remove('/private/var/tmp/test.txt')
 
 
 def test_absent_inexistent(tmpdir):

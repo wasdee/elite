@@ -20,15 +20,21 @@ class File(FileAction):
 
     @source.setter
     def source(self, source):
-        if source and self.state == 'absent':
-            raise ValueError("the 'source' argument may not be provided when 'state' is 'absent'")
-        if source and self.state == 'directory':
-            raise ValueError(
-                "the file action doesn't support copyng one directory to another, use the "
-                'rsync action instead'
-            )
-        if not source and self.state == 'symlink':
-            raise ValueError("the 'source' argument must be provided when 'state' is 'symlink'")
+        if source:
+            if self.state == 'absent':
+                raise ValueError(
+                    "the 'source' argument may not be provided when 'state' is 'absent'"
+                )
+            elif self.state == 'directory':
+                raise ValueError(
+                    "the file action doesn't support copyng one directory to another, use the "
+                    'rsync action instead'
+                )
+        else:
+            if self.state in ['alias', 'symlink']:
+                raise ValueError(
+                    f"the 'source' argument must be provided when 'state' is '{self.state}'"
+                )
         self._source = source
 
     @property
@@ -39,15 +45,21 @@ class File(FileAction):
     def state(self, state):
         if state not in ['file', 'directory', 'alias', 'symlink', 'absent']:
             raise ValueError('state must be file, directory, alias, symlink or absent')
-        if self.source and state == 'absent':
-            raise ValueError("the 'source' argument may not be provided when 'state' is 'absent'")
-        if self.source and state == 'directory':
-            raise ValueError(
-                "the file action doesn't support copyng one directory to another, use the "
-                'rsync action instead'
-            )
-        if not self.source and state == 'symlink':
-            raise ValueError("the 'source' argument must be provided when 'state' is 'symlink'")
+        if self.source:
+            if state == 'absent':
+                raise ValueError(
+                    "the 'source' argument may not be provided when 'state' is 'absent'"
+                )
+            elif state == 'directory':
+                raise ValueError(
+                    "the file action doesn't support copyng one directory to another, use the "
+                    'rsync action instead'
+                )
+        else:
+            if state in ['alias', 'symlink']:
+                raise ValueError(
+                    f"the 'source' argument must be provided when 'state' is '{state}'"
+                )
         self._state = state
 
     def process(self):
@@ -148,7 +160,7 @@ class File(FileAction):
                             bookmark_data, NSURLBookmarkResolutionWithoutUI, None, None, None
                         )
                     )
-                    if source_url.path() == source:
+                    if source_url and source_url.path() == source:
                         changed = self.set_file_attributes(path)
                         return self.changed(path=path) if changed else self.ok(path=path)
 
@@ -167,12 +179,11 @@ class File(FileAction):
             )
 
             # Write the alias using the bookmark data
-            if bookmark_data:
-                _success, _error = NSURL.writeBookmarkData_toURL_options_error_(
-                    bookmark_data, path_url, NSURLBookmarkCreationSuitableForBookmarkFile, None
-                )
-            else:
-                raise ActionError('unable to create alias')
+            success, _error = NSURL.writeBookmarkData_toURL_options_error_(
+                bookmark_data, path_url, NSURLBookmarkCreationSuitableForBookmarkFile, None
+            )
+            if not success:
+                raise ActionError('unable to create an alias at the path requested')
 
             self.set_file_attributes(path)
             return self.changed(path=path)
