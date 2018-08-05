@@ -30,7 +30,6 @@ disable =
 
     # Disable line continuation checking as it is buggy and covered by flake8 anyway
     # (See https://github.com/PyCQA/pylint/issues/289 for further information)
-    # Note that this is also disabled by prospector by default but I left it here for clarity
     bad-continuation,
 
     # Disable checking that method could be a function in classes
@@ -45,7 +44,7 @@ disable =
 
     # Disable docstrings until code is properly documented
     # TODO: Remove this option when completing code documentation
-    missing-docstring,
+    missing-docstring
 
 [FORMAT]
 # Maximum number of characters on a single line
