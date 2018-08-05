@@ -20,8 +20,8 @@ class FileInfo(Action):
         path = os.path.expanduser(self.path)
 
         # Check if the filepath exists
-        if os.path.exists(path):
-            exists = True
+        if os.path.exists(path) or os.path.islink(path):
+            exists = os.path.exists(path)
 
             # Determine the type of file found
             if os.path.islink(path):
@@ -43,7 +43,7 @@ class FileInfo(Action):
                             bookmark_data, NSURLBookmarkResolutionWithoutUI, None, None, None
                         )
                     )
-                    source = source_url.path()
+                    source = source_url.path() if source_url else None
                 else:
                     file_type = 'file'
                     source = None
@@ -55,7 +55,7 @@ class FileInfo(Action):
             mount = os.path.ismount(path)
 
             # Determine what flags are set on the file
-            stat = os.stat(path)
+            stat = os.stat(path, follow_symlinks=False)
             flags_bin = stat.st_flags
             flags = [flag for flag, flag_bin in FLAGS.items() if flags_bin & flag_bin]
         else:

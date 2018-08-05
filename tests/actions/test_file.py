@@ -293,12 +293,12 @@ def test_alias_exists_different(tmpdir):
 
 def test_alias_exists_same(tmpdir):
     p = tmpdir.join('test.alias')
+    shutil.copy(os.path.join(FIXTURE_PATH, 'file', 'test.alias'), p.strpath)
 
     try:
         # Create a file at the source path as it must exist for the alias to work
         with open('/private/var/tmp/test.txt', 'w'):
             pass
-        shutil.copy(os.path.join(FIXTURE_PATH, 'file', 'test.alias'), p.strpath)
 
         file = File(path=p.strpath, source='/private/var/tmp/test.txt', state='alias')
         assert file.process() == ActionResponse(changed=False, data={'path': p.strpath})
