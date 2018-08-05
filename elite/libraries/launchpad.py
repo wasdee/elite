@@ -7,12 +7,12 @@ from collections import defaultdict
 from ..utils import batch, generate_uuid
 
 
-def get_launchpad_db_dir():
+def get_launchpad_db_path():
     """Determines the user's Launchpad database directory containing the SQLite database."""
     darwin_user_dir = subprocess.check_output(
-        ['/usr/bin/getconf', 'DARWIN_USER_DIR']
-    ).decode('utf-8').rstrip()
-    return os.path.join(darwin_user_dir, 'com.apple.dock.launchpad', 'db')
+        ['/usr/bin/getconf', 'DARWIN_USER_DIR'], encoding='utf-8'
+    )
+    return os.path.join(darwin_user_dir.rstrip(), 'com.apple.dock.launchpad', 'db', 'db')
 
 
 class Types:
@@ -28,24 +28,131 @@ class LaunchpadValidationError(Exception):
     """An error that occurs when validating a provided Launchpad layout"""
 
 
+class LaunchpadExtractor:
+    def __init__(self, launchpad_db_path):
+        # The Launchpad database location
+        self.launchpad_db_path = launchpad_db_path
+
+        # Connect to the Launchpad SQLite database
+        self.conn = sqlite3.connect(self.launchpad_db_path)
+
+    def _build_layout(self, root, parent_mapping):
+        """
+        Builds a data structure containing the layout for a particular type of data.
+
+        :param root: The root id of the tree being built
+        :param parent_mapping: The mapping between parent_ids and items
+
+        :return: the layout data structure that was built as a tuple where the first item is the
+                 widget layout and the second item is the app layout.
+        """
+        layout = []
+
+        # Iterate through pages
+        for page_id, *_ in parent_mapping[root]:
+            page_items = []
+
+            # Iterate through items
+            for row_id, type_, app_title, widget_title, group_title in parent_mapping[page_id]:
+                # An app has been encountered which is added to the page
+                if type_ == Types.APP:
+                    page_items.append(app_title)
+
+                # A widget has been encountered which is added to the page
+                elif type_ == Types.WIDGET:
+                    page_items.append(widget_title)
+
+                # A folder has been encountered
+                elif type_ == Types.FOLDER_ROOT:
+                    # Start a dict for the folder with its title and layout
+                    folder = {
+                        'folder_title': group_title,
+                        'folder_layout': []
+                    }
+
+                    # Iterate through folder pages
+                    for folder_page_id, *_ in parent_mapping[row_id]:
+                        folder_page_items = []
+
+                        # Iterate through folder items
+                        for (
+                            _folder_item_id, folder_item_type, folder_item_app_title,
+                            folder_widget_title, _folder_group_title
+                        ) in parent_mapping[folder_page_id]:
+
+                            # An app has been encountered which is being added to the folder page
+                            if folder_item_type == Types.APP:
+                                folder_page_items.append(folder_item_app_title)
+
+                            # A widget has been encountered which is being added to the folder page
+                            elif folder_item_type == Types.WIDGET:
+                                folder_page_items.append(folder_widget_title)
+
+                        # Add the page to the folder
+                        folder['folder_layout'].append(folder_page_items)
+
+                    # Add the folder item to the page
+                    page_items.append(folder)
+
+            # Add the page to the layout
+            layout.append(page_items)
+
+        return layout
+
+    def extract(self):
+        # Iterate through root elements for Launchpad apps and Dashboard widgets
+        for key, value in self.conn.execute('''
+            SELECT key, value
+            FROM dbinfo
+            WHERE key IN ('launchpad_root', 'dashboard_root');
+        '''):
+            if key == 'launchpad_root':
+                launchpad_root = int(value)
+            elif key == 'dashboard_root':
+                dashboard_root = int(value)
+
+        # Build a mapping between the parent_id and the associated items
+        parent_mapping = defaultdict(list)
+
+        # Obtain all items and their associated titles
+        for row_id, parent_id, type_, app_title, widget_title, group_title in self.conn.execute('''
+            SELECT items.rowid, items.parent_id, items.type,
+                   apps.title AS app_title,
+                   widgets.title AS widget_title,
+                   groups.title AS group_title
+            FROM items
+            LEFT JOIN apps ON apps.item_id = items.rowid
+            LEFT JOIN widgets ON widgets.item_id = items.rowid
+            LEFT JOIN groups ON groups.item_id = items.rowid
+            WHERE items.uuid NOT IN ('ROOTPAGE', 'HOLDINGPAGE',
+                                     'ROOTPAGE_DB', 'HOLDINGPAGE_DB',
+                                     'ROOTPAGE_VERS', 'HOLDINGPAGE_VERS')
+            ORDER BY items.parent_id, items.ordering
+        '''):
+            parent_mapping[parent_id].append((row_id, type_, app_title, widget_title, group_title))
+
+        widget_layout = self._build_layout(dashboard_root, parent_mapping)
+        app_layout = self._build_layout(launchpad_root, parent_mapping)
+
+        return widget_layout, app_layout
+
+
+def extract(launchpad_db_path=None):
+    if not launchpad_db_path:
+        launchpad_db_path = get_launchpad_db_path()
+
+    extractor = LaunchpadExtractor(launchpad_db_path)
+    return extractor.extract()
+
+
 class LaunchpadBuilder:
-    def __init__(self, launchpad_db_path, widget_layout=None, app_layout=None):
-        if widget_layout is None:
-            widget_layout = []
-
-        if app_layout is None:
-            app_layout = []
-
+    def __init__(self, widget_layout, app_layout, launchpad_db_path):
         # The Launchpad database location
         self.launchpad_db_path = launchpad_db_path
 
         # Widget and app layouts
         self.widget_layout = widget_layout
         self.app_layout = app_layout
-
-        # Widgets or apps that were not in the layout but found in the db
-        self.extra_widgets = []
-        self.extra_apps = []
 
         # Connect to the Launchpad SQLite database
         self.conn = sqlite3.connect(self.launchpad_db_path)
@@ -312,10 +419,10 @@ class LaunchpadBuilder:
         group_id = max(app_max_id, widget_max_id)
 
         # Add any extra widgets not found in the user's layout to the end of the layout
-        self.extra_widgets = self._add_extra_items(self.widget_layout, widget_mapping)
+        extra_widgets = self._add_extra_items(self.widget_layout, widget_mapping)
 
         # Add any extra apps not found in the user's layout to the end of the layout
-        self.extra_apps = self._add_extra_items(self.app_layout, app_mapping)
+        extra_apps = self._add_extra_items(self.app_layout, app_mapping)
 
         # Grab a cursor for our operations
         cursor = self.conn.cursor()
@@ -380,106 +487,12 @@ class LaunchpadBuilder:
         ''')
         self.conn.commit()
 
-    def _build_layout(self, root, parent_mapping):
-        """
-        Builds a data structure containing the layout for a particular type of data.
+        return extra_widgets, extra_apps
 
-        :param root: The root id of the tree being built
-        :param parent_mapping: The mapping between parent_ids and items
 
-        :return: the layout data structure that was built as a tuple where the first item is the
-                 widget layout and the second item is the app layout.
-        """
-        layout = []
+def build(widget_layout, app_layout, launchpad_db_path=None):
+    if not launchpad_db_path:
+        launchpad_db_path = get_launchpad_db_path()
 
-        # Iterate through pages
-        for page_id, *_ in parent_mapping[root]:
-            page_items = []
-
-            # Iterate through items
-            for row_id, type_, app_title, widget_title, group_title in parent_mapping[page_id]:
-                # An app has been encountered which is added to the page
-                if type_ == Types.APP:
-                    page_items.append(app_title)
-
-                # A widget has been encountered which is added to the page
-                elif type_ == Types.WIDGET:
-                    page_items.append(widget_title)
-
-                # A folder has been encountered
-                elif type_ == Types.FOLDER_ROOT:
-                    # Start a dict for the folder with its title and layout
-                    folder = {
-                        'folder_title': group_title,
-                        'folder_layout': []
-                    }
-
-                    # Iterate through folder pages
-                    for folder_page_id, *_ in parent_mapping[row_id]:
-                        folder_page_items = []
-
-                        # Iterate through folder items
-                        for (
-                            _folder_item_id, folder_item_type, folder_item_app_title,
-                            folder_widget_title, _folder_group_title
-                        ) in parent_mapping[folder_page_id]:
-
-                            # An app has been encountered which is being added to the folder page
-                            if folder_item_type == Types.APP:
-                                folder_page_items.append(folder_item_app_title)
-
-                            # A widget has been encountered which is being added to the folder page
-                            elif folder_item_type == Types.WIDGET:
-                                folder_page_items.append(folder_widget_title)
-
-                        # Add the page to the folder
-                        folder['folder_layout'].append(folder_page_items)
-
-                    # Add the folder item to the page
-                    page_items.append(folder)
-
-            # Add the page to the layout
-            layout.append(page_items)
-
-        return layout
-
-    def extract(self):
-        # Reset extra widgets and apps as we are reading a config that won't have such items
-        self.extra_widgets = []
-        self.extra_apps = []
-
-        # Iterate through root elements for Launchpad apps and Dashboard widgets
-        for key, value in self.conn.execute('''
-            SELECT key, value
-            FROM dbinfo
-            WHERE key IN ('launchpad_root', 'dashboard_root');
-        '''):
-            if key == 'launchpad_root':
-                launchpad_root = int(value)
-            elif key == 'dashboard_root':
-                dashboard_root = int(value)
-
-        # Build a mapping between the parent_id and the associated items
-        parent_mapping = defaultdict(list)
-
-        # Obtain all items and their associated titles
-        for row_id, parent_id, type_, app_title, widget_title, group_title in self.conn.execute('''
-            SELECT items.rowid, items.parent_id, items.type,
-                   apps.title AS app_title,
-                   widgets.title AS widget_title,
-                   groups.title AS group_title
-            FROM items
-            LEFT JOIN apps ON apps.item_id = items.rowid
-            LEFT JOIN widgets ON widgets.item_id = items.rowid
-            LEFT JOIN groups ON groups.item_id = items.rowid
-            WHERE items.uuid NOT IN ('ROOTPAGE', 'HOLDINGPAGE',
-                                     'ROOTPAGE_DB', 'HOLDINGPAGE_DB',
-                                     'ROOTPAGE_VERS', 'HOLDINGPAGE_VERS')
-            ORDER BY items.parent_id, items.ordering
-        '''):
-            parent_mapping[parent_id].append((row_id, type_, app_title, widget_title, group_title))
-
-        self.widget_layout = self._build_layout(dashboard_root, parent_mapping)
-        self.app_layout = self._build_layout(launchpad_root, parent_mapping)
-
-        return self.widget_layout, self.app_layout
+    builder = LaunchpadBuilder(widget_layout, app_layout, launchpad_db_path)
+    return builder.build()

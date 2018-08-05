@@ -8,11 +8,13 @@ from time import sleep
 
 from ruamel.yaml import YAML
 
-from ..libraries.launchpad_builder import LaunchpadBuilder, get_launchpad_db_dir
+from ..libraries import launchpad
 
 
 # Configure YAML parsing to be safe by default
 yaml = YAML(typ='safe')
+yaml.default_flow_style = False
+yaml.explicit_start = True
 
 # Colours
 BOLD = '\033[1m'
@@ -65,8 +67,8 @@ def main():
     print()
 
     # Determine the location of the SQLite Launchpad database
-    launchpad_db_dir = get_launchpad_db_dir()
-    launchpad_db_path = os.path.join(launchpad_db_dir, 'db')
+    launchpad_db_path = launchpad.get_launchpad_db_path()
+    launchpad_db_dir = os.path.dirname(launchpad_db_path)
 
     print(f'{BLUE}Using Launchpad database {launchpad_db_path}{ENDC}')
 
@@ -91,31 +93,24 @@ def main():
             sleep(3)
 
         print(f'{BLUE}Rebuilding the Launchpad database{ENDC}')
-        launchpad_builder = LaunchpadBuilder(
-            launchpad_db_path, config['widget_layout'], config['app_layout']
-        )
-        launchpad_builder.build()
-
-        # Report any missing items which were defined in the layout but not in the db
-        if launchpad_builder.missing_widgets:
-            print(f'{RED}Missing widgets found and skipped:{ENDC}')
-            for missing_widget in launchpad_builder.missing_widgets:
-                print(f'{RED}- {missing_widget}{ENDC}')
-
-        if launchpad_builder.missing_apps:
-            print(f'{RED}Missing apps found and skipped:{ENDC}')
-            for missing_app in launchpad_builder.missing_apps:
-                print(f'{RED}- {missing_app}{ENDC}')
+        try:
+            extra_widgets, extra_apps = launchpad.build(
+                config.get('widget_layout', []), config.get('app_layout', []), launchpad_db_path
+            )
+        except launchpad.LaunchpadValidationError as e:
+            print(f'{RED}Launchpad Build Error: {str(e)}{ENDC}')
+            print()
+            sys.exit(1)
 
         # Report any extra widgets or apps found that weren't in the layout
-        if launchpad_builder.extra_widgets:
+        if extra_widgets:
             print(f'{RED}Extra widgets found and added to the last page:{ENDC}')
-            for extra_widget in launchpad_builder.extra_widgets:
+            for extra_widget in extra_widgets:
                 print(f'{RED}- {extra_widget}{ENDC}')
 
-        if launchpad_builder.extra_apps:
+        if extra_apps:
             print(f'{RED}Extra apps found and added to the last page:{ENDC}')
-            for extra_app in launchpad_builder.extra_apps:
+            for extra_app in extra_apps:
                 print(f'{RED}- {extra_app}{ENDC}')
 
         # Restart the Dock to that Launchpad can read our new and updated database
@@ -126,17 +121,16 @@ def main():
 
     # Extract
     elif args.command == 'extract':
-        launchpad_builder = LaunchpadBuilder(launchpad_db_path)
-        launchpad_builder.extract()
+        widget_layout, app_layout = launchpad.extract(launchpad_db_path)
 
         layout = {
-            'widget_layout': launchpad_builder.widget_layout,
-            'app_layout': launchpad_builder.app_layout
+            'widget_layout': widget_layout,
+            'app_layout': app_layout
         }
 
         with open(args.config_path, 'w') as fp:
             if args.format == 'yaml':
-                fp.write(yaml.safe_dump(layout, default_flow_style=False, explicit_start=True))
+                yaml.dump(layout, fp)
             else:
                 json.dump(layout, fp, indent=2)
 
@@ -145,17 +139,16 @@ def main():
     # Compare
     elif args.command == 'compare':
         with open(args.config_path) as fp:
-            config = yaml.load(fp)
+            layout_config = yaml.load(fp)
 
-        launchpad_builder = LaunchpadBuilder(launchpad_db_path)
-        launchpad_builder.extract()
+        widget_layout_existing, app_layout_existing = launchpad.extract(launchpad_db_path)
 
-        layout = {
-            'widget_layout': launchpad_builder.widget_layout,
-            'app_layout': launchpad_builder.app_layout
+        layout_existing = {
+            'widget_layout': widget_layout_existing,
+            'app_layout': app_layout_existing
         }
 
-        if config == layout:
+        if layout_config == layout_existing:
             print(f'{GREEN}The configuration provided is identical to the current layout{ENDC}')
         else:
             print(f'{RED}The configuration provided is different to the current layout{ENDC}')

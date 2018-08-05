@@ -6,11 +6,13 @@ import sys
 
 from ruamel.yaml import YAML
 
-from ..libraries.dock_builder import DockBuilder, get_dock_plist_path
+from ..libraries import dock
 
 
 # Configure YAML parsing to be safe by default
 yaml = YAML(typ='safe')
+yaml.default_flow_style = False
+yaml.explicit_start = True
 
 # Colours
 BOLD = '\033[1m'
@@ -59,7 +61,7 @@ def main():
     print()
 
     # Determine the location of the Dock plist file
-    dock_plist_path = get_dock_plist_path()
+    dock_plist_path = dock.get_dock_plist_path()
 
     print(f'{BLUE}Using Dock plist {dock_plist_path}{ENDC}')
 
@@ -69,10 +71,9 @@ def main():
             config = yaml.load(fp)
 
         print(f'{BLUE}Rebuilding the Dock plist{ENDC}')
-        dock_builder = DockBuilder(
-            dock_plist_path, config.get('app_layout', []), config.get('other_layout', [])
+        dock.build(
+            config.get('app_layout', []), config.get('other_layout', []), dock_plist_path
         )
-        dock_builder.build()
 
         # Restart the Dock so that the new plist file can be utilised
         print(f'{BLUE}Restarting the Dock to apply the new plist{ENDC}')
@@ -84,17 +85,16 @@ def main():
 
     # Extract
     elif args.command == 'extract':
-        dock_builder = DockBuilder(dock_plist_path)
-        dock_builder.extract()
+        app_layout, other_layout = dock.extract(dock_plist_path)
 
         layout = {
-            'app_layout': dock_builder.app_layout,
-            'other_layout': dock_builder.other_layout
+            'app_layout': app_layout,
+            'other_layout': other_layout
         }
 
         with open(args.config_path, 'w') as fp:
             if args.format == 'yaml':
-                fp.write(yaml.safe_dump(layout, default_flow_style=False, explicit_start=True))
+                yaml.dump(layout, fp)
             else:
                 json.dump(layout, fp, indent=2)
 
@@ -105,23 +105,22 @@ def main():
         with open(args.config_path) as fp:
             config = yaml.load(fp)
 
-        dock_builder = DockBuilder(dock_plist_path)
-        dock_builder.extract()
+        app_layout_existing, other_layout_existing = dock.extract(dock_plist_path)
 
-        extracted_layout = {
-            'app_layout': dock_builder.app_layout,
-            'other_layout': dock_builder.other_layout
+        layout_existing = {
+            'app_layout': app_layout_existing,
+            'other_layout': other_layout_existing
         }
 
-        dock_builder = DockBuilder(
-            dock_plist_path, config.get('app_layout', []), config.get('other_layout', [])
+        app_layout_normalised, other_layout_normalised = dock.normalise(
+            config.get('app_layout', []), config.get('other_layout', [])
         )
-        config_layout = {
-            'app_layout': dock_builder.app_layout,
-            'other_layout': dock_builder.other_layout
+        layout_config = {
+            'app_layout': app_layout_normalised,
+            'other_layout': other_layout_normalised
         }
 
-        if config_layout == extracted_layout:
+        if layout_config == layout_existing:
             print(f'{GREEN}The configuration provided is identical to the current layout{ENDC}')
         else:
             print(f'{RED}The configuration provided is different to the current layout{ENDC}')
