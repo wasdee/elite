@@ -95,8 +95,10 @@ class Plist(FileAction):
         path = os.path.expanduser(self.determine_plist_path())
 
         # Set the fmt of the output file
-        # pylint: disable=no-member
-        fmt = plistlib.FMT_XML if self.fmt == 'xml' else plistlib.FMT_BINARY
+        if self.fmt == 'xml':
+            fmt = plistlib.FMT_XML  # pylint: disable=no-member
+        else:
+            fmt = plistlib.FMT_BINARY  # pylint: disable=no-member
 
         # Load the plist or create a fresh data structure if it doesn't exist
         try:

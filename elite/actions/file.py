@@ -130,8 +130,7 @@ class File(FileAction):
 
         elif self.state == 'alias':
             # Only import PyObjC libraries if necessary (as they take time)
-            # pylint: disable=no-name-in-module
-            from Foundation import (
+            from Foundation import (  # pylint: disable=no-name-in-module
                 NSURL, NSURLBookmarkCreationSuitableForBookmarkFile,
                 NSURLBookmarkResolutionWithoutUI
             )
@@ -159,6 +158,7 @@ class File(FileAction):
                         NSURL.URLByResolvingBookmarkData_options_relativeToURL_bookmarkDataIsStale_error_(  # noqa: E501
                             bookmark_data, NSURLBookmarkResolutionWithoutUI, None, None, None
                         )
+                        # pylint: enable=line-too-long
                     )
                     if source_url and source_url.path() == source:
                         changed = self.set_file_attributes(path)
@@ -176,6 +176,7 @@ class File(FileAction):
                 source_url.bookmarkDataWithOptions_includingResourceValuesForKeys_relativeToURL_error_(  # noqa: E501
                     NSURLBookmarkCreationSuitableForBookmarkFile, None, None, None
                 )
+                # pylint: enable=line-too-long
             )
 
             # Write the alias using the bookmark data

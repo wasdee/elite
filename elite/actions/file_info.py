@@ -13,8 +13,9 @@ class FileInfo(Action):
     def process(self):
         # Only import PyObjC libraries if necessary (as they take time)
         if self.aliases:
-            # pylint: disable=no-name-in-module
-            from Foundation import NSURL, NSURLBookmarkResolutionWithoutUI
+            from Foundation import (  # pylint: disable=no-name-in-module
+                NSURL, NSURLBookmarkResolutionWithoutUI
+            )
 
         # Ensure that home directories are taken into account
         path = os.path.expanduser(self.path)
@@ -42,6 +43,7 @@ class FileInfo(Action):
                         NSURL.URLByResolvingBookmarkData_options_relativeToURL_bookmarkDataIsStale_error_(  # noqa: E501
                             bookmark_data, NSURLBookmarkResolutionWithoutUI, None, None, None
                         )
+                        # pylint: enable=line-too-long
                     )
                     source = source_url.path() if source_url else None
                 else:

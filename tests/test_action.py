@@ -120,8 +120,7 @@ def test_file_action_set_file_attributes_change_mode_not_writable(tmpdir, monkey
     p = tmpdir.join('test.txt').ensure()
     p.chmod(0o600)
 
-    # pylint: disable=unused-argument
-    def chmod(path, mode, follow_symlinks=True):
+    def chmod(path, mode, follow_symlinks=True):  # pylint: disable=unused-argument
         raise PermissionError(f"[Errno 1] Operation not permitted: '{p.strpath}'")
     monkeypatch.setattr(os, 'chmod', chmod)
 
@@ -135,8 +134,7 @@ def test_file_action_set_file_attributes_change_owner_inexistent(tmpdir, monkeyp
 
     monkeypatch.setattr(pwd, 'getpwnam', helpers.getpwnam)
 
-    # pylint: disable=unused-argument
-    def stat(path, follow_symlinks=True):
+    def stat(path, follow_symlinks=True):  # pylint: disable=unused-argument
         if path == p.strpath:
             return os.stat_result(
                 (33188, 3955467, 16777220, 1, 501, 20, 1308, 1533358970, 1532951575, 1532951575)
@@ -155,8 +153,7 @@ def test_file_action_set_file_attributes_change_owner_same(tmpdir, monkeypatch):
 
     monkeypatch.setattr(pwd, 'getpwnam', helpers.getpwnam)
 
-    # pylint: disable=unused-argument
-    def stat(path, follow_symlinks=True):
+    def stat(path, follow_symlinks=True):  # pylint: disable=unused-argument
         if path == p.strpath:
             return os.stat_result(
                 (33188, 3955467, 16777220, 1, 501, 20, 1308, 1533358970, 1532951575, 1532951575)
@@ -174,8 +171,7 @@ def test_file_action_set_file_attributes_change_owner_different(tmpdir, monkeypa
 
     monkeypatch.setattr(pwd, 'getpwnam', helpers.getpwnam)
 
-    # pylint: disable=unused-argument
-    def stat(path, follow_symlinks=True):
+    def stat(path, follow_symlinks=True):  # pylint: disable=unused-argument
         if path == p.strpath:
             return os.stat_result(
                 (33188, 3955467, 16777220, 1, 502, 20, 1308, 1533358970, 1532951575, 1532951575)
@@ -196,8 +192,7 @@ def test_file_action_set_file_attributes_change_owner_not_writable(tmpdir, monke
 
     monkeypatch.setattr(pwd, 'getpwnam', helpers.getpwnam)
 
-    # pylint: disable=unused-argument
-    def stat(path, follow_symlinks=True):
+    def stat(path, follow_symlinks=True):  # pylint: disable=unused-argument
         if path == p.strpath:
             return os.stat_result(
                 (33188, 3955467, 16777220, 1, 502, 20, 1308, 1533358970, 1532951575, 1532951575)
@@ -206,8 +201,7 @@ def test_file_action_set_file_attributes_change_owner_not_writable(tmpdir, monke
             raise FileNotFoundError(f"[Errno 2] No such file or directory: '{path}'")
     monkeypatch.setattr(os, 'stat', stat)
 
-    # pylint: disable=unused-argument
-    def chown(path, uid, gid, follow_symlinks=True):
+    def chown(path, uid, gid, follow_symlinks=True):  # pylint: disable=unused-argument
         raise PermissionError(f"[Errno 1] Operation not permitted: '{p.strpath}'")
     monkeypatch.setattr(os, 'chown', chown)
 
@@ -221,8 +215,7 @@ def test_file_action_set_file_attributes_change_group_inexistent(tmpdir, monkeyp
 
     monkeypatch.setattr(grp, 'getgrnam', helpers.getgrnam)
 
-    # pylint: disable=unused-argument
-    def stat(path, follow_symlinks=True):
+    def stat(path, follow_symlinks=True):  # pylint: disable=unused-argument
         if path == p.strpath:
             return os.stat_result(
                 (33188, 3955467, 16777220, 1, 501, 20, 1308, 1533358970, 1532951575, 1532951575)
@@ -241,8 +234,7 @@ def test_file_action_set_file_attributes_change_group_same(tmpdir, monkeypatch):
 
     monkeypatch.setattr(grp, 'getgrnam', helpers.getgrnam)
 
-    # pylint: disable=unused-argument
-    def stat(path, follow_symlinks=True):
+    def stat(path, follow_symlinks=True):  # pylint: disable=unused-argument
         if path == p.strpath:
             return os.stat_result(
                 (33188, 3955467, 16777220, 1, 501, 20, 1308, 1533358970, 1532951575, 1532951575)
@@ -260,8 +252,7 @@ def test_file_action_set_file_attributes_change_group_different(tmpdir, monkeypa
 
     monkeypatch.setattr(grp, 'getgrnam', helpers.getgrnam)
 
-    # pylint: disable=unused-argument
-    def stat(path, follow_symlinks=True):
+    def stat(path, follow_symlinks=True):  # pylint: disable=unused-argument
         if path == p.strpath:
             return os.stat_result(
                 (33188, 3955467, 16777220, 1, 501, 21, 1308, 1533358970, 1532951575, 1532951575)
@@ -282,8 +273,7 @@ def test_file_action_set_file_attributes_change_group_not_writable(tmpdir, monke
 
     monkeypatch.setattr(grp, 'getgrnam', helpers.getgrnam)
 
-    # pylint: disable=unused-argument
-    def stat(path, follow_symlinks=True):
+    def stat(path, follow_symlinks=True):  # pylint: disable=unused-argument
         if path == p.strpath:
             return os.stat_result(
                 (33188, 3955467, 16777220, 1, 501, 21, 1308, 1533358970, 1532951575, 1532951575)
@@ -292,8 +282,7 @@ def test_file_action_set_file_attributes_change_group_not_writable(tmpdir, monke
             raise FileNotFoundError(f"[Errno 2] No such file or directory: '{path}'")
     monkeypatch.setattr(os, 'stat', stat)
 
-    # pylint: disable=unused-argument
-    def chown(path, uid, gid, follow_symlinks=True):
+    def chown(path, uid, gid, follow_symlinks=True):  # pylint: disable=unused-argument
         raise PermissionError(f"[Errno 1] Operation not permitted: '{p.strpath}'")
     monkeypatch.setattr(os, 'chown', chown)
 
@@ -330,8 +319,7 @@ def test_file_action_set_file_attributes_change_flags_same(tmpdir):
 def test_file_action_set_file_attributes_change_flags_not_writable(tmpdir, monkeypatch):
     p = tmpdir.join('test.txt').ensure()
 
-    # pylint: disable=unused-argument
-    def chflags(path, flags, follow_symlinks=True):
+    def chflags(path, flags, follow_symlinks=True):  # pylint: disable=unused-argument
         raise PermissionError(f"[Errno 1] Operation not permitted: '{p.strpath}'")
     monkeypatch.setattr(os, 'chflags', chflags)
 
@@ -363,8 +351,7 @@ def test_file_action_remove_file(tmpdir):
 def test_file_action_remove_file_not_writable(tmpdir, monkeypatch):
     p = tmpdir.join('test').ensure()
 
-    # pylint: disable=unused-argument
-    def remove(path):
+    def remove(path):  # pylint: disable=unused-argument
         raise PermissionError(f"[Errno 13] Permission denied: '{p.strpath}'")
     monkeypatch.setattr(os, 'remove', remove)
 
@@ -386,8 +373,7 @@ def test_file_action_remove_symlink_not_writable(tmpdir, monkeypatch):
     p = tmpdir.join('testing.txt')
     p.mksymlinkto('something.txt')
 
-    # pylint: disable=unused-argument
-    def remove(path):
+    def remove(path):  # pylint: disable=unused-argument
         raise PermissionError(f"[Errno 13] Permission denied: '{p.strpath}'")
     monkeypatch.setattr(os, 'remove', remove)
 
@@ -409,8 +395,7 @@ def test_file_action_remove_directory(tmpdir):
 def test_file_action_remove_directory_not_writable(tmpdir, monkeypatch):
     p = tmpdir.mkdir('test')
 
-    # pylint: disable=unused-argument
-    def rmtree(path):
+    def rmtree(path):  # pylint: disable=unused-argument
         raise PermissionError(f"[Errno 13] Permission denied: '{p.strpath}'")
     monkeypatch.setattr(shutil, 'rmtree', rmtree)
 

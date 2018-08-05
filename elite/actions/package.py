@@ -39,6 +39,7 @@ class Package(Action):
         # Distribution file was found which points to multiple other packages
         # pylint: disable=line-too-long
         # https://developer.apple.com/library/content/documentation/DeveloperTools/Reference/DistributionDefinitionRef/Chapters/Distribution_XML_Ref.html
+        # pylint: enable=line-too-long
         if os.path.exists(os.path.join(package_extract_dir, 'Distribution')):
             # Create a list to store all identifiers found
             identifiers = []

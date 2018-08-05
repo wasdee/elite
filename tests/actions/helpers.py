@@ -13,8 +13,9 @@ CommandMapping = namedtuple(
 def build_run(fixture_subpath, command_mappings):
     fixture_path = os.path.join(os.path.dirname(__file__), 'fixtures', fixture_subpath)
 
-    # pylint: disable=unused-argument
-    def run(self, command, ignore_fail=False, fail_error=None, **kwargs):
+    def run(  # pylint: disable=unused-argument
+        self, command, ignore_fail=False, fail_error=None, **kwargs
+    ):
         for (
             expected_command, expected_returncode, stdout, stdout_filename, stderr, stderr_filename
         ) in command_mappings:

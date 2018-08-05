@@ -1,6 +1,5 @@
-# pylint: disable=no-name-in-module
-from Foundation import NSBundle
-from LaunchServices import (
+from Foundation import NSBundle  # pylint: disable=no-name-in-module
+from LaunchServices import (  # pylint: disable=no-name-in-module
     LSCopyDefaultHandlerForURLScheme, LSCopyDefaultRoleHandlerForContentType,
     LSSetDefaultHandlerForURLScheme, LSSetDefaultRoleHandlerForContentType, kLSRolesAll
 )
@@ -52,7 +51,6 @@ class Handler(Action):
         # The user is trying to change the default application for a content type
         if self.content_type:
             # Get the default bundle id for the specified content type
-            # pylint: disable=line-too-long
             default_bundle_id = LSCopyDefaultRoleHandlerForContentType(
                 self.content_type, kLSRolesAll
             )
