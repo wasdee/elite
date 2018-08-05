@@ -28,15 +28,32 @@ class Find(FileAction):
         if not os.path.isdir(path):
             raise ActionError('unable to find a directory with the path provided')
 
+        # Obtain the owner and group if necessary
+        if self.owner:
+            try:
+                uid = pwd.getpwnam(self.owner).pw_uid
+            except KeyError:
+                raise ActionError('the owner requested was not found')
+        else:
+            uid = None
+
+        if self.group:
+            try:
+                gid = grp.getgrnam(self.group).gr_gid
+            except KeyError:
+                raise ActionError('the group requested was not found')
+        else:
+            gid = None
+
         # Find all the paths with the filters provided and return them to the user
         paths = self.walk(
-            path, path.count(os.sep), self.mode, self.owner, self.group, self.flags,
+            path, path.count(os.sep), self.mode, uid, gid, self.flags,
             self.min_depth, self.max_depth, self.types, self.patterns, self.aliases
         )
-        return self.ok(paths=paths)
+        return self.ok(paths=sorted(paths))
 
     def walk(
-        self, path, root_depth, mode=None, owner=None, group=None, flags=None, min_depth=None,
+        self, path, root_depth, mode=None, uid=None, gid=None, flags=None, min_depth=None,
         max_depth=None, types=None, patterns=None, aliases=True
     ):
         # Only import PyObjC libraries if necessary (as they take time)
@@ -72,21 +89,12 @@ class Find(FileAction):
                     file_type = 'file'
 
             # Determine the mode, owner, group and flags if requested
-            if mode or owner or group or flags:
-                if mode:
-                    mode_bin = int(mode, 8)
+            if mode is not None or uid is not None or gid is not None or flags:
+                stat = os.stat(item.path, follow_symlinks=False)
 
-                if owner:
-                    try:
-                        uid = pwd.getpwnam(owner).pw_uid
-                    except KeyError:
-                        raise ActionError('the owner requested was not found')
-
-                if group:
-                    try:
-                        gid = grp.getgrnam(group).gr_gid
-                    except KeyError:
-                        raise ActionError('the group requested was not found')
+                if mode is not None:
+                    mode_int = int(mode, 8)
+                    stat_mode_int = int(oct(stat.st_mode)[-4:], 8)
 
                 if flags:
                     flags_bin = 0
@@ -95,16 +103,14 @@ class Find(FileAction):
                             raise ActionError('the specified flag is unsupported')
                         flags_bin |= FLAGS[flag]
 
-                stat = os.stat(item.path, follow_symlinks=False)
-
             # Determine if the current item should be added to our paths list based on filters
             if (
                 (not min_depth or depth >= min_depth) and
                 (not types or file_type in types) and
                 (not patterns or any(fnmatch(item.path, p) for p in patterns)) and
-                (not mode or stat.st_mode == mode_bin) and
-                (not owner or stat.st_uid == uid) and
-                (not group or stat.st_gid == gid) and
+                (mode is None or stat_mode_int == mode_int) and
+                (uid is None or stat.st_uid == uid) and
+                (gid is None or stat.st_gid == gid) and
                 (not flags or stat.st_flags & flags_bin)
             ):
                 paths.append(item.path)
@@ -112,7 +118,7 @@ class Find(FileAction):
             # Recurse through directories
             if item.is_dir() and not item.is_symlink():
                 paths.extend(self.walk(
-                    item.path, root_depth, mode, owner, group, flags, min_depth, max_depth,
+                    item.path, root_depth, mode, uid, gid, flags, min_depth, max_depth,
                     types, patterns, aliases
                 ))
 
