@@ -51,7 +51,7 @@ def main():
             plist_file = '<stdin>'
             plist_data = plistlib.loads(sys.stdin.buffer.read())
 
-        print(yaml.dump(plist_data, sys.stdout), end='')
+        yaml.dump(plist_data, sys.stdout)
     except IOError:
         print(f'{RED}Error: The requested plist file {plist_file} was not found{ENDC}')
         sys.exit(1)
