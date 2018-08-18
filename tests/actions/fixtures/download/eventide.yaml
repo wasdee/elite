@@ -1,0 +1,33 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Connection: [close]
+      Host: [www.eventideaudio.com]
+      User-Agent: [Python-urllib/3.7]
+    method: GET
+    uri: https://www.eventideaudio.com/downloader/1165
+  response:
+    body:
+      string: !!binary |
+        eAFjYBgFoyEwGgKjITAaAiMxBAAGAAABeAHt0CEKAgEUBNDBAwgbDDaj0TMoiN0TCC4iYrJp1Wy0
+        yTZhMZm8hvfwAEaFtdg8wPtl/jDtZTqeJHVRFxmUo+f1fKq6++NrWN0P7dtjt+2nuUun9f2amGeZ
+        TVbpfXKdWRYpf3aFAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQ
+    headers:
+      Cache-Control: [must-revalidate]
+      Cache-control: [no-cache="set-cookie"]
+      Connection: [Close]
+      Content-Description: [File Transfer]
+      Content-Disposition: [attachment; filename="2016-Stereo-Room-3.1.3-osx-installer.dmg"]
+      Content-Length: ['56761917']
+      Content-Type: [application/x-apple-diskimage]
+      Date: ['Sat, 18 Aug 2018 02:12:48 GMT']
+      Expires: ['0']
+      Pragma: [public]
+      Server: [Apache]
+      Set-Cookie: [AWSELB=912F4B0816DB77AE5A4026A0BA6C0D17EAB2D981C562CA894426038C99A3BEE8BBCFD8CCA6706D360BFD5B52D2A89FA819B02B193D679037FBB6B3210504394184B51291;PATH=/]
+      Vary: [Host]
+      X-Content-Type-Options: [nosniff, nosniff]
+      X-Drupal-Cache: [MISS]
+    status: {code: 200, message: OK}
+version: 1

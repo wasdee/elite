@@ -1,0 +1,44 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Connection: [close]
+      Host: [uhedownloads-heckmannaudiogmb.netdna-ssl.com]
+      User-Agent: [Python-urllib/3.7]
+    method: GET
+    uri: https://uhedownloads-heckmannaudiogmb.netdna-ssl.com/releases/Zebra2_28_7422_Mac.zip
+  response:
+    body:
+      string: !!binary |
+        UEsDBAoAAAAAAJaKbkwAAAAAAAAAAAAAAAAQABwAWmVicmEyXzc0MjJfTWFjL1VUCQAD20upWlJ5
+        Dlt1eAsAAQT2AQAABBQAAABQSwMEFAAAAAgAlopuTDFKOcoDGAAAb0UAACQAHABaZWJyYTJfNzQy
+        Ml9NYWMvQWNrbm93bGVkZ2VtZW50cy50eHRVVAkAA9tLqVpSeQ5bdXgLAAEE9gEAAAQUAAAA
+    headers:
+      Accept-Ranges: [bytes]
+      Cache-Control: ['public, max-age=180, s-maxage=3600, no-transform']
+      Connection: [close]
+      Content-Length: ['90825799']
+      Content-Security-Policy: ['default-src ''self'' u-he.com *.u-he.com https://*.twitter.com
+          https://*.twimg.com https://*.typekit.net https://*.youtube.com https://*.youtube-nocookie.com;
+          script-src ''self'' ''unsafe-inline'' https://*.jquery.com https://*.bootstrapcdn.com
+          https://*.twitter.com https://*.twimg.com https://*.typekit.net https://*.googletagmanager.com
+          https://*.google-analytics.com https://*.googleapis.com https://*.yahooapis.com;
+          style-src ''self'' ''unsafe-inline'' https://*.bootstrapcdn.com https://*.twitter.com
+          https://*.twimg.com https://*.typekit.net https://*.webtype.com; img-src
+          ''self'' data: https://*.twitter.com https://*.twimg.com https://*.typekit.net
+          https://*.webtype.com https://*.google-analytics.com; object-src ''self'';
+          media-src ''self'' https://*; font-src ''self'' https://*.typekit.net https://*.webtype.com
+          https://*.bootstrapcdn.com']
+      Content-Type: [application/zip]
+      Date: ['Sat, 18 Aug 2018 02:56:33 GMT']
+      ETag: ['"569e447-56d7dbad9dd73"']
+      Last-Modified: ['Wed, 15 Aug 2018 21:40:00 GMT']
+      Referrer-Policy: [no-referrer-when-downgrade]
+      Server: [NetDNA-cache/2.2]
+      Strict-Transport-Security: [max-age=2592000]
+      X-Cache: [EXPIRED]
+      X-Content-Type-Options: [nosniff]
+      X-Frame-Options: [SAMEORIGIN]
+      X-Xss-Protection: [1; mode=block]
+    status: {code: 200, message: OK}
+version: 1
