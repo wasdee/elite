@@ -26,15 +26,18 @@ class Archive(Action):
             raise ActionError('the archive source provided is not a RAR or ZIP file')
 
         # Create an object of the appropriate type based on the archive type
-        if archive_type == 'zip':
-            archive = zipfile.ZipFile(self.source)
-        else:
-            try:
-                archive = rarfile.RarFile(self.source)
-            except rarfile.NeedFirstVolume:
-                raise ActionError(
-                    'the archive provided is not the first volume of a multi-part set'
-                )
+        try:
+            if archive_type == 'zip':
+                archive = zipfile.ZipFile(self.source)
+            else:
+                try:
+                    archive = rarfile.RarFile(self.source)
+                except rarfile.NeedFirstVolume:
+                    raise ActionError(
+                        'the archive provided is not the first volume of a multi-part set'
+                    )
+        except (rarfile.BadRarFile, zipfile.BadZipFile):
+            raise ActionError('the contents of the archive provided are not valid')
 
         changed = False
 
@@ -80,7 +83,7 @@ class Archive(Action):
             # A file has been encountered
             else:
                 # Verify that the directory we're writing in is present (especially useful
-                # for ZIP archives)
+                # for archives where only the files have been added and not the directories)
                 output_dirname = os.path.dirname(output_filepath)
                 if not os.path.exists(output_dirname):
                     os.makedirs(output_dirname)
