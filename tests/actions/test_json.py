@@ -92,7 +92,7 @@ def test_json_invalid_file_parsing(tmpdir):
         json.process()
 
 
-def test_prefs_not_writable():
+def test_json_not_writable():
     json = JSON(path='/', values={'name': 'Fots'})
     with pytest.raises(ActionError):
         json.process()

@@ -264,10 +264,9 @@ def test_pref_invalid_file_value(tmpdir, monkeypatch):
     monkeypatch.setattr(Spotify, 'determine_pref_path', lambda self: p.strpath)
 
     spotify = Spotify(values={
-            'autologin.canonical_username': 'fots',
-            'autologin.username': 'fots'
-        }
-    )
+        'autologin.canonical_username': 'fots',
+        'autologin.username': 'fots'
+    })
     with pytest.raises(ActionError):
         spotify.process()
 
