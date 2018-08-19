@@ -1,3 +1,4 @@
+import sys
 from functools import wraps
 
 from . import ansi
@@ -29,16 +30,19 @@ def automate():
             except ConfigError as e:
                 print()
                 print(f'{ansi.RED}Config Error: {e}{ansi.ENDC}')
+                sys.exit(1)
 
             except EliteRuntimeError as e:
                 print()
                 print(f'{ansi.RED}Elite Runtime Error: {e}{ansi.ENDC}')
+                sys.exit(1)
 
             # An action failed to run
             except EliteError:
                 # Summary
                 printer.heading('Summary')
                 elite.summary()
+                sys.exit(1)
 
             # User has hit Ctrl+C
             except KeyboardInterrupt:
@@ -50,6 +54,7 @@ def automate():
                 # Summary
                 printer.heading('Summary')
                 elite.summary()
+                sys.exit(1)
 
             # Footer
             finally:

@@ -1,4 +1,5 @@
 import grp
+import os
 import pwd
 
 
@@ -35,3 +36,19 @@ def getgrnam(name):
         return grp.struct_group(('wheel', '*', 0, ['root']))
     else:
         raise KeyError(f'getgrnam(): name not found: {name}')
+
+
+def patch_root_runtime(monkeypatch):
+    monkeypatch.setattr(os, 'getuid', lambda: 0)
+    monkeypatch.setattr(os, 'getgid', lambda: 0)
+    monkeypatch.setattr(os, 'getcwd', lambda: '/Users/fots/Documents/Development/macbuild/elite')
+    monkeypatch.setattr(pwd, 'getpwuid', getpwuid)
+
+    monkeypatch.setenv('SUDO_USER', 'fots')
+    monkeypatch.setenv('SUDO_UID', '501')
+    monkeypatch.setenv('SUDO_GID', '20')
+    monkeypatch.setenv('LOGNAME', 'root')
+    monkeypatch.setenv('USER', 'root')
+    monkeypatch.setenv('USERNAME', 'root')
+    monkeypatch.setenv('SHELL', '/bin/sh')
+    monkeypatch.setenv('MAIL', '/var/mail/root')

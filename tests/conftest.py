@@ -1,5 +1,4 @@
 import os
-import pwd
 import shutil
 
 import pytest
@@ -22,18 +21,5 @@ def printer(monkeypatch, request):
 
 @pytest.fixture
 def elite(monkeypatch, printer):  # pylint: disable=redefined-outer-name
-    monkeypatch.setattr(os, 'getuid', lambda: 0)
-    monkeypatch.setattr(os, 'getgid', lambda: 0)
-    monkeypatch.setattr(os, 'getcwd', lambda: '/Users/fots/Documents/Development/macbuild/elite')
-    monkeypatch.setattr(pwd, 'getpwuid', helpers.getpwuid)
-
-    monkeypatch.setenv('SUDO_USER', 'fots')
-    monkeypatch.setenv('SUDO_UID', '501')
-    monkeypatch.setenv('SUDO_GID', '20')
-    monkeypatch.setenv('LOGNAME', 'root')
-    monkeypatch.setenv('USER', 'root')
-    monkeypatch.setenv('USERNAME', 'root')
-    monkeypatch.setenv('SHELL', '/bin/sh')
-    monkeypatch.setenv('MAIL', '/var/mail/root')
-
+    helpers.patch_root_runtime(monkeypatch)
     return Elite(printer)
