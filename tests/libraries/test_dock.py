@@ -61,39 +61,8 @@ def test_extract_unspecified_path(tmpdir, monkeypatch):
     monkeypatch.setattr(dock, 'get_dock_plist_path', lambda: p.strpath)
 
     app_layout, other_layout = dock.extract()
-    assert app_layout == [
-        '/Applications/ForkLift.app',
-        '/Applications/Siri.app',
-        '/Applications/Launchpad.app',
-        '/Applications/Safari.app',
-        '/Applications/Sublime Text.app',
-        '/Applications/Utilities/Terminal.app',
-        '/Applications/Cubase 9.5.app',
-        '/Applications/MuseScore 2.app',
-        '/Applications/XLD.app',
-        '/Applications/Focusrite Control.app',
-        '/Applications/Spotify.app',
-        '/Applications/OpenEmu.app',
-        '/Applications/Messages.app',
-        '/Applications/Skype.app',
-        '/Applications/Textual.app',
-        '/Applications/Things3.app',
-        '/Applications/VMware Fusion.app',
-        '/Applications/App Store.app',
-        '/Applications/System Preferences.app',
-    ]
-    assert other_layout == [
-        {
-            'path': '/Users/fots/Downloads',
-            'arrangement': 'Name',
-            'display_as': 'Stack',
-            'show_as': 'Automatic'
-        },
-        {
-            'label': 'GitHub',
-            'url': 'https://github.com/'
-        }
-    ]
+    assert len(app_layout) == 19
+    assert len(other_layout) == 2
 
 
 def test_normalise():
@@ -128,6 +97,41 @@ def test_normalise():
     ]
 
 
+def test_build_extract_roundtrip(tmpdir):
+    p = tmpdir.join('com.apple.dock.plist')
+    shutil.copy(os.path.join(FIXTURE_PATH, 'dock', 'com.apple.dock.plist'), p.strpath)
+
+    app_layout = [
+        '/Applications/ForkLift.app',
+        '/Applications/Siri.app',
+        '/Applications/Launchpad.app',
+        '/Applications/Safari.app',
+        '/Applications/Sublime Text.app'
+    ]
+
+    other_layout = [
+        {
+            'path': '/Users/fots/Documents',
+            'arrangement': 'Name',
+            'display_as': 'Stack',
+            'show_as': 'Automatic'
+        },
+        {
+            'label': 'GitLab',
+            'url': 'https://gitlab.com/'
+        }
+    ]
+
+    dock.build(
+        app_layout=app_layout,
+        other_layout=other_layout,
+        dock_plist_path=p.strpath,
+        perform_normalise=False
+    )
+
+    assert dock.extract(p.strpath) == (app_layout, other_layout)
+
+
 def test_build_extract_roundtrip_unspecified_path(tmpdir, monkeypatch):
     p = tmpdir.join('com.apple.dock.plist')
     shutil.copy(os.path.join(FIXTURE_PATH, 'dock', 'com.apple.dock.plist'), p.strpath)
@@ -158,41 +162,6 @@ def test_build_extract_roundtrip_unspecified_path(tmpdir, monkeypatch):
     dock.build(
         app_layout=app_layout,
         other_layout=other_layout,
-        perform_normalise=False
-    )
-
-    assert dock.extract(p.strpath) == (app_layout, other_layout)
-
-
-def test_build_extract_roundtrip(tmpdir):
-    p = tmpdir.join('com.apple.dock.plist')
-    shutil.copy(os.path.join(FIXTURE_PATH, 'dock', 'com.apple.dock.plist'), p.strpath)
-
-    app_layout = [
-        '/Applications/ForkLift.app',
-        '/Applications/Siri.app',
-        '/Applications/Launchpad.app',
-        '/Applications/Safari.app',
-        '/Applications/Sublime Text.app'
-    ]
-
-    other_layout = [
-        {
-            'path': '/Users/fots/Documents',
-            'arrangement': 'Name',
-            'display_as': 'Stack',
-            'show_as': 'Automatic'
-        },
-        {
-            'label': 'GitLab',
-            'url': 'https://gitlab.com/'
-        }
-    ]
-
-    dock.build(
-        app_layout=app_layout,
-        other_layout=other_layout,
-        dock_plist_path=p.strpath,
         perform_normalise=False
     )
 

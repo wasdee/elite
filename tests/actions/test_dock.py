@@ -47,7 +47,7 @@ def test_same(tmpdir, monkeypatch):
     ]
 
     dock = Dock(app_layout, other_layout)
-    assert dock.process() == ActionResponse(changed=False, data={'path': p.strpath})
+    assert dock.process() == ActionResponse(changed=False)
 
 
 def test_different(tmpdir, monkeypatch):
@@ -74,4 +74,4 @@ def test_different(tmpdir, monkeypatch):
     ]
 
     dock = Dock(app_layout, other_layout)
-    assert dock.process() == ActionResponse(changed=True, data={'path': p.strpath})
+    assert dock.process() == ActionResponse(changed=True)

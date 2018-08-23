@@ -26,7 +26,7 @@ class Dock(FileAction):
             other_layout_existing == other_layout_normalised
         ):
             changed = self.set_file_attributes(dock_plist_path)
-            return self.changed(path=dock_plist_path) if changed else self.ok(path=dock_plist_path)
+            return self.changed() if changed else self.ok()
 
         # Rebuild the layout of the Dock
         dock.build(
@@ -36,4 +36,4 @@ class Dock(FileAction):
 
         # The rebuild was successful
         self.set_file_attributes(dock_plist_path)
-        return self.changed(path=dock_plist_path)
+        return self.changed()
