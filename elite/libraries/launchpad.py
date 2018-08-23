@@ -151,8 +151,8 @@ class LaunchpadBuilder:
         self.launchpad_db_path = launchpad_db_path
 
         # Widget and app layouts
-        self.widget_layout = widget_layout
-        self.app_layout = app_layout
+        self.widget_layout = widget_layout.copy()
+        self.app_layout = app_layout.copy()
 
         # Connect to the Launchpad SQLite database
         self.conn = sqlite3.connect(self.launchpad_db_path)

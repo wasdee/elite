@@ -32,6 +32,10 @@ disable =
     # (See https://github.com/PyCQA/pylint/issues/289 for further information)
     bad-continuation,
 
+    # Import ordering and style is handled by flake8-import-order
+    wrong-import-order,
+    ungrouped-imports,
+
     # Disable checking that method could be a function in classes
     no-self-use,
 
