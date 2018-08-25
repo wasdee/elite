@@ -101,7 +101,7 @@ def test_file_source_not_readable(tmpdir, monkeypatch):
     sp = tmpdir.join('source.txt').ensure()
 
     def open_(file, mode='r'):  # pylint: disable=unused-argument
-        raise PermissionError(13, f"Permission denied: '{file}'")
+        raise PermissionError(13, 'Permission denied', file)
 
     monkeypatch.setattr(builtins, 'open', open_)
 

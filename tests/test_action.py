@@ -121,7 +121,7 @@ def test_file_action_set_file_attributes_change_mode_not_writable(tmpdir, monkey
     p.chmod(0o600)
 
     def chmod(path, mode, follow_symlinks=True):  # pylint: disable=unused-argument
-        raise PermissionError(f"[Errno 1] Operation not permitted: '{p.strpath}'")
+        raise PermissionError(1, 'Operation not permitted', p.strpath)
     monkeypatch.setattr(os, 'chmod', chmod)
 
     file_action = FileAction(mode='0644')
@@ -202,7 +202,7 @@ def test_file_action_set_file_attributes_change_owner_not_writable(tmpdir, monke
     monkeypatch.setattr(os, 'stat', stat)
 
     def chown(path, uid, gid, follow_symlinks=True):  # pylint: disable=unused-argument
-        raise PermissionError(f"[Errno 1] Operation not permitted: '{p.strpath}'")
+        raise PermissionError(1, 'Operation not permitted', p.strpath)
     monkeypatch.setattr(os, 'chown', chown)
 
     file_action = FileAction(owner='fots')
@@ -283,7 +283,7 @@ def test_file_action_set_file_attributes_change_group_not_writable(tmpdir, monke
     monkeypatch.setattr(os, 'stat', stat)
 
     def chown(path, uid, gid, follow_symlinks=True):  # pylint: disable=unused-argument
-        raise PermissionError(f"[Errno 1] Operation not permitted: '{p.strpath}'")
+        raise PermissionError(1, 'Operation not permitted', p.strpath)
     monkeypatch.setattr(os, 'chown', chown)
 
     file_action = FileAction(group='staff')
@@ -320,7 +320,7 @@ def test_file_action_set_file_attributes_change_flags_not_writable(tmpdir, monke
     p = tmpdir.join('test.txt').ensure()
 
     def chflags(path, flags, follow_symlinks=True):  # pylint: disable=unused-argument
-        raise PermissionError(f"[Errno 1] Operation not permitted: '{p.strpath}'")
+        raise PermissionError(1, 'Operation not permitted', p.strpath)
     monkeypatch.setattr(os, 'chflags', chflags)
 
     file_action = FileAction(flags=['hidden'])
@@ -352,7 +352,7 @@ def test_file_action_remove_file_not_writable(tmpdir, monkeypatch):
     p = tmpdir.join('test').ensure()
 
     def remove(path):  # pylint: disable=unused-argument
-        raise PermissionError(f"[Errno 13] Permission denied: '{p.strpath}'")
+        raise PermissionError(13, 'Permission denied', p.strpath)
     monkeypatch.setattr(os, 'remove', remove)
 
     file_action = FileAction()
@@ -374,7 +374,7 @@ def test_file_action_remove_symlink_not_writable(tmpdir, monkeypatch):
     p.mksymlinkto('something.txt')
 
     def remove(path):  # pylint: disable=unused-argument
-        raise PermissionError(f"[Errno 13] Permission denied: '{p.strpath}'")
+        raise PermissionError(13, 'Permission denied', p.strpath)
     monkeypatch.setattr(os, 'remove', remove)
 
     file_action = FileAction()
@@ -396,7 +396,7 @@ def test_file_action_remove_directory_not_writable(tmpdir, monkeypatch):
     p = tmpdir.mkdir('test')
 
     def rmtree(path):  # pylint: disable=unused-argument
-        raise PermissionError(f"[Errno 13] Permission denied: '{p.strpath}'")
+        raise PermissionError(13, 'Permission denied', p.strpath)
     monkeypatch.setattr(shutil, 'rmtree', rmtree)
 
     file_action = FileAction()
