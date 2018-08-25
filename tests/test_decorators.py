@@ -13,8 +13,7 @@ def test_automate_normal(capsys, monkeypatch):
 
     # Disabling parameter checks as pylint has a bug with relation to decorators
     # https://github.com/PyCQA/pylint/issues/259
-    # pylint: disable=no-value-for-parameter
-    main()
+    main()  # pylint: disable=no-value-for-parameter
     captured = capsys.readouterr()
     assert 'Summary' in captured.out
 
@@ -27,8 +26,7 @@ def test_automate_elite_config_error(capsys, monkeypatch):
         raise ConfigError('the top level of your config must contain key-value pairs')
 
     with pytest.raises(SystemExit) as exc_info:
-        # pylint: disable=no-value-for-parameter
-        main()
+        main()  # pylint: disable=no-value-for-parameter
 
     captured = capsys.readouterr()
     assert 'Config Error: the top level of your config must contain key-value pairs' in captured.out
@@ -41,8 +39,7 @@ def test_automate_elite_runtime_error_non_root(capsys):
         pass
 
     with pytest.raises(SystemExit) as exc_info:
-        # pylint: disable=no-value-for-parameter
-        main()
+        main()  # pylint: disable=no-value-for-parameter
 
     captured = capsys.readouterr()
     assert (
@@ -60,8 +57,7 @@ def test_automate_elite_error(capsys, monkeypatch):
         elite.fail('boo')
 
     with pytest.raises(SystemExit) as exc_info:
-        # pylint: disable=no-value-for-parameter
-        main()
+        main()  # pylint: disable=no-value-for-parameter
 
     captured = capsys.readouterr()
     assert 'Summary' in captured.out
@@ -76,8 +72,7 @@ def test_automate_ctrl_c(capsys, monkeypatch):
         raise KeyboardInterrupt
 
     with pytest.raises(SystemExit) as exc_info:
-        # pylint: disable=no-value-for-parameter
-        main()
+        main()  # pylint: disable=no-value-for-parameter
 
     captured = capsys.readouterr()
     assert 'Processing aborted as requested by keyboard interrupt.' in captured.out
