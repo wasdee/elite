@@ -1,8 +1,16 @@
 import os
 
+from AppKit import NSBundle  # pylint: disable=no-name-in-module
 from ScriptingBridge import SBApplication  # pylint: disable=no-name-in-module
+# Note that the import of SystemEventsLoginItem must occur after we initialise
+# system events or it simply won't work.
+# https://bitbucket.org/ronaldoussoren/pyobjc/issues/179/strange-import-behaviour-with
+system_events = SBApplication.applicationWithBundleIdentifier_('com.apple.systemevents')  # noqa
+# pylint: disable=wrong-import-position
+from Foundation import SystemEventsLoginItem  # noqa: I100, pylint: disable=no-name-in-module
 
 from . import Action, ActionError
+# pylint: enable=wrong-import-position
 
 
 class LoginItem(Action):
@@ -30,18 +38,8 @@ class LoginItem(Action):
 
         # The scripting bridge pops up in the Dock, so we must explicitly hide the app
         # before starting
-        from AppKit import NSBundle  # pylint: disable=no-name-in-module
-
         bundle_info = NSBundle.mainBundle().infoDictionary()
         bundle_info['LSBackgroundOnly'] = True
-
-        # Obtain the System Events application
-        system_events = SBApplication.applicationWithBundleIdentifier_('com.apple.systemevents')
-
-        # Note that the import of SystemEventsLoginItem must occur after we initialise
-        # system events or it simply won't work.
-        # https://bitbucket.org/ronaldoussoren/pyobjc/issues/179/strange-import-behaviour-with
-        from Foundation import SystemEventsLoginItem  # pylint: disable=no-name-in-module
 
         # Find a specific login item
         login_items = system_events.loginItems()
