@@ -1,5 +1,4 @@
 import os
-import shutil
 
 import pytest
 from elite import ansi
@@ -15,7 +14,7 @@ def printer(monkeypatch, request):
         print(ansi.SHOW_CURSOR, end='', flush=True)
     request.addfinalizer(fin)
 
-    monkeypatch.setattr(shutil, 'get_terminal_size', lambda: os.terminal_size((80, 24)))
+    monkeypatch.setattr('shutil.get_terminal_size', lambda: os.terminal_size((80, 24)))
     return Printer()
 
 

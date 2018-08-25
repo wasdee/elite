@@ -1,6 +1,5 @@
 import os
 import shutil
-import tempfile
 import textwrap
 
 import pytest
@@ -56,8 +55,8 @@ def test_package_no_pkg_refs(tmpdir, monkeypatch):
             )
         ]
     ))
-    monkeypatch.setattr(tempfile, 'mkdtemp', lambda: pp.strpath)
-    monkeypatch.setattr(os, 'geteuid', lambda: 0)
+    monkeypatch.setattr('tempfile.mkdtemp', lambda: pp.strpath)
+    monkeypatch.setattr('os.geteuid', lambda: 0)
 
     package = Package(path=kp.strpath)
     with pytest.raises(ActionError):
@@ -87,8 +86,8 @@ def test_package_no_package_info_identifier(tmpdir, monkeypatch):
             )
         ]
     ))
-    monkeypatch.setattr(tempfile, 'mkdtemp', lambda: pp.strpath)
-    monkeypatch.setattr(os, 'geteuid', lambda: 0)
+    monkeypatch.setattr('tempfile.mkdtemp', lambda: pp.strpath)
+    monkeypatch.setattr('os.geteuid', lambda: 0)
 
     package = Package(path=kp.strpath)
     with pytest.raises(ActionError):
@@ -112,8 +111,8 @@ def test_package_missing_disribution(tmpdir, monkeypatch):
             )
         ]
     ))
-    monkeypatch.setattr(tempfile, 'mkdtemp', lambda: pp.strpath)
-    monkeypatch.setattr(os, 'geteuid', lambda: 0)
+    monkeypatch.setattr('tempfile.mkdtemp', lambda: pp.strpath)
+    monkeypatch.setattr('os.geteuid', lambda: 0)
 
     package = Package(path=kp.strpath)
     with pytest.raises(ActionError):
@@ -138,8 +137,8 @@ def test_package_invalid_disribution(tmpdir, monkeypatch):
             )
         ]
     ))
-    monkeypatch.setattr(tempfile, 'mkdtemp', lambda: pp.strpath)
-    monkeypatch.setattr(os, 'geteuid', lambda: 0)
+    monkeypatch.setattr('tempfile.mkdtemp', lambda: pp.strpath)
+    monkeypatch.setattr('os.geteuid', lambda: 0)
 
     package = Package(path=kp.strpath)
     with pytest.raises(ActionError):
@@ -165,8 +164,8 @@ def test_package_invalid_pkginfo(tmpdir, monkeypatch):
             )
         ]
     ))
-    monkeypatch.setattr(tempfile, 'mkdtemp', lambda: pp.strpath)
-    monkeypatch.setattr(os, 'geteuid', lambda: 0)
+    monkeypatch.setattr('tempfile.mkdtemp', lambda: pp.strpath)
+    monkeypatch.setattr('os.geteuid', lambda: 0)
 
     package = Package(path=kp.strpath)
     with pytest.raises(ActionError):
@@ -200,8 +199,8 @@ def test_package_not_installed(tmpdir, monkeypatch):
             )
         ]
     ))
-    monkeypatch.setattr(tempfile, 'mkdtemp', lambda: pp.strpath)
-    monkeypatch.setattr(os, 'geteuid', lambda: 0)
+    monkeypatch.setattr('tempfile.mkdtemp', lambda: pp.strpath)
+    monkeypatch.setattr('os.geteuid', lambda: 0)
     Package.receipts_dirs = [rp.strpath]
 
     package = Package(path=kp.strpath)
@@ -236,8 +235,8 @@ def test_package_installed(tmpdir, monkeypatch):
             )
         ]
     ))
-    monkeypatch.setattr(tempfile, 'mkdtemp', lambda: pp.strpath)
-    monkeypatch.setattr(os, 'geteuid', lambda: 0)
+    monkeypatch.setattr('tempfile.mkdtemp', lambda: pp.strpath)
+    monkeypatch.setattr('os.geteuid', lambda: 0)
     Package.receipts_dirs = [rp.strpath]
 
     package = Package(path=kp.strpath)
@@ -273,10 +272,10 @@ def test_package_choices(tmpdir, monkeypatch):
             )
         ]
     ))
-    monkeypatch.setattr(tempfile, 'mkdtemp', lambda: pp.strpath)
-    monkeypatch.setattr(tempfile, 'mkstemp', lambda: (11, cp.strpath))
-    monkeypatch.setattr(os, 'geteuid', lambda: 0)
-    monkeypatch.setattr(os, 'remove', lambda path, *, dir_fd=None: None)
+    monkeypatch.setattr('tempfile.mkdtemp', lambda: pp.strpath)
+    monkeypatch.setattr('tempfile.mkstemp', lambda: (11, cp.strpath))
+    monkeypatch.setattr('os.geteuid', lambda: 0)
+    monkeypatch.setattr('os.remove', lambda path, *, dir_fd=None: None)
     Package.receipts_dirs = [rp.strpath]
 
     package = Package(

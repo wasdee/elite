@@ -1,7 +1,4 @@
-import grp
 import os
-import pwd
-import shutil
 from unittest import mock
 
 import pytest
@@ -122,7 +119,7 @@ def test_file_action_set_file_attributes_change_mode_not_writable(tmpdir, monkey
 
     def chmod(path, mode, follow_symlinks=True):  # pylint: disable=unused-argument
         raise PermissionError(1, 'Operation not permitted', p.strpath)
-    monkeypatch.setattr(os, 'chmod', chmod)
+    monkeypatch.setattr('os.chmod', chmod)
 
     file_action = FileAction(mode='0644')
     with pytest.raises(ActionError):
@@ -132,7 +129,7 @@ def test_file_action_set_file_attributes_change_mode_not_writable(tmpdir, monkey
 def test_file_action_set_file_attributes_change_owner_inexistent(tmpdir, monkeypatch):
     p = tmpdir.join('test.txt')
 
-    monkeypatch.setattr(pwd, 'getpwnam', helpers.getpwnam)
+    monkeypatch.setattr('pwd.getpwnam', helpers.getpwnam)
 
     def stat(path, follow_symlinks=True):  # pylint: disable=unused-argument
         if path == p.strpath:
@@ -141,7 +138,7 @@ def test_file_action_set_file_attributes_change_owner_inexistent(tmpdir, monkeyp
             )
         else:
             raise FileNotFoundError(f"[Errno 2] No such file or directory: '{path}'")
-    monkeypatch.setattr(os, 'stat', stat)
+    monkeypatch.setattr('os.stat', stat)
 
     file_action = FileAction(owner='hmmm')
     with pytest.raises(ActionError):
@@ -151,7 +148,7 @@ def test_file_action_set_file_attributes_change_owner_inexistent(tmpdir, monkeyp
 def test_file_action_set_file_attributes_change_owner_same(tmpdir, monkeypatch):
     p = tmpdir.join('test.txt')
 
-    monkeypatch.setattr(pwd, 'getpwnam', helpers.getpwnam)
+    monkeypatch.setattr('pwd.getpwnam', helpers.getpwnam)
 
     def stat(path, follow_symlinks=True):  # pylint: disable=unused-argument
         if path == p.strpath:
@@ -160,7 +157,7 @@ def test_file_action_set_file_attributes_change_owner_same(tmpdir, monkeypatch):
             )
         else:
             raise FileNotFoundError(f"[Errno 2] No such file or directory: '{path}'")
-    monkeypatch.setattr(os, 'stat', stat)
+    monkeypatch.setattr('os.stat', stat)
 
     file_action = FileAction(owner='fots')
     assert file_action.set_file_attributes(p.strpath) is False
@@ -169,7 +166,7 @@ def test_file_action_set_file_attributes_change_owner_same(tmpdir, monkeypatch):
 def test_file_action_set_file_attributes_change_owner_different(tmpdir, monkeypatch):
     p = tmpdir.join('test.txt')
 
-    monkeypatch.setattr(pwd, 'getpwnam', helpers.getpwnam)
+    monkeypatch.setattr('pwd.getpwnam', helpers.getpwnam)
 
     def stat(path, follow_symlinks=True):  # pylint: disable=unused-argument
         if path == p.strpath:
@@ -178,7 +175,7 @@ def test_file_action_set_file_attributes_change_owner_different(tmpdir, monkeypa
             )
         else:
             raise FileNotFoundError(f"[Errno 2] No such file or directory: '{path}'")
-    monkeypatch.setattr(os, 'stat', stat)
+    monkeypatch.setattr('os.stat', stat)
 
     with mock.patch('os.chown') as chown_mock:
         file_action = FileAction(owner='fots')
@@ -190,7 +187,7 @@ def test_file_action_set_file_attributes_change_owner_different(tmpdir, monkeypa
 def test_file_action_set_file_attributes_change_owner_not_writable(tmpdir, monkeypatch):
     p = tmpdir.join('test.txt')
 
-    monkeypatch.setattr(pwd, 'getpwnam', helpers.getpwnam)
+    monkeypatch.setattr('pwd.getpwnam', helpers.getpwnam)
 
     def stat(path, follow_symlinks=True):  # pylint: disable=unused-argument
         if path == p.strpath:
@@ -199,11 +196,11 @@ def test_file_action_set_file_attributes_change_owner_not_writable(tmpdir, monke
             )
         else:
             raise FileNotFoundError(f"[Errno 2] No such file or directory: '{path}'")
-    monkeypatch.setattr(os, 'stat', stat)
+    monkeypatch.setattr('os.stat', stat)
 
     def chown(path, uid, gid, follow_symlinks=True):  # pylint: disable=unused-argument
         raise PermissionError(1, 'Operation not permitted', p.strpath)
-    monkeypatch.setattr(os, 'chown', chown)
+    monkeypatch.setattr('os.chown', chown)
 
     file_action = FileAction(owner='fots')
     with pytest.raises(ActionError):
@@ -213,7 +210,7 @@ def test_file_action_set_file_attributes_change_owner_not_writable(tmpdir, monke
 def test_file_action_set_file_attributes_change_group_inexistent(tmpdir, monkeypatch):
     p = tmpdir.join('test.txt')
 
-    monkeypatch.setattr(grp, 'getgrnam', helpers.getgrnam)
+    monkeypatch.setattr('grp.getgrnam', helpers.getgrnam)
 
     def stat(path, follow_symlinks=True):  # pylint: disable=unused-argument
         if path == p.strpath:
@@ -222,7 +219,7 @@ def test_file_action_set_file_attributes_change_group_inexistent(tmpdir, monkeyp
             )
         else:
             raise FileNotFoundError(f"[Errno 2] No such file or directory: '{path}'")
-    monkeypatch.setattr(os, 'stat', stat)
+    monkeypatch.setattr('os.stat', stat)
 
     file_action = FileAction(group='hmmm')
     with pytest.raises(ActionError):
@@ -232,7 +229,7 @@ def test_file_action_set_file_attributes_change_group_inexistent(tmpdir, monkeyp
 def test_file_action_set_file_attributes_change_group_same(tmpdir, monkeypatch):
     p = tmpdir.join('test.txt')
 
-    monkeypatch.setattr(grp, 'getgrnam', helpers.getgrnam)
+    monkeypatch.setattr('grp.getgrnam', helpers.getgrnam)
 
     def stat(path, follow_symlinks=True):  # pylint: disable=unused-argument
         if path == p.strpath:
@@ -241,7 +238,7 @@ def test_file_action_set_file_attributes_change_group_same(tmpdir, monkeypatch):
             )
         else:
             raise FileNotFoundError(f"[Errno 2] No such file or directory: '{path}'")
-    monkeypatch.setattr(os, 'stat', stat)
+    monkeypatch.setattr('os.stat', stat)
 
     file_action = FileAction(group='staff')
     assert file_action.set_file_attributes(p.strpath) is False
@@ -250,7 +247,7 @@ def test_file_action_set_file_attributes_change_group_same(tmpdir, monkeypatch):
 def test_file_action_set_file_attributes_change_group_different(tmpdir, monkeypatch):
     p = tmpdir.join('test.txt')
 
-    monkeypatch.setattr(grp, 'getgrnam', helpers.getgrnam)
+    monkeypatch.setattr('grp.getgrnam', helpers.getgrnam)
 
     def stat(path, follow_symlinks=True):  # pylint: disable=unused-argument
         if path == p.strpath:
@@ -259,7 +256,7 @@ def test_file_action_set_file_attributes_change_group_different(tmpdir, monkeypa
             )
         else:
             raise FileNotFoundError(f"[Errno 2] No such file or directory: '{path}'")
-    monkeypatch.setattr(os, 'stat', stat)
+    monkeypatch.setattr('os.stat', stat)
 
     with mock.patch('os.chown') as chown_mock:
         file_action = FileAction(group='staff')
@@ -271,7 +268,7 @@ def test_file_action_set_file_attributes_change_group_different(tmpdir, monkeypa
 def test_file_action_set_file_attributes_change_group_not_writable(tmpdir, monkeypatch):
     p = tmpdir.join('test.txt')
 
-    monkeypatch.setattr(grp, 'getgrnam', helpers.getgrnam)
+    monkeypatch.setattr('grp.getgrnam', helpers.getgrnam)
 
     def stat(path, follow_symlinks=True):  # pylint: disable=unused-argument
         if path == p.strpath:
@@ -280,11 +277,11 @@ def test_file_action_set_file_attributes_change_group_not_writable(tmpdir, monke
             )
         else:
             raise FileNotFoundError(f"[Errno 2] No such file or directory: '{path}'")
-    monkeypatch.setattr(os, 'stat', stat)
+    monkeypatch.setattr('os.stat', stat)
 
     def chown(path, uid, gid, follow_symlinks=True):  # pylint: disable=unused-argument
         raise PermissionError(1, 'Operation not permitted', p.strpath)
-    monkeypatch.setattr(os, 'chown', chown)
+    monkeypatch.setattr('os.chown', chown)
 
     file_action = FileAction(group='staff')
     with pytest.raises(ActionError):
@@ -321,7 +318,7 @@ def test_file_action_set_file_attributes_change_flags_not_writable(tmpdir, monke
 
     def chflags(path, flags, follow_symlinks=True):  # pylint: disable=unused-argument
         raise PermissionError(1, 'Operation not permitted', p.strpath)
-    monkeypatch.setattr(os, 'chflags', chflags)
+    monkeypatch.setattr('os.chflags', chflags)
 
     file_action = FileAction(flags=['hidden'])
     with pytest.raises(ActionError):
@@ -353,7 +350,7 @@ def test_file_action_remove_file_not_writable(tmpdir, monkeypatch):
 
     def remove(path):  # pylint: disable=unused-argument
         raise PermissionError(13, 'Permission denied', p.strpath)
-    monkeypatch.setattr(os, 'remove', remove)
+    monkeypatch.setattr('os.remove', remove)
 
     file_action = FileAction()
     with pytest.raises(ActionError):
@@ -375,7 +372,7 @@ def test_file_action_remove_symlink_not_writable(tmpdir, monkeypatch):
 
     def remove(path):  # pylint: disable=unused-argument
         raise PermissionError(13, 'Permission denied', p.strpath)
-    monkeypatch.setattr(os, 'remove', remove)
+    monkeypatch.setattr('os.remove', remove)
 
     file_action = FileAction()
     with pytest.raises(ActionError):
@@ -397,7 +394,7 @@ def test_file_action_remove_directory_not_writable(tmpdir, monkeypatch):
 
     def rmtree(path):  # pylint: disable=unused-argument
         raise PermissionError(13, 'Permission denied', p.strpath)
-    monkeypatch.setattr(shutil, 'rmtree', rmtree)
+    monkeypatch.setattr('shutil.rmtree', rmtree)
 
     file_action = FileAction()
     with pytest.raises(ActionError):

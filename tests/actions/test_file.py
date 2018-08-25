@@ -1,4 +1,3 @@
-import builtins
 import os
 import shutil
 
@@ -103,7 +102,7 @@ def test_file_source_not_readable(tmpdir, monkeypatch):
     def open_(file, mode='r'):  # pylint: disable=unused-argument
         raise PermissionError(13, 'Permission denied', file)
 
-    monkeypatch.setattr(builtins, 'open', open_)
+    monkeypatch.setattr('builtins.open', open_)
 
     file = File(path=dp.strpath, source=sp.strpath, state='file')
     with pytest.raises(ActionError):

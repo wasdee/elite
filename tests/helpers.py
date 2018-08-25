@@ -1,5 +1,4 @@
 import grp
-import os
 import pwd
 
 
@@ -39,10 +38,10 @@ def getgrnam(name):
 
 
 def patch_root_runtime(monkeypatch):
-    monkeypatch.setattr(os, 'getuid', lambda: 0)
-    monkeypatch.setattr(os, 'getgid', lambda: 0)
-    monkeypatch.setattr(os, 'getcwd', lambda: '/Users/fots/Documents/Development/macbuild/elite')
-    monkeypatch.setattr(pwd, 'getpwuid', getpwuid)
+    monkeypatch.setattr('os.getuid', lambda: 0)
+    monkeypatch.setattr('os.getgid', lambda: 0)
+    monkeypatch.setattr('os.getcwd', lambda: '/Users/fots/Documents/Development/macbuild/elite')
+    monkeypatch.setattr('pwd.getpwuid', getpwuid)
 
     monkeypatch.setenv('SUDO_USER', 'fots')
     monkeypatch.setenv('SUDO_UID', '501')

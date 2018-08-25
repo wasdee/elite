@@ -1,5 +1,3 @@
-import subprocess
-
 import pytest
 from elite.utils import ReversibleDict, batch, deep_equal, deep_merge, generate_uuid
 
@@ -146,5 +144,5 @@ def test_generate_uuid(monkeypatch):
 
         raise Exception(f'unexpected args {args} encountered')
 
-    monkeypatch.setattr(subprocess, 'check_output', check_output)
+    monkeypatch.setattr('subprocess.check_output', check_output)
     assert generate_uuid() == 'A217CF9E-07D2-4DE0-8864-CD1988305656'

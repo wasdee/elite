@@ -1,7 +1,6 @@
 import os
 import shutil
 
-import elite.libraries.launchpad
 import pytest
 from elite.actions import ActionError, ActionResponse
 from elite.actions.launchpad import Launchpad
@@ -15,7 +14,7 @@ def test_same(tmpdir, monkeypatch):
     shutil.copytree(os.path.join(FIXTURE_PATH, 'launchpad'), p.strpath)
 
     monkeypatch.setattr(
-        elite.libraries.launchpad, 'get_launchpad_db_path', lambda: p.join('db').strpath
+        'elite.libraries.launchpad.get_launchpad_db_path', lambda: p.join('db').strpath
     )
 
     widget_layout = [
@@ -113,7 +112,7 @@ def test_different(tmpdir, monkeypatch):
     shutil.copytree(os.path.join(FIXTURE_PATH, 'launchpad'), p.strpath)
 
     monkeypatch.setattr(
-        elite.libraries.launchpad, 'get_launchpad_db_path', lambda: p.join('db').strpath
+        'elite.libraries.launchpad.get_launchpad_db_path', lambda: p.join('db').strpath
     )
 
     widget_layout = [
@@ -240,7 +239,7 @@ def test_different_extra_items(tmpdir, monkeypatch):
     shutil.copytree(os.path.join(FIXTURE_PATH, 'launchpad'), p.strpath)
 
     monkeypatch.setattr(
-        elite.libraries.launchpad, 'get_launchpad_db_path', lambda: p.join('db').strpath
+        'elite.libraries.launchpad.get_launchpad_db_path', lambda: p.join('db').strpath
     )
 
     widget_layout = [
@@ -363,7 +362,7 @@ def test_invalid(tmpdir, monkeypatch):
     shutil.copytree(os.path.join(FIXTURE_PATH, 'launchpad'), p.strpath)
 
     monkeypatch.setattr(
-        elite.libraries.launchpad, 'get_launchpad_db_path', lambda: p.join('db').strpath
+        'elite.libraries.launchpad.get_launchpad_db_path', lambda: p.join('db').strpath
     )
 
     widget_layout = [

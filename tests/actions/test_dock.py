@@ -1,7 +1,6 @@
 import os
 import shutil
 
-import elite.libraries.dock
 from elite.actions import ActionResponse
 from elite.actions.dock import Dock
 
@@ -13,7 +12,7 @@ def test_same(tmpdir, monkeypatch):
     p = tmpdir.join('com.apple.dock.plist')
     shutil.copy(os.path.join(FIXTURE_PATH, 'dock', 'com.apple.dock.plist'), p.strpath)
 
-    monkeypatch.setattr(elite.libraries.dock, 'get_dock_plist_path', lambda: p.strpath)
+    monkeypatch.setattr('elite.libraries.dock.get_dock_plist_path', lambda: p.strpath)
 
     app_layout = [
         'ForkLift',
@@ -54,7 +53,7 @@ def test_different(tmpdir, monkeypatch):
     p = tmpdir.join('com.apple.dock.plist')
     shutil.copy(os.path.join(FIXTURE_PATH, 'dock', 'com.apple.dock.plist'), p.strpath)
 
-    monkeypatch.setattr(elite.libraries.dock, 'get_dock_plist_path', lambda: p.strpath)
+    monkeypatch.setattr('elite.libraries.dock.get_dock_plist_path', lambda: p.strpath)
 
     app_layout = [
         'ForkLift',

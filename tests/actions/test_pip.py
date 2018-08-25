@@ -1,6 +1,3 @@
-import os
-import shutil
-
 import pytest
 from elite.actions import ActionError, ActionResponse
 from elite.actions.pip import Pip
@@ -84,7 +81,7 @@ def test_invalid_list_output(monkeypatch):
 
 def test_virtualenv_executable_found(monkeypatch):
     monkeypatch.setattr(
-        os.path, 'exists', lambda path: path == '/Users/fots/.virtualenvs/myenv/bin/pip3'
+        'os.path.exists', lambda path: path == '/Users/fots/.virtualenvs/myenv/bin/pip3'
     )
     monkeypatch.setattr(Pip, 'run', build_run(
         fixture_subpath='pip',
@@ -108,7 +105,7 @@ def test_virtualenv_executable_not_found(monkeypatch):
             '/Users/fots/.virtualenvs/myenv/bin/pip2'
         ]
 
-    monkeypatch.setattr(os.path, 'exists', exists)
+    monkeypatch.setattr('os.path.exists', exists)
     monkeypatch.setattr(Pip, 'run', build_run(
         fixture_subpath='pip',
         command_mappings=[
@@ -126,7 +123,7 @@ def test_virtualenv_executable_not_found(monkeypatch):
 
 def test_find_executable_found(monkeypatch):
     monkeypatch.setattr(
-        shutil, 'which', lambda cmd: '/opt/python/bin/pip' if cmd == 'pip' else None
+        'shutil.which', lambda cmd: '/opt/python/bin/pip' if cmd == 'pip' else None
     )
     monkeypatch.setattr(Pip, 'run', build_run(
         fixture_subpath='pip',
@@ -143,7 +140,7 @@ def test_find_executable_found(monkeypatch):
 
 
 def test_find_executable_not_found(monkeypatch):
-    monkeypatch.setattr(shutil, 'which', lambda cmd: None)
+    monkeypatch.setattr('shutil.which', lambda cmd: None)
     monkeypatch.setattr(Pip, 'run', build_run(
         fixture_subpath='pip',
         command_mappings=[

@@ -1,6 +1,4 @@
-import grp
 import os
-import pwd
 
 import pytest
 from elite.actions import ActionError, ActionResponse
@@ -200,9 +198,9 @@ def test_mode(tmpdir):
 
 def test_owner_inexistent(tmpdir, monkeypatch):
     build_directory(tmpdir)
-    monkeypatch.setattr(pwd, 'getpwnam', helpers.getpwnam)
-    monkeypatch.setattr(grp, 'getgrnam', helpers.getgrnam)
-    monkeypatch.setattr(os, 'stat', directory_stat)
+    monkeypatch.setattr('pwd.getpwnam', helpers.getpwnam)
+    monkeypatch.setattr('grp.getgrnam', helpers.getgrnam)
+    monkeypatch.setattr('os.stat', directory_stat)
 
     find = Find(path=tmpdir.strpath, owner='wow')
     with pytest.raises(ActionError):
@@ -211,9 +209,9 @@ def test_owner_inexistent(tmpdir, monkeypatch):
 
 def test_owner(tmpdir, monkeypatch):
     build_directory(tmpdir)
-    monkeypatch.setattr(pwd, 'getpwnam', helpers.getpwnam)
-    monkeypatch.setattr(grp, 'getgrnam', helpers.getgrnam)
-    monkeypatch.setattr(os, 'stat', directory_stat)
+    monkeypatch.setattr('pwd.getpwnam', helpers.getpwnam)
+    monkeypatch.setattr('grp.getgrnam', helpers.getgrnam)
+    monkeypatch.setattr('os.stat', directory_stat)
 
     find = Find(path=tmpdir.strpath, owner='happy')
     assert find.process() == ActionResponse(changed=False, data={
@@ -226,9 +224,9 @@ def test_owner(tmpdir, monkeypatch):
 
 def test_group_inexistent(tmpdir, monkeypatch):
     build_directory(tmpdir)
-    monkeypatch.setattr(pwd, 'getpwnam', helpers.getpwnam)
-    monkeypatch.setattr(grp, 'getgrnam', helpers.getgrnam)
-    monkeypatch.setattr(os, 'stat', directory_stat)
+    monkeypatch.setattr('pwd.getpwnam', helpers.getpwnam)
+    monkeypatch.setattr('grp.getgrnam', helpers.getgrnam)
+    monkeypatch.setattr('os.stat', directory_stat)
 
     find = Find(path=tmpdir.strpath, group='wow')
     with pytest.raises(ActionError):
@@ -237,9 +235,9 @@ def test_group_inexistent(tmpdir, monkeypatch):
 
 def test_group(tmpdir, monkeypatch):
     build_directory(tmpdir)
-    monkeypatch.setattr(pwd, 'getpwnam', helpers.getpwnam)
-    monkeypatch.setattr(grp, 'getgrnam', helpers.getgrnam)
-    monkeypatch.setattr(os, 'stat', directory_stat)
+    monkeypatch.setattr('pwd.getpwnam', helpers.getpwnam)
+    monkeypatch.setattr('grp.getgrnam', helpers.getgrnam)
+    monkeypatch.setattr('os.stat', directory_stat)
 
     find = Find(path=tmpdir.strpath, group='wheel')
     assert find.process() == ActionResponse(changed=False, data={
