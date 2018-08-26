@@ -21,7 +21,25 @@ def test_determine_pref_path_username():
     )
 
 
-def test_pref_boolean_same(tmpdir, monkeypatch):
+def test_spotify_supplied_value_invalid(tmpdir, monkeypatch):
+    p = tmpdir.join('prefs')
+    p.write(textwrap.dedent('''\
+        audio.sync_bitrate_enumeration=3
+        audio.play_bitrate_enumeration=0
+        ui.hide_hpto=true
+        audio.normalize_v2=false
+        app.player.autoplay=false
+        ui.show_friend_feed=true
+    '''))
+
+    monkeypatch.setattr(Spotify, 'determine_pref_path', lambda self: p.strpath)
+
+    spotify = Spotify(values={'wow': 5.5})
+    with pytest.raises(ActionError):
+        spotify.process()
+
+
+def test_spotify_boolean_same(tmpdir, monkeypatch):
     p = tmpdir.join('prefs')
     p.write(textwrap.dedent('''\
         audio.sync_bitrate_enumeration=3
@@ -46,25 +64,7 @@ def test_pref_boolean_same(tmpdir, monkeypatch):
     ''')
 
 
-def test_pref_invalid_supplied_value(tmpdir, monkeypatch):
-    p = tmpdir.join('prefs')
-    p.write(textwrap.dedent('''\
-        audio.sync_bitrate_enumeration=3
-        audio.play_bitrate_enumeration=0
-        ui.hide_hpto=true
-        audio.normalize_v2=false
-        app.player.autoplay=false
-        ui.show_friend_feed=true
-    '''))
-
-    monkeypatch.setattr(Spotify, 'determine_pref_path', lambda self: p.strpath)
-
-    spotify = Spotify(values={'wow': 5.5})
-    with pytest.raises(ActionError):
-        spotify.process()
-
-
-def test_pref_boolean_different(tmpdir, monkeypatch):
+def test_spotify_boolean_different(tmpdir, monkeypatch):
     p = tmpdir.join('prefs')
     p.write(textwrap.dedent('''\
         audio.sync_bitrate_enumeration=3
@@ -89,7 +89,7 @@ def test_pref_boolean_different(tmpdir, monkeypatch):
     ''')
 
 
-def test_pref_boolean_inexistent(tmpdir, monkeypatch):
+def test_spotify_boolean_inexistent(tmpdir, monkeypatch):
     p = tmpdir.join('prefs').ensure()
 
     monkeypatch.setattr(Spotify, 'determine_pref_path', lambda self: p.strpath)
@@ -101,7 +101,7 @@ def test_pref_boolean_inexistent(tmpdir, monkeypatch):
     ''')
 
 
-def test_pref_integer_same(tmpdir, monkeypatch):
+def test_spotify_integer_same(tmpdir, monkeypatch):
     p = tmpdir.join('prefs')
     p.write(textwrap.dedent('''\
         audio.sync_bitrate_enumeration=4
@@ -126,7 +126,7 @@ def test_pref_integer_same(tmpdir, monkeypatch):
     ''')
 
 
-def test_pref_integer_different(tmpdir, monkeypatch):
+def test_spotify_integer_different(tmpdir, monkeypatch):
     p = tmpdir.join('prefs')
     p.write(textwrap.dedent('''\
         audio.sync_bitrate_enumeration=3
@@ -157,7 +157,7 @@ def test_pref_integer_different(tmpdir, monkeypatch):
     ''')
 
 
-def test_pref_integer_inexistent(tmpdir, monkeypatch):
+def test_spotify_integer_inexistent(tmpdir, monkeypatch):
     p = tmpdir.join('prefs').ensure()
 
     monkeypatch.setattr(Spotify, 'determine_pref_path', lambda self: p.strpath)
@@ -169,7 +169,7 @@ def test_pref_integer_inexistent(tmpdir, monkeypatch):
     ''')
 
 
-def test_pref_string_same(tmpdir, monkeypatch):
+def test_spotify_string_same(tmpdir, monkeypatch):
     p = tmpdir.join('prefs')
     p.write(textwrap.dedent('''\
         autologin.canonical_username="fots"
@@ -199,7 +199,7 @@ def test_pref_string_same(tmpdir, monkeypatch):
     ''')
 
 
-def test_pref_string_different(tmpdir, monkeypatch):
+def test_spotify_string_different(tmpdir, monkeypatch):
     p = tmpdir.join('prefs')
     p.write(textwrap.dedent('''\
         autologin.canonical_username="pablo"
@@ -229,7 +229,7 @@ def test_pref_string_different(tmpdir, monkeypatch):
     ''')
 
 
-def test_pref_string_inexistent(tmpdir, monkeypatch):
+def test_spotify_string_inexistent(tmpdir, monkeypatch):
     p = tmpdir.join('prefs').ensure()
 
     monkeypatch.setattr(Spotify, 'determine_pref_path', lambda self: p.strpath)
@@ -241,7 +241,7 @@ def test_pref_string_inexistent(tmpdir, monkeypatch):
     ''')
 
 
-def test_prefs_invalid_file_parsing(tmpdir, monkeypatch):
+def test_spotify_file_parsing_invalid(tmpdir, monkeypatch):
     p = tmpdir.join('prefs')
     p.write(textwrap.dedent('''\
         hmmmm
@@ -254,7 +254,7 @@ def test_prefs_invalid_file_parsing(tmpdir, monkeypatch):
         spotify.process()
 
 
-def test_pref_invalid_file_value(tmpdir, monkeypatch):
+def test_spotify_file_value_invalid(tmpdir, monkeypatch):
     p = tmpdir.join('prefs')
     p.write(textwrap.dedent('''\
         autologin.canonical_username="pablo"
@@ -273,7 +273,7 @@ def test_pref_invalid_file_value(tmpdir, monkeypatch):
         spotify.process()
 
 
-def test_prefs_not_writable(tmpdir, monkeypatch):
+def test_spotify_not_writable(tmpdir, monkeypatch):
     p = tmpdir.join('test.json')
 
     monkeypatch.setattr('builtins.open', build_open_with_permission_error(p.strpath))

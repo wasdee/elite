@@ -6,7 +6,7 @@ from elite.actions.git import Git
 from .helpers import CommandMapping, build_run
 
 
-def test_inexistent(tmpdir, monkeypatch):
+def test_path_inexistent(tmpdir, monkeypatch):
     p = tmpdir.join('painter')
 
     repo = 'https://github.com/fgimian/painter.git'
@@ -25,7 +25,7 @@ def test_inexistent(tmpdir, monkeypatch):
     assert git.process() == ActionResponse(changed=True)
 
 
-def test_existing_different_remote(tmpdir, monkeypatch):
+def test_different_remote_existing(tmpdir, monkeypatch):
     p = tmpdir.mkdir('painter')
     p.join('.git/config').ensure()
 
@@ -54,7 +54,7 @@ def test_existing_different_remote(tmpdir, monkeypatch):
     assert not p.exists()
 
 
-def test_existing_different_branch(tmpdir, monkeypatch):
+def test_different_branch_existing(tmpdir, monkeypatch):
     p = tmpdir.mkdir('painter')
     p.join('.git/config').ensure()
 
@@ -86,7 +86,7 @@ def test_existing_different_branch(tmpdir, monkeypatch):
     assert git.process() == ActionResponse(changed=True)
 
 
-def test_existing_same(tmpdir, monkeypatch):
+def test_same_existing(tmpdir, monkeypatch):
     p = tmpdir.join('painter')
     p.join('.git/config').ensure()
 

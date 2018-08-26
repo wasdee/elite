@@ -8,24 +8,24 @@ from elite.actions.handler import Handler
 kLSRolesAll = 4294967295
 
 
-def test_invalid_content_type_url_scheme_empty_combination():
+def test_argument_content_type_url_scheme_empty_combination_invalid():
     with pytest.raises(ValueError):
         Handler(path='/Applications/Sublime Text.app')
 
 
-def test_invalid_content_type_empty_after_init():
+def test_argument_content_type_empty_after_init_invalid():
     handler = Handler(path='/Applications/Sublime Text.app', content_type='public.plain-text')
     with pytest.raises(ValueError):
         handler.content_type = None
 
 
-def test_invalid_url_scheme_empty_after_init():
+def test_argument_url_scheme_empty_after_init_invalid():
     handler = Handler(path='/Applications/Safari.app', url_scheme='http')
     with pytest.raises(ValueError):
         handler.url_scheme = None
 
 
-def test_invalid_content_type_url_scheme_combination():
+def test_argument_content_type_url_scheme_combination_invalid():
     with pytest.raises(ValueError):
         Handler(
             path='/Applications/Safari.app',
@@ -34,20 +34,20 @@ def test_invalid_content_type_url_scheme_combination():
         )
 
 
-def test_invalid_content_type_after_init():
+def test_argument_content_type_after_init_invalid():
     handler = Handler(path='/Applications/Safari.app', url_scheme='http')
     with pytest.raises(ValueError):
         handler.content_type = 'public.plain-text'
 
 
-def test_invalid_url_scheme_after_init():
+def test_argument_url_scheme_after_init_invalid():
     handler = Handler(path='/Applications/Sublime Text.app', content_type='public.plain-text')
     with pytest.raises(ValueError):
         handler.url_scheme = 'public.plain-text'
 
 
 @mock.patch('elite.actions.handler.NSBundle')
-def test_invalid_bundle_path(bundle_mock):
+def test_bundle_path_invalid(bundle_mock):
     bundle_mock.bundleWithPath_.return_value = None
 
     handler = Handler(path='/Applications/Boo.app', content_type='public.plain-text')
@@ -59,7 +59,7 @@ def test_invalid_bundle_path(bundle_mock):
 
 @mock.patch('elite.actions.handler.LSCopyDefaultRoleHandlerForContentType')
 @mock.patch('elite.actions.handler.NSBundle')
-def test_invalid_content_type(bundle_mock, copy_content_type_mock):
+def test_content_type_invalid(bundle_mock, copy_content_type_mock):
     bundle_mock.bundleWithPath_().bundleIdentifier.return_value = 'com.sublimetext.3'
     copy_content_type_mock.return_value = None
 
@@ -100,7 +100,7 @@ def test_content_type_different(bundle_mock, copy_content_type_mock, set_content
 
 @mock.patch('elite.actions.handler.LSCopyDefaultHandlerForURLScheme')
 @mock.patch('elite.actions.handler.NSBundle')
-def test_invalid_url_scheme(bundle_mock, copy_url_scheme_mock):
+def test_url_scheme_invalid(bundle_mock, copy_url_scheme_mock):
     bundle_mock.bundleWithPath_().bundleIdentifier.return_value = 'com.apple.Safari'
     copy_url_scheme_mock.return_value = None
 

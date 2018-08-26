@@ -14,18 +14,18 @@ PLIST_HEADER = (
 )
 
 
-def test_invalid_path_domain_empty_combination():
+def test_argument_path_domain_empty_combination_invalid():
     with pytest.raises(ValueError):
         Plist(values={'python_lover': True})
 
 
-def test_invalid_domain_empty_after_init():
+def test_argument_domain_empty_after_init_invalid():
     plist = Plist(values={'ShowOverlayStatusBar': True}, domain='com.apple.Safari')
     with pytest.raises(ValueError):
         plist.domain = None
 
 
-def test_invalid_path_domain_both_combination():
+def test_argument_path_domain_both_combination_invalid():
     with pytest.raises(ValueError):
         Plist(
             values={'ShowOverlayStatusBar': True},
@@ -34,13 +34,13 @@ def test_invalid_path_domain_both_combination():
         )
 
 
-def test_invalid_path_both_after_init():
+def test_argument_path_both_after_init_invalid():
     plist = Plist(values={'ShowOverlayStatusBar': True}, domain='com.apple.Safari')
     with pytest.raises(ValueError):
         plist.path = '~/Library/Preferences/com.apple.Safari.plist'
 
 
-def test_invalid_domain_both_after_init():
+def test_argument_domain_both_after_init_invalid():
     plist = Plist(
         values={'ShowOverlayStatusBar': True}, path='~/Library/Preferences/com.apple.Safari.plist'
     )
@@ -48,7 +48,7 @@ def test_invalid_domain_both_after_init():
         plist.domain = 'com.apple.Safari'
 
 
-def test_invalid_container_domain_global_combination():
+def test_argument_container_domain_global_combination_invalid():
     with pytest.raises(ValueError):
         Plist(
             values={'AppleInterfaceStyle': 'Dark'},
@@ -57,7 +57,7 @@ def test_invalid_container_domain_global_combination():
         )
 
 
-def test_invalid_domain_global_after_init():
+def test_argument_domain_global_after_init_invalid():
     plist = Plist(
         values={'NSNavLastRootDirectory': '~/Library/Mobile Documents/com~apple~Pages/Documents'},
         domain='com.apple.iWork.Pages',
@@ -67,7 +67,7 @@ def test_invalid_domain_global_after_init():
         plist.domain = 'Apple Global Domain'
 
 
-def test_invalid_container_global_after_init():
+def test_argument_container_global_after_init_invalid():
     plist = Plist(
         values={'NSNavLastRootDirectory': '~/Library/Mobile Documents/com~apple~Pages/Documents'},
         domain='Apple Global Domain'
@@ -76,7 +76,7 @@ def test_invalid_container_global_after_init():
         plist.container = 'com.apple.iWork.Pages'
 
 
-def test_invalid_container_missing_domain():
+def test_argument_container_missing_domain_invalid():
     with pytest.raises(ValueError):
         Plist(
             values={
@@ -86,7 +86,7 @@ def test_invalid_container_missing_domain():
         )
 
 
-def test_invalid_container_missing_domain_after_init():
+def test_argument_container_missing_domain_after_init_invalid():
     plist = Plist(
         values={'NSNavLastRootDirectory': '~/Library/Mobile Documents/com~apple~Pages/Documents'},
         path=(
@@ -98,12 +98,12 @@ def test_invalid_container_missing_domain_after_init():
         plist.container = 'com.apple.iWork.Pages'
 
 
-def test_invalid_fmt():
+def test_argument_fmt_invalid():
     with pytest.raises(ValueError):
         Plist(values={'ShowOverlayStatusBar': True}, domain='com.apple.Safari', fmt='boo')
 
 
-def test_invalid_fmt_after_init():
+def test_argument_fmt_after_init_invalid():
     plist = Plist(values={'ShowOverlayStatusBar': True}, domain='com.apple.Safari')
     with pytest.raises(ValueError):
         plist.fmt = 'boo'
@@ -211,7 +211,7 @@ def test_plist_different(tmpdir):
     ''').replace(' ' * 4, '\t')
 
 
-def test_plist_inexistent_values(tmpdir):
+def test_plist_values_inexistent(tmpdir):
     p = tmpdir.join('test.plist')
     p.write(PLIST_HEADER + textwrap.dedent('''\
         <plist version="1.0">
@@ -236,7 +236,7 @@ def test_plist_inexistent_values(tmpdir):
     ''').replace(' ' * 4, '\t')
 
 
-def test_plist_inexistent_path(tmpdir):
+def test_plist_path_inexistent(tmpdir):
     p = tmpdir.join('test.plist')
 
     plist = Plist(path=p.strpath, values={'python_lover': False})
@@ -251,7 +251,7 @@ def test_plist_inexistent_path(tmpdir):
     ''').replace(' ' * 4, '\t')
 
 
-def test_plist_invalid_file_parsing(tmpdir):
+def test_plist_file_parsing_invalid(tmpdir):
     p = tmpdir.join('test.plist')
     p.write('hmmmm')
 

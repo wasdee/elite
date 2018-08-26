@@ -5,12 +5,12 @@ from elite.actions.tap import Tap
 from .helpers import CommandMapping, build_run
 
 
-def test_invalid_state():
+def test_argument_state_invalid():
     with pytest.raises(ValueError):
         Tap(name='homebrew/cask-fonts', state='hmmm')
 
 
-def test_invalid_command(monkeypatch):
+def test_command_invalid(monkeypatch):
     monkeypatch.setattr(Tap, 'run', build_run(
         fixture_subpath='tap',
         command_mappings=[

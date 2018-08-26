@@ -5,12 +5,12 @@ from elite.actions.cask import Cask
 from .helpers import CommandMapping, build_run
 
 
-def test_invalid_state():
+def test_argument_state_invalid():
     with pytest.raises(ValueError):
         Cask(name='musescore', state='hmmm')
 
 
-def test_invalid_list_command(monkeypatch):
+def test_list_command_invalid(monkeypatch):
     monkeypatch.setattr(Cask, 'run', build_run(
         fixture_subpath='cask',
         command_mappings=[

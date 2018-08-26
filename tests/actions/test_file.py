@@ -11,57 +11,57 @@ from .helpers import build_open_with_permission_error
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), 'fixtures')
 
 
-def test_invalid_state():
+def test_argument_state_invalid():
     with pytest.raises(ValueError):
         File(path='boo.txt', state='hmmm')
 
 
-def test_invalid_source_absent_state_combination():
+def test_argument_source_absent_state_combination_invalid():
     with pytest.raises(ValueError):
         File(path='boo.txt', source='source.txt', state='absent')
 
 
-def test_invalid_source_absent_after_init():
+def test_argument_source_absent_after_init_invalid():
     file = File(path='boo.txt', state='absent')
     with pytest.raises(ValueError):
         file.source = 'source.txt'
 
 
-def test_invalid_source_directory_state_combination():
+def test_argument_source_directory_state_combination_invalid():
     with pytest.raises(ValueError):
         File(path='boo.txt', source='source', state='directory')
 
 
-def test_invalid_source_directory_after_init():
+def test_argument_source_directory_after_init_invalid():
     file = File(path='boo.txt', state='directory')
     with pytest.raises(ValueError):
         file.source = 'source'
 
 
-def test_invalid_source_directory_symlink_combination():
+def test_argument_source_directory_symlink_combination_invalid():
     with pytest.raises(ValueError):
         File(path='boo.txt', state='symlink')
 
 
-def test_invalid_source_symlink_after_init():
+def test_argument_source_symlink_after_init_invalid():
     file = File(path='boo.txt', source='source.txt', state='symlink')
     with pytest.raises(ValueError):
         file.source = None
 
 
-def test_invalid_state_absent_after_init():
+def test_argument_state_absent_after_init_invalid():
     file = File(path='boo.txt', source='source.txt')
     with pytest.raises(ValueError):
         file.state = 'absent'
 
 
-def test_invalid_state_directory_after_init():
+def test_argument_state_directory_after_init_invalid():
     file = File(path='boo.txt', source='source')
     with pytest.raises(ValueError):
         file.state = 'directory'
 
 
-def test_invalid_state_symlink_after_init():
+def test_argument_state_symlink_after_init_invalid():
     file = File(path='boo.txt')
     with pytest.raises(ValueError):
         file.state = 'symlink'
@@ -310,7 +310,7 @@ def test_alias_destination_path_is_directory(tmpdir):
     assert b'source.txt' in alias_data
 
 
-def test_alias_inexistent_source(tmpdir):
+def test_alias_source_inexistent(tmpdir):
     p = tmpdir.join('testing.txt')
 
     file = File(path=p.strpath, source='source.txt', state='alias')
@@ -318,7 +318,7 @@ def test_alias_inexistent_source(tmpdir):
         file.process()
 
 
-def test_alias_inexistent_path(tmpdir):
+def test_alias_path_inexistent(tmpdir):
     dp = tmpdir.join('testing.txt')
     sp = tmpdir.join('source.txt').ensure()
 

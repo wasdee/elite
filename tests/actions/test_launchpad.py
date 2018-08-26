@@ -357,7 +357,7 @@ def test_different_extra_items(tmpdir, monkeypatch):
     assert sorted(response.data['extra_apps']) == ['FaceTime', 'Messages']
 
 
-def test_invalid(tmpdir, monkeypatch):
+def test_layout_invalid(tmpdir, monkeypatch):
     p = tmpdir.join('db')
     shutil.copytree(os.path.join(FIXTURE_PATH, 'launchpad'), p.strpath)
 

@@ -8,7 +8,7 @@ from elite.actions.archive import Archive
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), 'fixtures')
 
 
-def test_extract_invalid_archive_type(tmpdir):
+def test_archive_type_invalid(tmpdir):
     p = tmpdir.mkdir('directory')
 
     archive = Archive(
@@ -19,7 +19,7 @@ def test_extract_invalid_archive_type(tmpdir):
         archive.process()
 
 
-def test_extract_rar_invalid_archive_contents(tmpdir):
+def test_rar_archive_contents_invalid(tmpdir):
     sp = tmpdir.join('archive.rar').ensure()
     dp = tmpdir.mkdir('directory')
 
@@ -31,7 +31,7 @@ def test_extract_rar_invalid_archive_contents(tmpdir):
         archive.process()
 
 
-def test_extract_rar_invalid_archive_volume(tmpdir):
+def test_rar_archive_volume_invalid(tmpdir):
     p = tmpdir.mkdir('directory')
 
     archive = Archive(
@@ -42,7 +42,7 @@ def test_extract_rar_invalid_archive_volume(tmpdir):
         archive.process()
 
 
-def test_extract_zip_preserve(tmpdir):
+def test_zip_preserve(tmpdir):
     p = tmpdir.mkdir('directory')
 
     archive = Archive(
@@ -70,7 +70,7 @@ def test_extract_zip_preserve(tmpdir):
     assert oct(p.join('directory2/file4.txt').stat().mode)[-4:] == '0666'
 
 
-def test_extract_zip_no_preserve(tmpdir):
+def test_zip_no_preserve(tmpdir):
     p = tmpdir.mkdir('directory')
 
     archive = Archive(
@@ -98,7 +98,7 @@ def test_extract_zip_no_preserve(tmpdir):
     assert oct(p.join('directory2/file4.txt').stat().mode)[-4:] == '0644'
 
 
-def test_extract_zip_no_dirs(tmpdir):
+def test_zip_no_dirs(tmpdir):
     p = tmpdir.mkdir('directory')
 
     archive = Archive(
@@ -118,7 +118,7 @@ def test_extract_zip_no_dirs(tmpdir):
     assert p.join('directory2/file4.txt').isfile()
 
 
-def test_extract_zip_existing(tmpdir):
+def test_zip_existing(tmpdir):
     p = tmpdir.mkdir('directory')
 
     archive = Archive(
@@ -130,7 +130,7 @@ def test_extract_zip_existing(tmpdir):
     assert archive.process() == ActionResponse(changed=False)
 
 
-def test_extract_rar_preserve(tmpdir):
+def test_rar_preserve(tmpdir):
     p = tmpdir.mkdir('directory')
 
     archive = Archive(
@@ -158,7 +158,7 @@ def test_extract_rar_preserve(tmpdir):
     assert oct(p.join('directory2/file4.txt').stat().mode)[-4:] == '0666'
 
 
-def test_extract_rar_no_preserve(tmpdir):
+def test_rar_no_preserve(tmpdir):
     p = tmpdir.mkdir('directory')
 
     archive = Archive(
@@ -186,7 +186,7 @@ def test_extract_rar_no_preserve(tmpdir):
     assert oct(p.join('directory2/file4.txt').stat().mode)[-4:] == '0644'
 
 
-def test_extract_rar_no_dirs(tmpdir):
+def test_rar_no_dirs(tmpdir):
     p = tmpdir.mkdir('directory')
 
     archive = Archive(
@@ -206,7 +206,7 @@ def test_extract_rar_no_dirs(tmpdir):
     assert p.join('directory2/file4.txt').isfile()
 
 
-def test_extract_rar_existing(tmpdir):
+def test_rar_existing(tmpdir):
     p = tmpdir.mkdir('directory')
 
     archive = Archive(
@@ -218,7 +218,7 @@ def test_extract_rar_existing(tmpdir):
     assert archive.process() == ActionResponse(changed=False)
 
 
-def test_extract_zip_invalid_archive_contents(tmpdir):
+def test_zip_archive_contents_invalid(tmpdir):
     sp = tmpdir.join('archive.zip').ensure()
     dp = tmpdir.mkdir('directory')
 
@@ -230,7 +230,7 @@ def test_extract_zip_invalid_archive_contents(tmpdir):
         archive.process()
 
 
-def test_extract_ignore(tmpdir):
+def test_ignore(tmpdir):
     p = tmpdir.mkdir('directory')
 
     archive = Archive(
@@ -248,7 +248,7 @@ def test_extract_ignore(tmpdir):
     assert not p.join('directory2/file4.txt').isfile()
 
 
-def test_extract_base_dir(tmpdir):
+def test_base_dir(tmpdir):
     p = tmpdir.mkdir('directory')
 
     archive = Archive(

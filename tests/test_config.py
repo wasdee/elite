@@ -4,14 +4,14 @@ import pytest
 from elite.config import Config, ConfigError
 
 
-def test_config_inexistent(tmpdir):
+def test_path_inexistent(tmpdir):
     p = tmpdir.join('config.yaml')
 
     with pytest.raises(ConfigError):
         Config(p.strpath)
 
 
-def test_config_invalid(tmpdir):
+def test_yaml_invalid(tmpdir):
     p = tmpdir.join('config.yaml')
     p.write(textwrap.dedent('''\
         ---
@@ -24,7 +24,7 @@ def test_config_invalid(tmpdir):
         Config(p.strpath)
 
 
-def test_config_wrong_data_type(tmpdir):
+def test_wrong_data_type(tmpdir):
     p = tmpdir.join('config.yaml')
     p.write(textwrap.dedent('''\
         ---
@@ -37,7 +37,7 @@ def test_config_wrong_data_type(tmpdir):
         Config(p.strpath)
 
 
-def test_config_basic(tmpdir):
+def test_basic(tmpdir):
     p = tmpdir.join('config.yaml')
     p.write(textwrap.dedent('''\
         ---
@@ -52,7 +52,7 @@ def test_config_basic(tmpdir):
     assert config.data3 is True
 
 
-def test_config_tag_include_single(tmpdir):
+def test_tag_include_single(tmpdir):
     d = tmpdir.join('data.yaml')
     d.write(textwrap.dedent('''\
         ---
@@ -72,7 +72,7 @@ def test_config_tag_include_single(tmpdir):
     assert config.data == {'reaction': 'wow'}
 
 
-def test_config_tag_include_single_anchors_passed(tmpdir):
+def test_tag_include_single_anchors_passed(tmpdir):
     d = tmpdir.join('data.yaml')
     d.write(textwrap.dedent('''\
         ---
@@ -92,7 +92,7 @@ def test_config_tag_include_single_anchors_passed(tmpdir):
     assert config.data == {'known_as': 'booboohead'}
 
 
-def test_config_tag_include_multiple(tmpdir):
+def test_tag_include_multiple(tmpdir):
     d1 = tmpdir.join('data1.yaml')
     d1.write(textwrap.dedent('''\
         ---
@@ -126,18 +126,7 @@ def test_config_tag_include_multiple(tmpdir):
     ]
 
 
-def test_config_tag_macos_font_invalid_number_of_arguments(tmpdir):
-    p = tmpdir.join('config.yaml')
-    p.write(textwrap.dedent('''\
-        ---
-        path: !macos_font [SourceCodePro-Regular, 16, yup]
-    '''))
-
-    with pytest.raises(ConfigError):
-        Config(p.strpath)
-
-
-def test_config_tag_join_path(tmpdir):
+def test_tag_join_path(tmpdir):
     p = tmpdir.join('config.yaml')
     p.write(textwrap.dedent('''\
         ---
@@ -148,7 +137,7 @@ def test_config_tag_join_path(tmpdir):
     assert config.path == '/Users/fots/test.txt'
 
 
-def test_config_tag_first_existing_dir_exists(tmpdir):
+def test_tag_first_existing_dir_exists(tmpdir):
     tmpdir.mkdir('dir2')
     tmpdir.mkdir('dir3')
 
@@ -165,7 +154,7 @@ def test_config_tag_first_existing_dir_exists(tmpdir):
     assert config.path == f'{tmpdir.strpath}/dir2'
 
 
-def test_config_tag_first_existing_dir_inexistent(tmpdir):
+def test_tag_first_existing_dir_inexistent(tmpdir):
     p = tmpdir.join('config.yaml')
     p.write(textwrap.dedent(f'''\
         ---
@@ -179,7 +168,18 @@ def test_config_tag_first_existing_dir_inexistent(tmpdir):
     assert config.path is None
 
 
-def test_config_tag_macos_font_exists(tmpdir):
+def test_tag_macos_font_number_of_arguments_invalid(tmpdir):
+    p = tmpdir.join('config.yaml')
+    p.write(textwrap.dedent('''\
+        ---
+        path: !macos_font [SourceCodePro-Regular, 16, yup]
+    '''))
+
+    with pytest.raises(ConfigError):
+        Config(p.strpath)
+
+
+def test_tag_macos_font_exists(tmpdir):
     p = tmpdir.join('config.yaml')
     p.write(textwrap.dedent(f'''\
         ---
@@ -190,7 +190,7 @@ def test_config_tag_macos_font_exists(tmpdir):
     assert config.font.startswith(b'bplist00')
 
 
-def test_config_tag_macos_font_inexistent(tmpdir):
+def test_tag_macos_font_inexistent(tmpdir):
     p = tmpdir.join('config.yaml')
     p.write(textwrap.dedent(f'''\
         ---
@@ -201,45 +201,45 @@ def test_config_tag_macos_font_inexistent(tmpdir):
         Config(p.strpath)
 
 
-def test_config_tag_macos_font_color_incorrect_number_of_arguments(tmpdir):
+def test_tag_macos_color_number_of_arguments_invalid(tmpdir):
     p = tmpdir.join('config.yaml')
     p.write(textwrap.dedent(f'''\
         ---
-        font: !macos_color [65, 65]
+        color: !macos_color [65, 65]
     '''))
 
     with pytest.raises(ConfigError):
         Config(p.strpath)
 
 
-def test_config_tag_macos_font_color_invalid_colour(tmpdir):
+def test_tag_macos_color_exists(tmpdir):
     p = tmpdir.join('config.yaml')
     p.write(textwrap.dedent(f'''\
         ---
-        font: !macos_color [65, 256, 65, 1.0]
-    '''))
-
-    with pytest.raises(ConfigError):
-        Config(p.strpath)
-
-
-def test_config_tag_macos_font_color_invalid_alpha(tmpdir):
-    p = tmpdir.join('config.yaml')
-    p.write(textwrap.dedent(f'''\
-        ---
-        font: !macos_color [65, 65, 65, 1.1]
-    '''))
-
-    with pytest.raises(ConfigError):
-        Config(p.strpath)
-
-
-def test_config_tag_macos_font_color(tmpdir):
-    p = tmpdir.join('config.yaml')
-    p.write(textwrap.dedent(f'''\
-        ---
-        font: !macos_color [65, 65, 255, 1.0]
+        color: !macos_color [65, 65, 255, 1.0]
     '''))
 
     config = Config(p.strpath)
-    assert config.font.startswith(b'bplist00')
+    assert config.color.startswith(b'bplist00')
+
+
+def test_tag_macos_color_rgb_invalid(tmpdir):
+    p = tmpdir.join('config.yaml')
+    p.write(textwrap.dedent(f'''\
+        ---
+        color: !macos_color [65, 256, 65, 1.0]
+    '''))
+
+    with pytest.raises(ConfigError):
+        Config(p.strpath)
+
+
+def test_tag_macos_color_alpha_invalid(tmpdir):
+    p = tmpdir.join('config.yaml')
+    p.write(textwrap.dedent(f'''\
+        ---
+        color: !macos_color [65, 65, 65, 1.1]
+    '''))
+
+    with pytest.raises(ConfigError):
+        Config(p.strpath)

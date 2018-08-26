@@ -5,7 +5,27 @@ from elite.actions.brew import Brew
 from .helpers import CommandMapping, build_run
 
 
-def test_invalid_name(monkeypatch):
+def test_argument_state_invalid():
+    with pytest.raises(ValueError):
+        Brew(name='wget', state='hmmm')
+
+
+def test_info_output_invalid(monkeypatch):
+    monkeypatch.setattr(Brew, 'run', build_run(
+        fixture_subpath='brew',
+        command_mappings=[
+            CommandMapping(
+                command=['brew', 'info', '--json=v1', 'wget']
+            )
+        ]
+    ))
+
+    brew = Brew(name='wget', state='present')
+    with pytest.raises(ActionError):
+        brew.process()
+
+
+def test_name_invalid(monkeypatch):
     monkeypatch.setattr(Brew, 'run', build_run(
         fixture_subpath='brew',
         command_mappings=[
@@ -17,26 +37,6 @@ def test_invalid_name(monkeypatch):
     ))
 
     brew = Brew(name='fake', state='present')
-    with pytest.raises(ActionError):
-        brew.process()
-
-
-def test_invalid_state():
-    with pytest.raises(ValueError):
-        Brew(name='wget', state='hmmm')
-
-
-def test_invalid_info_output(monkeypatch):
-    monkeypatch.setattr(Brew, 'run', build_run(
-        fixture_subpath='brew',
-        command_mappings=[
-            CommandMapping(
-                command=['brew', 'info', '--json=v1', 'wget']
-            )
-        ]
-    ))
-
-    brew = Brew(name='wget', state='present')
     with pytest.raises(ActionError):
         brew.process()
 

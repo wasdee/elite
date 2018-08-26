@@ -106,7 +106,7 @@ def test_extract(tmpdir):
     ]
 
 
-def test_extract_unspecified_path(tmpdir, monkeypatch):
+def test_extract_path_unspecified(tmpdir, monkeypatch):
     p = tmpdir.join('db')
     shutil.copytree(os.path.join(FIXTURE_PATH, 'launchpad'), p.strpath)
 
@@ -159,7 +159,7 @@ def test_build_missing_folder_layout(tmpdir):
         )
 
 
-def test_build_inexistent_widget(tmpdir):
+def test_build_widget_inexistent(tmpdir):
     p = tmpdir.join('db')
     shutil.copytree(os.path.join(FIXTURE_PATH, 'launchpad'), p.strpath)
 
@@ -175,7 +175,7 @@ def test_build_inexistent_widget(tmpdir):
         )
 
 
-def test_build_inexistent_app(tmpdir):
+def test_build_app_inexistent(tmpdir):
     p = tmpdir.join('db')
     shutil.copytree(os.path.join(FIXTURE_PATH, 'launchpad'), p.strpath)
 
@@ -191,7 +191,7 @@ def test_build_inexistent_app(tmpdir):
         )
 
 
-def test_build_inexistent_folder_widget(tmpdir):
+def test_build_folder_widget_inexistent(tmpdir):
     p = tmpdir.join('db')
     shutil.copytree(os.path.join(FIXTURE_PATH, 'launchpad'), p.strpath)
 
@@ -214,7 +214,7 @@ def test_build_inexistent_folder_widget(tmpdir):
         )
 
 
-def test_build_inexistent_folder_app(tmpdir):
+def test_build_folder_app_inexistent(tmpdir):
     p = tmpdir.join('db')
     shutil.copytree(os.path.join(FIXTURE_PATH, 'launchpad'), p.strpath)
 
@@ -492,7 +492,7 @@ def test_build_extract_roundtrip_missing_items(tmpdir):
     assert sorted(updated_app_layout[-1]) == ['App Store', 'Entropy']
 
 
-def test_build_extract_roundtrip_unspecified_path(tmpdir, monkeypatch):
+def test_build_extract_roundtrip_path_unspecified(tmpdir, monkeypatch):
     p = tmpdir.join('db')
     shutil.copytree(os.path.join(FIXTURE_PATH, 'launchpad'), p.strpath)
 

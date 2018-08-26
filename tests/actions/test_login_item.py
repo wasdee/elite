@@ -36,12 +36,12 @@ class MockLoginItemsList(list):
         self.append(item)
 
 
-def test_invalid_state():
+def test_argument_state_invalid():
     with pytest.raises(ValueError):
         LoginItem(path='/Applications/Dropbox.app', state='hmmm')
 
 
-def test_inexistent_path(tmpdir):
+def test_path_inexistent(tmpdir):
     p = tmpdir.join('Dropbox.app')
 
     login_item = LoginItem(path=p.strpath, state='present')

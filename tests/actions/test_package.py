@@ -17,7 +17,7 @@ PLIST_HEADER = (
 )
 
 
-def test_package_inexistent(tmpdir):
+def test_path_inexistent(tmpdir):
     p = tmpdir.join('something.pkg')
 
     package = Package(path=p.strpath)
@@ -25,7 +25,7 @@ def test_package_inexistent(tmpdir):
         package.process()
 
 
-def test_package_insufficient_permissions(tmpdir):
+def test_insufficient_permissions(tmpdir):
     kp = tmpdir.join('West Africa 1.3.0 Installer Mac.pkg').ensure()
 
     package = Package(path=kp.strpath)
@@ -33,7 +33,7 @@ def test_package_insufficient_permissions(tmpdir):
         package.process()
 
 
-def test_package_no_pkg_refs(tmpdir, monkeypatch):
+def test_no_pkg_refs(tmpdir, monkeypatch):
     kp = tmpdir.join('West Africa 1.3.0 Installer Mac.pkg').ensure()
     pp = tmpdir.mkdir('package')
     pp.join('Distribution').write(textwrap.dedent('''\
@@ -63,7 +63,7 @@ def test_package_no_pkg_refs(tmpdir, monkeypatch):
         package.process()
 
 
-def test_package_no_package_info_identifier(tmpdir, monkeypatch):
+def test_no_package_info_identifier(tmpdir, monkeypatch):
     kp = tmpdir.join('West Africa 1.3.0 Installer Mac.pkg').ensure()
     pp = tmpdir.join('package')
     shutil.copytree(os.path.join(FIXTURE_PATH, 'package', 'pkg'), pp.strpath)
@@ -94,7 +94,7 @@ def test_package_no_package_info_identifier(tmpdir, monkeypatch):
         package.process()
 
 
-def test_package_missing_disribution(tmpdir, monkeypatch):
+def test_missing_disribution(tmpdir, monkeypatch):
     kp = tmpdir.join('West Africa 1.3.0 Installer Mac.pkg').ensure()
     pp = tmpdir.join('package')
 
@@ -119,7 +119,7 @@ def test_package_missing_disribution(tmpdir, monkeypatch):
         package.process()
 
 
-def test_package_invalid_disribution(tmpdir, monkeypatch):
+def test_disribution_invalid(tmpdir, monkeypatch):
     kp = tmpdir.join('West Africa 1.3.0 Installer Mac.pkg').ensure()
     pp = tmpdir.mkdir('package')
     pp.join('Distribution').write('boo')
@@ -145,7 +145,7 @@ def test_package_invalid_disribution(tmpdir, monkeypatch):
         package.process()
 
 
-def test_package_invalid_pkginfo(tmpdir, monkeypatch):
+def test_pkginfo_invalid(tmpdir, monkeypatch):
     kp = tmpdir.join('West Africa 1.3.0 Installer Mac.pkg').ensure()
     pp = tmpdir.join('package')
     shutil.copytree(os.path.join(FIXTURE_PATH, 'package', 'pkg'), pp.strpath)
@@ -172,7 +172,7 @@ def test_package_invalid_pkginfo(tmpdir, monkeypatch):
         package.process()
 
 
-def test_package_not_installed(tmpdir, monkeypatch):
+def test_not_installed(tmpdir, monkeypatch):
     kp = tmpdir.join('West Africa 1.3.0 Installer Mac.pkg').ensure()
     pp = tmpdir.join('package')
     shutil.copytree(os.path.join(FIXTURE_PATH, 'package', 'pkg'), pp.strpath)
@@ -207,7 +207,7 @@ def test_package_not_installed(tmpdir, monkeypatch):
     assert package.process() == ActionResponse(changed=True)
 
 
-def test_package_installed(tmpdir, monkeypatch):
+def test_installed(tmpdir, monkeypatch):
     kp = tmpdir.join('West Africa 1.3.0 Installer Mac.pkg').ensure()
     pp = tmpdir.join('package')
     shutil.copytree(os.path.join(FIXTURE_PATH, 'package', 'pkg'), pp.strpath)
@@ -243,7 +243,7 @@ def test_package_installed(tmpdir, monkeypatch):
     assert package.process() == ActionResponse(changed=False)
 
 
-def test_package_choices(tmpdir, monkeypatch):
+def test_choices(tmpdir, monkeypatch):
     kp = tmpdir.join('West Africa 1.3.0 Installer Mac.pkg').ensure()
     pp = tmpdir.join('package')
     shutil.copytree(os.path.join(FIXTURE_PATH, 'package', 'pkg'), pp.strpath)

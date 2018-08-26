@@ -5,29 +5,29 @@ from elite.actions.gem import Gem
 from .helpers import CommandMapping, build_run
 
 
-def test_invalid_state():
+def test_argument_state_invalid():
     with pytest.raises(ValueError):
         Gem(name='rails', state='hmmm')
 
 
-def test_invalid_version_state_combination():
+def test_argument_version_state_combination_invalid():
     with pytest.raises(ValueError):
         Gem(name='rails', state='latest', version='5.2.0')
 
 
-def test_invalid_version_after_init():
+def test_argument_version_after_init_invalid():
     gem = Gem(name='rails', state='latest')
     with pytest.raises(ValueError):
         gem.version = '5.2.0'
 
 
-def test_invalid_state_after_init():
+def test_argument_state_after_init_invalid():
     gem = Gem(name='rails', version='5.2.0')
     with pytest.raises(ValueError):
         gem.state = 'latest'
 
 
-def test_invalid_specification_output(monkeypatch):
+def test_specification_output_invalid(monkeypatch):
     monkeypatch.setattr(Gem, 'run', build_run(
         fixture_subpath='gem',
         command_mappings=[
@@ -43,7 +43,7 @@ def test_invalid_specification_output(monkeypatch):
         gem.process()
 
 
-def test_unspecified_executable(monkeypatch):
+def test_executable_unspecified(monkeypatch):
     monkeypatch.setattr(Gem, 'run', build_run(
         fixture_subpath='gem',
         command_mappings=[

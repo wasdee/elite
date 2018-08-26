@@ -5,51 +5,51 @@ from elite.actions.npm import NPM
 from .helpers import CommandMapping, build_run
 
 
-def test_invalid_state():
+def test_argument_state_invalid():
     with pytest.raises(ValueError):
         NPM(name='express', state='hmmm', path='/Users/fots/project')
 
 
-def test_invalid_version_state_combination():
+def test_argument_version_state_combination_invalid():
     with pytest.raises(ValueError):
         NPM(name='express', state='latest', version='4.16.3', path='/Users/fots/project')
 
 
-def test_invalid_version_after_init():
+def test_argument_version_after_init_invalid():
     npm = NPM(name='express', state='latest', path='/Users/fots/project')
     with pytest.raises(ValueError):
         npm.version = '4.16.3'
 
 
-def test_invalid_state_after_init():
+def test_argument_state_after_init_invalid():
     npm = NPM(name='express', version='4.16.3', path='/Users/fots/project')
     with pytest.raises(ValueError):
         npm.state = 'latest'
 
 
-def test_invalid_mode():
+def test_argument_mode_invalid():
     with pytest.raises(ValueError):
         NPM(name='express', mode='hmmm', path='/Users/fots/project')
 
 
-def test_invalid_mode_path_combination():
+def test_argument_mode_path_combination_invalid():
     with pytest.raises(ValueError):
         NPM(name='express', mode='local')
 
 
-def test_invalid_mode_after_init():
+def test_argument_mode_after_init_invalid():
     npm = NPM(name='express', mode='global')
     with pytest.raises(ValueError):
         npm.mode = 'local'
 
 
-def test_invalid_path_after_init():
+def test_argument_path_after_init_invalid():
     npm = NPM(name='express', mode='local', path='/Users/fots/project')
     with pytest.raises(ValueError):
         npm.path = None
 
 
-def test_invalid_list_command(monkeypatch):
+def test_list_command_invalid(monkeypatch):
     monkeypatch.setattr(NPM, 'run', build_run(
         fixture_subpath='npm',
         command_mappings=[
@@ -68,7 +68,7 @@ def test_invalid_list_command(monkeypatch):
         npm.process()
 
 
-def test_invalid_list_output(monkeypatch):
+def test_list_output_invalid(monkeypatch):
     monkeypatch.setattr(NPM, 'run', build_run(
         fixture_subpath='npm',
         command_mappings=[
@@ -87,7 +87,7 @@ def test_invalid_list_output(monkeypatch):
         npm.process()
 
 
-def test_unspecified_executable(monkeypatch):
+def test_executable_unspecified(monkeypatch):
     monkeypatch.setattr(NPM, 'run', build_run(
         fixture_subpath='npm',
         command_mappings=[

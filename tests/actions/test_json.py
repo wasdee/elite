@@ -7,7 +7,7 @@ from elite.actions.json import JSON
 from .helpers import build_open_with_permission_error
 
 
-def test_json_same(tmpdir):
+def test_same(tmpdir):
     p = tmpdir.join('test.json')
     p.write(textwrap.dedent('''\
         {
@@ -28,7 +28,7 @@ def test_json_same(tmpdir):
     ''')
 
 
-def test_json_different(tmpdir):
+def test_different(tmpdir):
     p = tmpdir.join('test.json')
     p.write(textwrap.dedent('''\
         {
@@ -53,7 +53,7 @@ def test_json_different(tmpdir):
     ''')
 
 
-def test_json_inexistent_values(tmpdir):
+def test_values_inexistent(tmpdir):
     p = tmpdir.join('test.json')
     p.write(textwrap.dedent('''\
         {
@@ -71,7 +71,7 @@ def test_json_inexistent_values(tmpdir):
     ''')
 
 
-def test_json_inexistent_path(tmpdir):
+def test_path_inexistent(tmpdir):
     p = tmpdir.join('test.json')
 
     json = JSON(path=p.strpath, values={'python_lover': False})
@@ -83,7 +83,7 @@ def test_json_inexistent_path(tmpdir):
     ''')
 
 
-def test_json_invalid_file_parsing(tmpdir):
+def test_file_parsing_invalid(tmpdir):
     p = tmpdir.join('test.json')
     p.write(textwrap.dedent('''\
         hmmmm
@@ -94,7 +94,7 @@ def test_json_invalid_file_parsing(tmpdir):
         json.process()
 
 
-def test_json_not_writable(tmpdir, monkeypatch):
+def test_not_writable(tmpdir, monkeypatch):
     p = tmpdir.join('test.json')
 
     monkeypatch.setattr('builtins.open', build_open_with_permission_error(p.strpath))

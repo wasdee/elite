@@ -5,29 +5,29 @@ from elite.actions.pip import Pip
 from .helpers import CommandMapping, build_run
 
 
-def test_invalid_state():
+def test_argument_state_invalid():
     with pytest.raises(ValueError):
         Pip(name='pycodestyle', state='hmmm')
 
 
-def test_invalid_version_state_combination():
+def test_argument_version_state_combination_invalid():
     with pytest.raises(ValueError):
         Pip(name='pycodestyle', state='latest', version='2.3.1')
 
 
-def test_invalid_version_after_init():
+def test_argument_version_after_init_invalid():
     pip = Pip(name='pycodestyle', state='latest')
     with pytest.raises(ValueError):
         pip.version = '2.3.1'
 
 
-def test_invalid_state_after_init():
+def test_argument_state_after_init_invalid():
     pip = Pip(name='pycodestyle', version='2.3.1')
     with pytest.raises(ValueError):
         pip.state = 'latest'
 
 
-def test_invalid_virtualenv_executable_combination():
+def test_argument_virtualenv_executable_combination_invalid():
     with pytest.raises(ValueError):
         Pip(
             name='pycodestyle', executable='pip3.6',
@@ -35,19 +35,19 @@ def test_invalid_virtualenv_executable_combination():
         )
 
 
-def test_invalid_virtualenv_after_init():
+def test_argument_virtualenv_after_init_invalid():
     pip = Pip(name='pycodestyle', executable='pip3.6')
     with pytest.raises(ValueError):
         pip.virtualenv = '/Users/fots/.virtualenvs/myenv'
 
 
-def test_invalid_executable_after_init():
+def test_argument_executable_after_init_invalid():
     pip = Pip(name='pycodestyle', virtualenv='/Users/fots/.virtualenvs/myenv')
     with pytest.raises(ValueError):
         pip.executable = 'pip3.6'
 
 
-def test_invalid_list_command(monkeypatch):
+def test_list_command_invalid(monkeypatch):
     monkeypatch.setattr(Pip, 'run', build_run(
         fixture_subpath='pip',
         command_mappings=[
@@ -63,7 +63,7 @@ def test_invalid_list_command(monkeypatch):
         pip.process()
 
 
-def test_invalid_list_output(monkeypatch):
+def test_list_output_invalid(monkeypatch):
     monkeypatch.setattr(Pip, 'run', build_run(
         fixture_subpath='pip',
         command_mappings=[

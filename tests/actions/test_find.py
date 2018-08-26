@@ -57,7 +57,7 @@ def directory_stat(path, *, dir_fd=None, follow_symlinks=True):
         return os_stat(path, dir_fd=dir_fd, follow_symlinks=follow_symlinks)
 
 
-def test_inexistent(tmpdir):
+def test_path_inexistent(tmpdir):
     p = tmpdir.join('test')
     find = Find(path=p.strpath)
     with pytest.raises(ActionError):

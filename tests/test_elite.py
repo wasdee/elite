@@ -16,13 +16,13 @@ class Printer:
         pass
 
 
-def test_not_run_as_root():
+def test_elite_not_run_as_root():
     printer = Printer()
     with pytest.raises(EliteError):
         Elite(printer)
 
 
-def test_invalid_sudo_uid_gid(monkeypatch, printer):
+def test_elite_sudo_uid_gid_invalid(monkeypatch, printer):
     helpers.patch_root_runtime(monkeypatch)
     monkeypatch.setenv('SUDO_UID', 'hmm')
     monkeypatch.setenv('SUDO_GID', 'wow')
@@ -31,7 +31,7 @@ def test_invalid_sudo_uid_gid(monkeypatch, printer):
         Elite(printer)
 
 
-def test_initialisation(monkeypatch, printer):
+def test_elite_initialisation(monkeypatch, printer):
     helpers.patch_root_runtime(monkeypatch)
 
     elite = Elite(printer)
@@ -55,7 +55,7 @@ def test_initialisation(monkeypatch, printer):
     assert 'MAIL' not in elite.user_env
 
 
-def test_register_action_which_already_exists(monkeypatch, printer):
+def test_elite_register_action_which_already_exists(monkeypatch, printer):
     helpers.patch_root_runtime(monkeypatch)
 
     class MyAction(Action):
@@ -68,7 +68,7 @@ def test_register_action_which_already_exists(monkeypatch, printer):
         elite.register_action('my_action', MyAction)
 
 
-def test_run_action_inexistent(monkeypatch, printer):
+def test_elite_run_action_inexistent(monkeypatch, printer):
     helpers.patch_root_runtime(monkeypatch)
 
     elite = Elite(printer)
@@ -76,7 +76,7 @@ def test_run_action_inexistent(monkeypatch, printer):
         elite.my_action()
 
 
-def test_run_action_ok(monkeypatch, printer):
+def test_elite_run_action_ok(monkeypatch, printer):
     helpers.patch_root_runtime(monkeypatch)
 
     class MyAction(Action):
@@ -88,7 +88,7 @@ def test_run_action_ok(monkeypatch, printer):
     assert elite.my_action() == EliteResponse(changed=False, ok=True, data={'cool': True})
 
 
-def test_run_action_changed(monkeypatch, printer):
+def test_elite_run_action_changed(monkeypatch, printer):
     helpers.patch_root_runtime(monkeypatch)
 
     class MyAction(Action):
@@ -100,7 +100,7 @@ def test_run_action_changed(monkeypatch, printer):
     assert elite.my_action() == EliteResponse(changed=True, ok=True)
 
 
-def test_run_action_failed(monkeypatch, printer):
+def test_elite_run_action_failed(monkeypatch, printer):
     helpers.patch_root_runtime(monkeypatch)
 
     class MyAction(Action):
@@ -116,7 +116,7 @@ def test_run_action_failed(monkeypatch, printer):
 @mock.patch('elite.elite.demote')
 @mock.patch('os.setegid')
 @mock.patch('os.seteuid')
-def test_options_sudo(seteuid_mock, setegid_mock, demote_mock, monkeypatch, printer):
+def test_elite_options_sudo(seteuid_mock, setegid_mock, demote_mock, monkeypatch, printer):
     helpers.patch_root_runtime(monkeypatch)
 
     class MyAction(Action):
@@ -133,7 +133,7 @@ def test_options_sudo(seteuid_mock, setegid_mock, demote_mock, monkeypatch, prin
     assert demote_mock.call_args == mock.call(0, 0)
 
 
-def test_options_changed(monkeypatch, printer):
+def test_elite_options_changed(monkeypatch, printer):
     helpers.patch_root_runtime(monkeypatch)
 
     class MyAction(Action):
@@ -146,7 +146,7 @@ def test_options_changed(monkeypatch, printer):
         assert elite.my_action() == EliteResponse(changed=False, ok=True)
 
 
-def test_options_ignore_failed(monkeypatch, printer):
+def test_elite_options_ignore_failed(monkeypatch, printer):
     helpers.patch_root_runtime(monkeypatch)
 
     class MyAction(Action):
@@ -159,7 +159,7 @@ def test_options_ignore_failed(monkeypatch, printer):
         assert elite.my_action() == EliteResponse(changed=False, ok=False, failed_message='oh no')
 
 
-def test_options_env(monkeypatch, printer):
+def test_elite_options_env(monkeypatch, printer):
     helpers.patch_root_runtime(monkeypatch)
 
     class MyAction(Action):

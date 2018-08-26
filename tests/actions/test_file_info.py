@@ -8,7 +8,7 @@ from elite.actions.file_info import FileInfo
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), 'fixtures')
 
 
-def test_inexistent(tmpdir):
+def test_path_inexistent(tmpdir):
     p = tmpdir.join('test.txt')
 
     file_info = FileInfo(path=p.strpath)

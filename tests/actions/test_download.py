@@ -22,7 +22,7 @@ def test_path_not_writable(tmpdir, monkeypatch):
             download.process()
 
 
-def test_existent_path_with_valid_url(tmpdir):
+def test_path_existing_with_valid_url(tmpdir):
     p = tmpdir.join('data.dmg').ensure()
 
     download = Download(url='https://www.eventideaudio.com/downloader/1165', path=p.strpath)
@@ -30,7 +30,7 @@ def test_existent_path_with_valid_url(tmpdir):
         assert download.process() == ActionResponse(changed=False, data={'path': p.strpath})
 
 
-def test_inexistent_url(tmpdir):
+def test_url_inexistent(tmpdir):
     p = tmpdir.mkdir('directory')
 
     download = Download(

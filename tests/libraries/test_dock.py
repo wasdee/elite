@@ -54,7 +54,7 @@ def test_extract(tmpdir):
     ]
 
 
-def test_extract_unspecified_path(tmpdir, monkeypatch):
+def test_extract_path_unspecified(tmpdir, monkeypatch):
     p = tmpdir.join('com.apple.dock.plist')
     shutil.copy(os.path.join(FIXTURE_PATH, 'dock', 'com.apple.dock.plist'), p.strpath)
 
@@ -132,7 +132,7 @@ def test_build_extract_roundtrip(tmpdir):
     assert dock.extract(p.strpath) == (app_layout, other_layout)
 
 
-def test_build_extract_roundtrip_unspecified_path(tmpdir, monkeypatch):
+def test_build_extract_roundtrip_path_unspecified(tmpdir, monkeypatch):
     p = tmpdir.join('com.apple.dock.plist')
     shutil.copy(os.path.join(FIXTURE_PATH, 'dock', 'com.apple.dock.plist'), p.strpath)
 

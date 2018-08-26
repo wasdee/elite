@@ -5,7 +5,7 @@ from elite.actions.package_choices import PackageChoices
 from .helpers import CommandMapping, build_run
 
 
-def test_choices_inexistent(tmpdir):
+def test_path_inexistent(tmpdir):
     p = tmpdir.join('onedrive--18.091.9506.0004.pkg')
 
     package_choices = PackageChoices(p.strpath)
@@ -13,7 +13,7 @@ def test_choices_inexistent(tmpdir):
         package_choices.process()
 
 
-def test_choices_invalid(tmpdir, monkeypatch):
+def test_xml_invalid(tmpdir, monkeypatch):
     p = tmpdir.join('onedrive--18.091.9506.0004.pkg').ensure()
 
     monkeypatch.setattr(PackageChoices, 'run', build_run(
@@ -33,7 +33,7 @@ def test_choices_invalid(tmpdir, monkeypatch):
         package_choices.process()
 
 
-def test_choices(tmpdir, monkeypatch):
+def test_normal(tmpdir, monkeypatch):
     p = tmpdir.join('onedrive--18.091.9506.0004.pkg').ensure()
 
     monkeypatch.setattr(PackageChoices, 'run', build_run(
