@@ -45,10 +45,11 @@ def demote(uid, gid):
     def demoter():
         os.setegid(0)
         os.seteuid(0)
-        os.setgid(gid)
-        os.setuid(uid)
-        os.setegid(gid)
-        os.seteuid(uid)
+        if uid != 0 and gid != 0:
+            os.setgid(gid)
+            os.setuid(uid)
+            os.setegid(gid)
+            os.seteuid(uid)
 
     return demoter
 
