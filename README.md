@@ -64,8 +64,8 @@ A suggested directory structure of an Elite project is as follows:
 ```
 
 You may structure your config directory any way you like.  Personally, I like to create
-sub-directories for different applications.  Elite offers various useful YAML tag functions which
-allow you to include one config file in another.
+sub-directories for different applications.  Elite offers a useful `!include` YAML tag function
+which allow you to include one config file in another.
 
 e.g.
 
@@ -115,7 +115,7 @@ follows:
 
 ```python
 #!/usr/bin/env python3
-from elite import ActionError, Config, automate
+from elite import Config, automate
 
 
 @automate()
@@ -144,8 +144,23 @@ if __name__ == '__main__':
     main()
 ```
 
-For a complete pattern for how Elite may be used, please see my macbuild project on GitHub
-(coming soon).
+You may thn run this script as follows:
+
+```bash
+sudo ./macbuild.py
+```
+
+**Note**: Elite requires sudo privileges so that it may appropriately elevate priveleges when
+requested to do so (using `elite.options(sude=True)`), but will otherwise demote running of all
+actions to your current user account.
+
+For a complete pattern for how Elite may be used, please see my
+[macbuild project on GitHub](https://github.com/fgimian/macbuild).
+
+## Documentation
+
+Detailed documentation for Elite will be written in the near future.  In the meantime, please 
+refer to the Quick Start guide above and the codebase itself for usage information.
 
 ## License
 
