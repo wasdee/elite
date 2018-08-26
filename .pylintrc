@@ -46,6 +46,9 @@ disable =
     # which is often more readable
     no-else-return,
 
+    # Disable failure for TODO items in the codebase
+    fixme,
+
     # Disable docstrings until code is properly documented
     # TODO: Remove this option when completing code documentation
     missing-docstring
