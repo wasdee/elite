@@ -5,6 +5,16 @@ from . import Action
 
 
 class Rsync(Action):
+    """
+    Syncronises one directory to another using rsync.
+
+    :param path: the destination path
+    :param source: the source path to syncronise
+    :param executable: a custom path to the rsync executable
+    :param archive: whether or not to enable the rsync archive flag
+    :param options: additional command-line options that should be using with rsync
+    """
+
     def __init__(self, path, source, executable=None, archive=True, options=None, **kwargs):
         self.path = path
         self.source = source

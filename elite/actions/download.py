@@ -9,6 +9,13 @@ from . import ActionError, FileAction
 
 
 class Download(FileAction):
+    """
+    Downloads a specified URL to a particular destination path.
+
+    :param url: the URL to download
+    :param path: the directory or filename where the download should be placed
+    """
+
     def __init__(self, url, path, **kwargs):
         self.url = url
         self.path = path

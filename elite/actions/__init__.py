@@ -20,6 +20,12 @@ ActionResponse = namedtuple('ActionResponse', ['changed', 'data'], defaults=({},
 
 
 class Action:
+    """
+    The action base class which actions may inherit from.
+
+    :param preexec_fn: the function to call prior exec of commands that are run
+    """
+
     def __init__(self, preexec_fn=None):
         self.preexec_fn = preexec_fn
 
@@ -64,6 +70,15 @@ class Action:
 
 
 class FileAction(Action):
+    """
+    The file action base class which file-based actions may inherit from.
+
+    :param mode: the mode of the file being written
+    :param owner: the username which should own the file being written
+    :param group: the group that should own the file being written
+    :param flags: any BSD flags that should be applied to the file being written
+    """
+
     def __init__(self, mode=None, owner=None, group=None, flags=None, **kwargs):
         self.mode = mode
         self.owner = owner

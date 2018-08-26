@@ -14,6 +14,14 @@ from . import Action, ActionError
 
 
 class LoginItem(Action):
+    """
+    Manages a macOS login item.
+
+    :param path: the path of the app
+    :param state: the state that the login item must be in
+    :param hidden: whether the app should start hidden or not
+    """
+
     def __init__(self, path, state='present', hidden=False, **kwargs):
         self._state = state
         self.path = path

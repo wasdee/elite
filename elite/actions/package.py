@@ -8,6 +8,14 @@ from . import Action, ActionError
 
 
 class Package(Action):
+    """
+    Provides the ability to manage macOS package installation (\\*.pkg).
+
+    :param path: the path of the package to work with
+    :param choices: a dictionary containing any choice overrides during installation
+    :param target: the target path to install into
+    """
+
     # The locations to search for receipts
     receipts_dirs = ['/System/Library/Receipts', '/private/var/db/receipts']
 

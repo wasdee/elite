@@ -8,6 +8,16 @@ from . import Action, ActionError
 
 
 class Archive(Action):
+    """
+    Extracts ZIP and RAR archives to a specified destination.
+
+    :param path: the destination where the archive should be extracted
+    :param source: the path of the archive
+    :param preserve_mode: preserve the archived mode of all files being extracted
+    :param ignore_files: file or directory names to ignore
+    :param base_dir: extract from a particular sub-directory as the base
+    """
+
     def __init__(
         self, path, source, preserve_mode=True, ignore_files=None, base_dir=None, **kwargs
     ):

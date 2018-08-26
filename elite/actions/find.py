@@ -10,6 +10,17 @@ from ..constants import FLAGS
 
 
 class Find(FileAction):
+    """
+    Searches for files in a given path and with a particular set of criteria.
+
+    :param path: the path to search
+    :param min_depth: the minimum directory depth to return files from
+    :param max_depth: the maximum directory depth to return files from
+    :param types: the types of files to return
+    :param patterns: various glob patterns to match against
+    :param aliases: whether to process macOS aliases
+    """
+
     def __init__(
         self, path, min_depth=None, max_depth=None, types=None, patterns=None, aliases=True,
         **kwargs

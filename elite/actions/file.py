@@ -10,6 +10,14 @@ from . import ActionError, FileAction
 
 
 class File(FileAction):
+    """
+    Manages files, directories, symlinks and macOS aliases.
+
+    :param path: the path of the file to manipulate
+    :param source: the source file that should be copied or linked
+    :param state: the state that the file should be in
+    """
+
     def __init__(self, path, source=None, state='file', **kwargs):
         self._source = source
         self._state = state

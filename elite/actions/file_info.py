@@ -9,6 +9,14 @@ from ..constants import FLAGS
 
 
 class FileInfo(Action):
+    """
+    Obtains details about a specified file and returns it as data to the caller.
+
+    :param path: the path of the file to obtain information about
+    :param source: the source file that should be copied or linked
+    :param aliases: whether to process macOS aliases
+    """
+
     def __init__(self, path, aliases=True, **kwargs):
         self.path = path
         self.aliases = aliases

@@ -28,6 +28,13 @@ def convert_from_spotify_value(value):
 
 
 class Spotify(FileAction):
+    """
+    Provides the ability to manipulate Spotify configuration files.
+
+    :param values: a dictionary containing the data to be incorporated into the config
+    :param username: the username of the user to manipulate config files for
+    """
+
     def __init__(self, values, username=None, **kwargs):
         self.values = values
         self.username = username

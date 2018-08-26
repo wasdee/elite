@@ -8,6 +8,14 @@ from . import Action, ActionError
 
 
 class Handler(Action):
+    """
+    Registers a macOS app as a handler for a particular file type or URL scheme.
+
+    :param path: the path of the app
+    :param content_type: the type of file to associate the app with
+    :param url_scheme: the URL scheme to associate the app with
+    """
+
     def __init__(self, path, content_type=None, url_scheme=None, **kwargs):
         self._content_type = content_type
         self._url_scheme = url_scheme

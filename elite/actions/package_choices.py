@@ -5,6 +5,12 @@ from . import Action, ActionError
 
 
 class PackageChoices(Action):
+    """
+    Returns available choices for a macOS package (\\*.pkg)
+
+    :param path: the path of the package to work with
+    """
+
     def __init__(self, path, **kwargs):
         self.path = path
         super().__init__(**kwargs)

@@ -4,6 +4,15 @@ from . import FileAction
 
 
 class Git(FileAction):
+    """
+    Manages a local clone of a remote Git repository
+
+    :param repo: the repository URL to clone
+    :param path: the path where the Git repository should reside
+    :param branch: the branch which the clone should be on
+    :param remote: the name of the remote that references the repo URL
+    """
+
     def __init__(self, repo, path, branch='master', remote='origin', **kwargs):
         self.repo = repo
         self.path = path

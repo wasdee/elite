@@ -3,6 +3,13 @@ from ..libraries import dock
 
 
 class Dock(FileAction):
+    """
+    Builds the specified macOS Dock layout.
+
+    :param app_layout: the applications that should appear in the Dock
+    :param other_layout: other directories and URLs that should appear on the right of the Dock
+    """
+
     def __init__(self, app_layout, other_layout, **kwargs):
         self.app_layout = app_layout
         self.other_layout = other_layout

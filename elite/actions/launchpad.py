@@ -3,6 +3,13 @@ from ..libraries import launchpad
 
 
 class Launchpad(Action):
+    """
+    Builds the specified Launchpad layout for both widgets and apps.
+
+    :param widget_layout: the layout of widgets that should appear in Launchpad
+    :param app_layout: the layout of applications that should appear in Launchpad
+    """
+
     def __init__(self, widget_layout, app_layout, **kwargs):
         self.widget_layout = widget_layout
         self.app_layout = app_layout

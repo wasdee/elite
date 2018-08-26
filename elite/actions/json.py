@@ -6,6 +6,14 @@ from ..utils import deep_equal, deep_merge
 
 
 class JSON(FileAction):
+    """
+    Provides the ability to manipulate JSON configuration files.
+
+    :param path: the full path of the JSON file to manipulate
+    :param values: a dictionary containing the data to be incorporated into the config
+    :param indent: the indentation level of the written JSON file
+    """
+
     def __init__(self, path, values, indent=2, **kwargs):
         self.path = path
         self.values = values

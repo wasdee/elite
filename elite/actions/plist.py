@@ -6,6 +6,17 @@ from ..utils import deep_equal, deep_merge
 
 
 class Plist(FileAction):
+    """
+    Provides the ability to manipulate macOS property list configuration files.
+
+    :param values: a dictionary containing the data to be incorporated into the config
+    :param path: the full path of the plist file to manipulate
+    :param domain: the app domain name of the plist to manipulate
+    :param container: the sandbox container name of the plist to manipulate
+    :param source: the path of an additional plist file to incorporate with the values provided
+    :param fmt: the format of the plist file to write (xml or binary)
+    """
+
     def __init__(
         self, values, path=None, domain=None, container=None, source=None, fmt='xml', **kwargs
     ):
