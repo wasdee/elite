@@ -1,5 +1,9 @@
 import os
 
+from Foundation import (  # pylint: disable=no-name-in-module
+    NSURL, NSURLBookmarkResolutionWithoutUI
+)
+
 from . import Action
 from ..constants import FLAGS
 
@@ -11,12 +15,6 @@ class FileInfo(Action):
         super().__init__(**kwargs)
 
     def process(self):
-        # Only import PyObjC libraries if necessary (as they take time)
-        if self.aliases:
-            from Foundation import (  # pylint: disable=no-name-in-module
-                NSURL, NSURLBookmarkResolutionWithoutUI
-            )
-
         # Ensure that home directories are taken into account
         path = os.path.expanduser(self.path)
 

@@ -3,6 +3,8 @@ import os
 import pwd
 from fnmatch import fnmatch
 
+from Foundation import NSURL, NSURLIsAliasFileKey  # pylint: disable=no-name-in-module
+
 from . import ActionError, FileAction
 from ..constants import FLAGS
 
@@ -56,10 +58,6 @@ class Find(FileAction):
         self, path, root_depth, mode=None, uid=None, gid=None, flags=None, min_depth=None,
         max_depth=None, types=None, patterns=None, aliases=True
     ):
-        # Only import PyObjC libraries if necessary (as they take time)
-        if aliases:
-            from Foundation import NSURL, NSURLIsAliasFileKey  # pylint: disable=no-name-in-module
-
         # Create a list to store all the files found
         paths = []
 
