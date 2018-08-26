@@ -4,6 +4,8 @@ import pytest
 from elite.actions import ActionError, ActionResponse
 from elite.actions.plist import Plist
 
+from .helpers import build_open_with_permission_error
+
 
 PLIST_HEADER = (
     '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -322,8 +324,12 @@ def test_plist_source_invalid(tmpdir):
         plist.process()
 
 
-def test_plist_not_writable():
-    plist = Plist(path='/', values={'name': 'Fots'})
+def test_plist_not_writable(tmpdir, monkeypatch):
+    p = tmpdir.join('test.json')
+
+    monkeypatch.setattr('builtins.open', build_open_with_permission_error(p.strpath))
+
+    plist = Plist(path=p.strpath, values={'name': 'Fots'})
     with pytest.raises(ActionError):
         plist.process()
 

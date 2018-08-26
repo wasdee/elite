@@ -5,6 +5,8 @@ import pytest
 from elite.actions import ActionError, ActionResponse
 from elite.actions.file import File
 
+from .helpers import build_open_with_permission_error
+
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), 'fixtures')
 
@@ -65,8 +67,12 @@ def test_invalid_state_symlink_after_init():
         file.state = 'symlink'
 
 
-def test_file_empty_not_writable():
-    file = File(path='/file', state='file')
+def test_file_empty_not_writable(tmpdir, monkeypatch):
+    p = tmpdir.join('testing.txt')
+
+    monkeypatch.setattr('builtins.open', build_open_with_permission_error(p.strpath))
+
+    file = File(path=p.strpath, state='file')
     with pytest.raises(ActionError):
         file.process()
 
@@ -99,21 +105,43 @@ def test_file_source_not_readable(tmpdir, monkeypatch):
     dp = tmpdir.join('testing.txt').ensure()
     sp = tmpdir.join('source.txt').ensure()
 
-    def open_(file, mode='r'):  # pylint: disable=unused-argument
-        raise PermissionError(13, 'Permission denied', file)
-
-    monkeypatch.setattr('builtins.open', open_)
+    monkeypatch.setattr('builtins.open', build_open_with_permission_error(sp.strpath))
 
     file = File(path=dp.strpath, source=sp.strpath, state='file')
     with pytest.raises(ActionError):
         file.process()
 
 
-def test_file_source_not_writable(tmpdir):
+def test_file_source_and_path_not_readable(tmpdir, monkeypatch):
+    dp = tmpdir.join('testing.txt').ensure()
+    sp = tmpdir.join('source.txt').ensure()
+
+    monkeypatch.setattr('builtins.open', build_open_with_permission_error(dp.strpath))
+
+    file = File(path=dp.strpath, source=sp.strpath, state='file')
+    with pytest.raises(ActionError):
+        file.process()
+
+
+def test_file_source_and_path_not_writable(tmpdir, monkeypatch):
+    dp = tmpdir.join('testing.txt').ensure()
     sp = tmpdir.join('source.txt')
     sp.write('Hello there')
 
-    file = File(path='/file', source=sp.strpath, state='file')
+    builtins_open = open
+
+    def open_(  # pylint: disable=unused-argument
+        file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True,
+        opener=None
+    ):
+        if file == dp.strpath and mode == 'wb':
+            raise PermissionError(13, 'Permission denied', file)
+        else:
+            return builtins_open(file, mode, buffering, encoding, errors, newline, closefd, opener)
+
+    monkeypatch.setattr('builtins.open', open_)
+
+    file = File(path=dp.strpath, source=sp.strpath, state='file')
     with pytest.raises(ActionError):
         file.process()
 
@@ -170,8 +198,20 @@ def test_file_source_exists_same(tmpdir):
     assert file.process() == ActionResponse(changed=False, data={'path': dp.strpath})
 
 
-def test_directory_not_writable():
-    file = File(path='/directory', state='directory')
+def test_directory_not_writable(tmpdir, monkeypatch):
+    p = tmpdir.join('directory')
+
+    os_mkdir = os.mkdir
+
+    def mkdir(path, *args, **kwargs):
+        if path == p.strpath:
+            raise PermissionError(13, 'Permission denied', file)
+        else:
+            return os_mkdir(path, *args, **kwargs)
+
+    monkeypatch.setattr('os.mkdir', mkdir)
+
+    file = File(path=p.strpath, state='directory')
     with pytest.raises(ActionError):
         file.process()
 
@@ -191,8 +231,20 @@ def test_directory_exists(tmpdir):
     assert file.process() == ActionResponse(changed=False, data={'path': p.strpath})
 
 
-def test_symlink_not_writable():
-    file = File(path='/symlink', source='source.txt', state='symlink')
+def test_symlink_not_writable(tmpdir, monkeypatch):
+    p = tmpdir.join('testing.txt')
+
+    os_symlink = os.symlink
+
+    def symlink(src, dst, *args, **kwargs):
+        if dst == p.strpath:
+            raise PermissionError(13, 'Permission denied', file)
+        else:
+            return os_symlink(src, dst, *args, **kwargs)
+
+    monkeypatch.setattr('os.symlink', symlink)
+
+    file = File(path=p.strpath, source='source.txt', state='symlink')
     with pytest.raises(ActionError):
         file.process()
 
@@ -238,6 +290,7 @@ def test_symlink_exists_same(tmpdir):
 def test_alias_not_writable(tmpdir):
     sp = tmpdir.join('source.txt').ensure()
 
+    # TODO: Determine a suitable way to mock the appropriate PyObjC methods to do this better
     file = File(path='/alias', source=sp.strpath, state='alias')
     with pytest.raises(ActionError):
         file.process()

@@ -11,7 +11,7 @@ FIXTURE_PATH = os.path.join(os.path.dirname(__file__), 'fixtures')
 def test_inexistent(tmpdir):
     p = tmpdir.join('test.txt')
 
-    file_info = FileInfo(p.strpath)
+    file_info = FileInfo(path=p.strpath)
     assert file_info.process() == ActionResponse(changed=False, data={
         'exists': False,
         'file_type': None,
@@ -24,7 +24,7 @@ def test_inexistent(tmpdir):
 def test_directory(tmpdir):
     p = tmpdir.mkdir('directory')
 
-    file_info = FileInfo(p.strpath)
+    file_info = FileInfo(path=p.strpath)
     assert file_info.process() == ActionResponse(changed=False, data={
         'exists': True,
         'file_type': 'directory',
@@ -37,7 +37,7 @@ def test_directory(tmpdir):
 def test_file_with_aliases(tmpdir):
     p = tmpdir.join('test.txt').ensure()
 
-    file_info = FileInfo(p.strpath)
+    file_info = FileInfo(path=p.strpath)
     assert file_info.process() == ActionResponse(changed=False, data={
         'exists': True,
         'file_type': 'file',
@@ -50,7 +50,7 @@ def test_file_with_aliases(tmpdir):
 def test_file_without_aliases(tmpdir):
     p = tmpdir.join('test.txt').ensure()
 
-    file_info = FileInfo(p.strpath, aliases=False)
+    file_info = FileInfo(path=p.strpath, aliases=False)
     assert file_info.process() == ActionResponse(changed=False, data={
         'exists': True,
         'file_type': 'file',
@@ -64,7 +64,7 @@ def test_alias_inexistent(tmpdir):
     p = tmpdir.join('test.alias')
     shutil.copy(os.path.join(FIXTURE_PATH, 'file', 'test.alias'), p.strpath)
 
-    file_info = FileInfo(p.strpath)
+    file_info = FileInfo(path=p.strpath)
     assert file_info.process() == ActionResponse(changed=False, data={
         'exists': True,
         'file_type': 'alias',
@@ -83,7 +83,7 @@ def test_alias_exists(tmpdir):
         with open('/private/var/tmp/test.txt', 'w'):
             pass
 
-        file_info = FileInfo(p.strpath)
+        file_info = FileInfo(path=p.strpath)
         assert file_info.process() == ActionResponse(changed=False, data={
             'exists': True,
             'file_type': 'alias',
@@ -99,7 +99,7 @@ def test_file_flags(tmpdir):
     p = tmpdir.join('test.txt').ensure()
     os.chflags(p.strpath, 0b1000000000000000)
 
-    file_info = FileInfo(p.strpath)
+    file_info = FileInfo(path=p.strpath)
     assert file_info.process() == ActionResponse(changed=False, data={
         'exists': True,
         'file_type': 'file',
@@ -113,7 +113,7 @@ def test_symlink_inexistent(tmpdir):
     p = tmpdir.join('testing.txt')
     p.mksymlinkto('something.txt')
 
-    file_info = FileInfo(p.strpath)
+    file_info = FileInfo(path=p.strpath)
     assert file_info.process() == ActionResponse(changed=False, data={
         'exists': False,
         'file_type': 'symlink',
@@ -128,7 +128,7 @@ def test_symlink_exists(tmpdir):
     p.mksymlinkto('something.txt')
     tmpdir.join('something.txt').ensure()
 
-    file_info = FileInfo(p.strpath)
+    file_info = FileInfo(path=p.strpath)
     assert file_info.process() == ActionResponse(changed=False, data={
         'exists': True,
         'file_type': 'symlink',
@@ -139,7 +139,7 @@ def test_symlink_exists(tmpdir):
 
 
 def test_mount():
-    file_info = FileInfo('/')
+    file_info = FileInfo(path='/')
     assert file_info.process() == ActionResponse(changed=False, data={
         'exists': True,
         'file_type': 'directory',

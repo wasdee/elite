@@ -47,3 +47,15 @@ def build_run(fixture_subpath, command_mappings):
         raise Exception(f'unexpected command {command} encountered')
 
     return run
+
+
+def build_open_with_permission_error(denied_path):
+    builtins_open = open
+
+    def open_(file, *args, **kwargs):
+        if file == denied_path:
+            raise PermissionError(13, 'Permission denied', file)
+        else:
+            return builtins_open(file, *args, **kwargs)
+
+    return open_

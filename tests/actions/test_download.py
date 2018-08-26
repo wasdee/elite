@@ -5,12 +5,18 @@ import vcr
 from elite.actions import ActionError, ActionResponse
 from elite.actions.download import Download
 
+from .helpers import build_open_with_permission_error
+
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), 'fixtures')
 
 
-def test_path_not_writable():
-    download = Download(url='https://www.eventideaudio.com/downloader/1165', path='/data.dmg')
+def test_path_not_writable(tmpdir, monkeypatch):
+    p = tmpdir.join('data.dmg')
+
+    monkeypatch.setattr('builtins.open', build_open_with_permission_error(p.strpath))
+
+    download = Download(url='https://www.eventideaudio.com/downloader/1165', path=p.strpath)
     with vcr.use_cassette(os.path.join(FIXTURE_PATH, 'download', 'eventide.yaml')):
         with pytest.raises(ActionError):
             download.process()

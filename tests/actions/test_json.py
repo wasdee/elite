@@ -4,6 +4,8 @@ import pytest
 from elite.actions import ActionError, ActionResponse
 from elite.actions.json import JSON
 
+from .helpers import build_open_with_permission_error
+
 
 def test_json_same(tmpdir):
     p = tmpdir.join('test.json')
@@ -92,7 +94,11 @@ def test_json_invalid_file_parsing(tmpdir):
         json.process()
 
 
-def test_json_not_writable():
-    json = JSON(path='/', values={'name': 'Fots'})
+def test_json_not_writable(tmpdir, monkeypatch):
+    p = tmpdir.join('test.json')
+
+    monkeypatch.setattr('builtins.open', build_open_with_permission_error(p.strpath))
+
+    json = JSON(path=p.strpath, values={'name': 'Fots'})
     with pytest.raises(ActionError):
         json.process()

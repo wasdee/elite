@@ -4,6 +4,8 @@ import pytest
 from elite.actions import ActionError, ActionResponse
 from elite.actions.spotify import Spotify
 
+from .helpers import build_open_with_permission_error
+
 
 def test_determine_pref_path():
     spotify = Spotify(values={'ui.show_friend_feed': False})
@@ -271,8 +273,11 @@ def test_pref_invalid_file_value(tmpdir, monkeypatch):
         spotify.process()
 
 
-def test_prefs_not_writable(monkeypatch):
-    monkeypatch.setattr(Spotify, 'determine_pref_path', lambda self: '/')
+def test_prefs_not_writable(tmpdir, monkeypatch):
+    p = tmpdir.join('test.json')
+
+    monkeypatch.setattr('builtins.open', build_open_with_permission_error(p.strpath))
+    monkeypatch.setattr(Spotify, 'determine_pref_path', lambda self: p.strpath)
 
     spotify = Spotify(values={'autologin.username': 'fots'})
     with pytest.raises(ActionError):

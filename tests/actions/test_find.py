@@ -6,9 +6,6 @@ from elite.actions.find import Find
 from tests import helpers
 
 
-os_stat = os.stat
-
-
 def build_directory(p):
     fa1 = p.join('filea1.yaml').ensure()
     os.chflags(fa1.strpath, 0b1000000000000000)
@@ -34,6 +31,9 @@ def build_directory(p):
     d2.join('filec1.zip').ensure()
     d2.join('filec2.txt').ensure()
     d2.join('filec3.yaml').ensure()
+
+
+os_stat = os.stat
 
 
 def directory_stat(path, *, dir_fd=None, follow_symlinks=True):
