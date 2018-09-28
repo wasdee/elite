@@ -120,7 +120,7 @@ class Elite:
             self.user_env.pop(key, None)
 
         # Set effective permissions and environment to that of the calling user (demotion)
-        self._switch_to_user()
+        self._switch_to_user(currently_root=True)
 
         # Register the core actions provided with Elite
         self._register_core_actions()

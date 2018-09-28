@@ -128,8 +128,8 @@ def test_elite_options_sudo(seteuid_mock, setegid_mock, demote_mock, monkeypatch
     with elite.options(sudo=True):
         assert elite.my_action() == EliteResponse(changed=False, ok=True)
 
-    assert seteuid_mock.call_args_list == [mock.call(0), mock.call(501)]
-    assert setegid_mock.call_args_list == [mock.call(0), mock.call(20)]
+    assert seteuid_mock.call_args_list == [mock.call(501), mock.call(0), mock.call(501)]
+    assert setegid_mock.call_args_list == [mock.call(20), mock.call(0), mock.call(20)]
     assert demote_mock.call_args == mock.call(0, 0)
 
 
