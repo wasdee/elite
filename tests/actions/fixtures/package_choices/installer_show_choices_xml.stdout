@@ -1,60 +1,63 @@
+generating timestamp file failed! 
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <array>
 	<dict>
-		<key>childItems</key>
-		<array>
-			<dict>
-				<key>childItems</key>
-				<array>
-					<dict>
-						<key>childItems</key>
-						<array/>
-						<key>choiceIdentifier</key>
-						<string>com.microsoft.OneDrive</string>
-						<key>choiceIsEnabled</key>
-						<true/>
-						<key>choiceIsSelected</key>
-						<integer>1</integer>
-						<key>choiceIsVisible</key>
-						<false/>
-						<key>choiceSizeInKilobytes</key>
-						<integer>80609</integer>
-						<key>pathsOfActivePackagesInChoice</key>
-						<array>
-							<string>file://localhost/Users/fots/Library/Caches/Homebrew/Cask/onedrive--18.091.9506.0004.pkg#OneDrive.pkg</string>
-						</array>
-					</dict>
-				</array>
-				<key>choiceIdentifier</key>
-				<string>default</string>
-				<key>choiceIsEnabled</key>
-				<true/>
-				<key>choiceIsSelected</key>
-				<integer>1</integer>
-				<key>choiceIsVisible</key>
-				<true/>
-				<key>choiceSizeInKilobytes</key>
-				<integer>0</integer>
-				<key>pathsOfActivePackagesInChoice</key>
-				<array/>
-			</dict>
-		</array>
+		<key>attributeSetting</key>
+		<false/>
+		<key>choiceAttribute</key>
+		<string>visible</string>
 		<key>choiceIdentifier</key>
-		<string>__ROOT_CHOICE_IDENT_Microsoft OneDrive</string>
-		<key>choiceIsEnabled</key>
-		<true/>
-		<key>choiceIsSelected</key>
+		<string>Damage_FactoryContent</string>
+	</dict>
+	<dict>
+		<key>attributeSetting</key>
+		<false/>
+		<key>choiceAttribute</key>
+		<string>enabled</string>
+		<key>choiceIdentifier</key>
+		<string>Damage_FactoryContent</string>
+	</dict>
+	<dict>
+		<key>attributeSetting</key>
 		<integer>1</integer>
-		<key>choiceIsVisible</key>
+		<key>choiceAttribute</key>
+		<string>selected</string>
+		<key>choiceIdentifier</key>
+		<string>Damage_FactoryContent</string>
+	</dict>
+	<dict>
+		<key>attributeSetting</key>
 		<true/>
-		<key>choiceSizeInKilobytes</key>
-		<integer>0</integer>
-		<key>choiceTitle</key>
-		<string>Microsoft OneDrive</string>
-		<key>pathsOfActivePackagesInChoice</key>
-		<array/>
+		<key>choiceAttribute</key>
+		<string>visible</string>
+		<key>choiceIdentifier</key>
+		<string>Damage_Library</string>
+	</dict>
+	<dict>
+		<key>attributeSetting</key>
+		<false/>
+		<key>choiceAttribute</key>
+		<string>enabled</string>
+		<key>choiceIdentifier</key>
+		<string>Damage_Library</string>
+	</dict>
+	<dict>
+		<key>attributeSetting</key>
+		<integer>1</integer>
+		<key>choiceAttribute</key>
+		<string>selected</string>
+		<key>choiceIdentifier</key>
+		<string>Damage_Library</string>
+	</dict>
+	<dict>
+		<key>attributeSetting</key>
+		<string>/Users/Shared</string>
+		<key>choiceAttribute</key>
+		<string>customLocation</string>
+		<key>choiceIdentifier</key>
+		<string>Damage_Library</string>
 	</dict>
 </array>
 </plist>

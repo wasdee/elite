@@ -1,5 +1,6 @@
 import os
 import plistlib
+import tempfile
 
 from . import Action, ActionError
 
@@ -23,9 +24,20 @@ class PackageChoices(Action):
         if not os.path.isfile(path):
             raise ActionError('unable to find a file with the path provided')
 
+        # Create a temporary plist for use in determining the installer choices
+        _empty_plist_fd, empty_plist_name = tempfile.mkstemp()
+        with open(empty_plist_name, 'wb') as f:
+            plistlib.dump([], f)
+
         # Obtain all installer choices as a plist
         choices_proc = self.run(
-            ['installer', '-showChoicesXML', '-package', path, '-target', '/'], stdout=True,
+            [
+                'installer',
+                '-showChoicesAfterApplyingChangesXML', empty_plist_name,
+                '-package', path,
+                '-target', '/'
+            ],
+            stdout=True,
             fail_error='unable to obtain installer information for the path provided'
         )
 
