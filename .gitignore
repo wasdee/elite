@@ -10,10 +10,12 @@ build/
 dist/
 *.egg-info/
 
+# tox environments
+.tox/
+
 # Unit tests
 .cache/
 .pytest_cache/
-.tox/
 
 # Coverage reports
 htmlcov/
