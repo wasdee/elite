@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+from CoreFoundation import NSURL  # pylint: disable=no-name-in-module
 from elite.actions import ActionError, ActionResponse
 from elite.actions.login_item import LoginItem
 
@@ -9,31 +10,18 @@ class MockLoginItem:
     def __init__(self, path, hidden):
         self._path = path
         self._hidden = hidden
-        self.deleted = False
-
-    def __eq__(self, other):
-        return (
-            self.path() == other.path() and
-            self.hidden() == other.hidden() and
-            self.deleted == other.deleted
-        )
 
     def path(self):
         return self._path
 
-    def hidden(self):
-        return self._hidden
-
-    def setHidden_(self, hidden):  # noqa: N802, pylint: disable=invalid-name
-        self._hidden = hidden
-
-    def delete(self):
-        self.deleted = True
+    def properties(self):
+        return {'com.apple.loginitem.HideOnLaunch': self._hidden}
 
 
-class MockLoginItemsList(list):
-    def addObject_(self, item):  # noqa: N802, pylint: disable=invalid-name
-        self.append(item)
+def mock_resolve_url(in_item, in_flags, out_error):  # pylint: disable=unused-argument
+    url = NSURL.fileURLWithPath_(in_item.path())
+    error = None
+    return url, error
 
 
 def test_argument_state_invalid():
@@ -49,96 +37,103 @@ def test_path_inexistent(tmpdir):
         login_item.process()
 
 
-@mock.patch('elite.actions.login_item.SystemEventsLoginItem')
-@mock.patch('elite.actions.login_item.system_events')
-def test_present_installed_identical(  # pylint: disable=unused-argument
-    system_events_mock, system_events_login_item_mock, tmpdir
-):
+@mock.patch('elite.actions.login_item.LSSharedFileListInsertItemURL')
+@mock.patch('elite.actions.login_item.LSSharedFileListItemCopyResolvedURL')
+@mock.patch('elite.actions.login_item.LSSharedFileListCreate')
+def test_present_installed_identical(ls_create_mock, ls_resolve_url_mock, ls_insert_mock, tmpdir):
     p = tmpdir.mkdir('Dropbox.app')
-    login_items = MockLoginItemsList([
+    login_items = [
         MockLoginItem('/Applications/Gmail Notifier.app', hidden=False),
         MockLoginItem(p.strpath, hidden=True),
         MockLoginItem('/Applications/iTunes.app/Contents/MacOS/iTunesHelper.app', hidden=False),
         MockLoginItem('/Applications/BetterSnapTool.app', hidden=False),
         MockLoginItem('/Applications/Flux.app', hidden=False)
-    ])
-    system_events_mock.loginItems.return_value = login_items
+    ]
+    ls_create_mock().allItems.return_value = login_items
+    ls_resolve_url_mock.side_effect = mock_resolve_url
 
     login_item = LoginItem(path=p.strpath, state='present', hidden=True)
     assert login_item.process() == ActionResponse(changed=False)
+    assert not ls_insert_mock.called
 
 
-@mock.patch('elite.actions.login_item.SystemEventsLoginItem')
-@mock.patch('elite.actions.login_item.system_events')
-def test_present_installed_hidden_different(  # pylint: disable=unused-argument
-    system_events_mock, system_events_login_item_mock, tmpdir
+@mock.patch('elite.actions.login_item.LSSharedFileListInsertItemURL')
+@mock.patch('elite.actions.login_item.LSSharedFileListItemCopyResolvedURL')
+@mock.patch('elite.actions.login_item.LSSharedFileListCreate')
+def test_present_installed_hidden_different(
+    ls_create_mock, ls_resolve_url_mock, ls_insert_mock, tmpdir
 ):
     p = tmpdir.mkdir('Dropbox.app')
-    login_items = MockLoginItemsList([
+    login_items = [
         MockLoginItem('/Applications/Gmail Notifier.app', hidden=False),
         MockLoginItem(p.strpath, hidden=True),
         MockLoginItem('/Applications/iTunes.app/Contents/MacOS/iTunesHelper.app', hidden=False),
         MockLoginItem('/Applications/BetterSnapTool.app', hidden=False),
         MockLoginItem('/Applications/Flux.app', hidden=False)
-    ])
-    system_events_mock.loginItems.return_value = login_items
+    ]
+    ls_create_mock().allItems.return_value = login_items
+    ls_resolve_url_mock.side_effect = mock_resolve_url
 
     login_item = LoginItem(path=p.strpath, state='present', hidden=False)
     assert login_item.process() == ActionResponse(changed=True)
-    assert login_items[1] == MockLoginItem(p.strpath, hidden=False)
+    assert ls_insert_mock.called
 
 
-@mock.patch('elite.actions.login_item.SystemEventsLoginItem')
-@mock.patch('elite.actions.login_item.system_events')
-def test_present_not_installed(system_events_mock, system_events_login_item_mock, tmpdir):
+@mock.patch('elite.actions.login_item.LSSharedFileListInsertItemURL')
+@mock.patch('elite.actions.login_item.LSSharedFileListItemCopyResolvedURL')
+@mock.patch('elite.actions.login_item.LSSharedFileListCreate')
+def test_present_not_installed(
+    ls_create_mock, ls_resolve_url_mock, ls_insert_mock, tmpdir
+):
     p = tmpdir.mkdir('Dropbox.app')
-    login_items = MockLoginItemsList([
+    login_items = [
         MockLoginItem('/Applications/Gmail Notifier.app', hidden=False),
         MockLoginItem('/Applications/iTunes.app/Contents/MacOS/iTunesHelper.app', hidden=False),
         MockLoginItem('/Applications/BetterSnapTool.app', hidden=False),
         MockLoginItem('/Applications/Flux.app', hidden=False)
-    ])
-    system_events_mock.loginItems.return_value = login_items
-    system_events_login_item_mock.alloc().initWithProperties_.return_value = MockLoginItem(
-        p.strpath, hidden=False
-    )
+    ]
+    ls_create_mock().allItems.return_value = login_items
+    ls_resolve_url_mock.side_effect = mock_resolve_url
 
     login_item = LoginItem(path=p.strpath, state='present', hidden=False)
     assert login_item.process() == ActionResponse(changed=True)
-    assert system_events_login_item_mock.alloc().initWithProperties_.call_args == mock.call({
-        'path': p.strpath,
-        'hidden': False
-    })
-    assert login_items[4] == MockLoginItem(p.strpath, hidden=False)
+    assert ls_insert_mock.called
 
 
-@mock.patch('elite.actions.login_item.system_events')
-def test_absent_not_installed(system_events_mock, tmpdir):
+@mock.patch('elite.actions.login_item.LSSharedFileListItemRemove')
+@mock.patch('elite.actions.login_item.LSSharedFileListItemCopyResolvedURL')
+@mock.patch('elite.actions.login_item.LSSharedFileListCreate')
+def test_absent_not_installed(ls_create_mock, ls_resolve_url_mock, ls_remove_mock, tmpdir):
     p = tmpdir.mkdir('Dropbox.app')
-    login_items = MockLoginItemsList([
+    login_items = [
         MockLoginItem('/Applications/Gmail Notifier.app', hidden=False),
         MockLoginItem('/Applications/iTunes.app/Contents/MacOS/iTunesHelper.app', hidden=False),
         MockLoginItem('/Applications/BetterSnapTool.app', hidden=False),
         MockLoginItem('/Applications/Flux.app', hidden=False)
-    ])
-    system_events_mock.loginItems.return_value = login_items
+    ]
+    ls_create_mock().allItems.return_value = login_items
+    ls_resolve_url_mock.side_effect = mock_resolve_url
 
     login_item = LoginItem(path=p.strpath, state='absent')
     assert login_item.process() == ActionResponse(changed=False)
+    assert not ls_remove_mock.called
 
 
-@mock.patch('elite.actions.login_item.system_events')
-def test_absent_installed(system_events_mock, tmpdir):
+@mock.patch('elite.actions.login_item.LSSharedFileListItemRemove')
+@mock.patch('elite.actions.login_item.LSSharedFileListItemCopyResolvedURL')
+@mock.patch('elite.actions.login_item.LSSharedFileListCreate')
+def test_absent_installed(ls_create_mock, ls_resolve_url_mock, ls_remove_mock, tmpdir):
     p = tmpdir.mkdir('Dropbox.app')
-    login_items = MockLoginItemsList([
+    login_items = [
         MockLoginItem('/Applications/Gmail Notifier.app', hidden=False),
         MockLoginItem(p.strpath, hidden=True),
         MockLoginItem('/Applications/iTunes.app/Contents/MacOS/iTunesHelper.app', hidden=False),
         MockLoginItem('/Applications/BetterSnapTool.app', hidden=False),
         MockLoginItem('/Applications/Flux.app', hidden=False)
-    ])
-    system_events_mock.loginItems.return_value = login_items
+    ]
+    ls_create_mock().allItems.return_value = login_items
+    ls_resolve_url_mock.side_effect = mock_resolve_url
 
     login_item = LoginItem(path=p.strpath, state='absent')
     assert login_item.process() == ActionResponse(changed=True)
-    assert login_items[1].deleted is True
+    assert ls_remove_mock.called

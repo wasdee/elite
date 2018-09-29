@@ -1,16 +1,12 @@
 import os
 
-from AppKit import NSBundle  # pylint: disable=no-name-in-module
-from ScriptingBridge import SBApplication  # pylint: disable=no-name-in-module
-# Note that the import of SystemEventsLoginItem must occur after we initialise
-# system events or it simply won't work.
-# https://bitbucket.org/ronaldoussoren/pyobjc/issues/179/strange-import-behaviour-with
-system_events = SBApplication.applicationWithBundleIdentifier_('com.apple.systemevents')  # noqa
-# pylint: disable=wrong-import-position
-from Foundation import SystemEventsLoginItem  # noqa: I100, pylint: disable=no-name-in-module
+from CoreFoundation import NSURL  # pylint: disable=no-name-in-module
+from LaunchServices import (  # pylint: disable=no-name-in-module
+    LSSharedFileListCreate, LSSharedFileListInsertItemURL, LSSharedFileListItemCopyResolvedURL,
+    LSSharedFileListItemRemove, kLSSharedFileListItemLast, kLSSharedFileListSessionLoginItems
+)
 
 from . import Action, ActionError
-# pylint: enable=wrong-import-position
 
 
 class LoginItem(Action):
@@ -44,44 +40,44 @@ class LoginItem(Action):
         if not os.path.exists(self.path):
             raise ActionError('the path provided could not be found')
 
-        # The scripting bridge pops up in the Dock, so we must explicitly hide the app
-        # before starting
-        bundle_info = NSBundle.mainBundle().infoDictionary()
-        bundle_info['LSBackgroundOnly'] = True
+        # Create the new item's bookmark and properties
+        url = NSURL.fileURLWithPath_(self.path)
+        properties = {'com.apple.loginitem.HideOnLaunch': self.hidden}
 
         # Find a specific login item
-        login_items = system_events.loginItems()
+        login_items = LSSharedFileListCreate(None, kLSSharedFileListSessionLoginItems, None)
 
         if self.state == 'present':
             # Search for the login item in the existing login items
-            for login_item in login_items:
-                # The item path was found
-                if login_item.path() == self.path:
-                    # Compare to confirm that the item has the same hidden attribute
-                    if login_item.hidden() == self.hidden:
-                        return self.ok()
+            for login_item in login_items.allItems():
+                login_item_url, _ = LSSharedFileListItemCopyResolvedURL(login_item, 0, None)
 
-                    # Update the hidden attribute as they differ
-                    login_item.setHidden_(self.hidden)
-                    return self.changed()
+                # The item path was found and has the same hidden setting
+                if (
+                    login_item_url.path() == url.path() and
+                    login_item.properties()['com.apple.loginitem.HideOnLaunch'] == self.hidden
+                ):
+                    return self.ok()
 
-            # Create a new login item
-            login_item = SystemEventsLoginItem.alloc().initWithProperties_({
-                'path': self.path,
-                'hidden': self.hidden
-            })
-
-            # Add the login item to the list
-            login_items.addObject_(login_item)
+            # Add (or update) the login item to the list
+            LSSharedFileListInsertItemURL(
+                login_items, kLSSharedFileListItemLast, None, None, url, properties, None
+            )
             return self.changed()
 
         else:  # 'absent'
             # Search for the login item in the existing login items
-            for login_item in login_items:
-                # The item path was found so we delete it
-                if login_item.path() == self.path:
-                    login_item.delete()
-                    return self.changed()
+            found_item = None
+            for login_item in login_items.allItems():
+                login_item_url, _ = LSSharedFileListItemCopyResolvedURL(login_item, 0, None)
 
-            # The item was not found as requested
-            return self.ok()
+                # The item path was found so we delete it
+                if login_item_url.path() == url.path():
+                    found_item = login_item
+                    break
+
+            if not found_item:
+                return self.ok()
+
+            LSSharedFileListItemRemove(login_items, found_item)
+            return self.changed()
