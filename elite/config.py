@@ -1,10 +1,8 @@
 import os
 import pathlib
 
-from AppKit import NSFont  # pylint: disable=no-name-in-module
-# Strangely NSKeyedArchiver won't import without ScriptingBridge
-import ScriptingBridge  # noqa: F401,I100, pylint: disable=unused-import
-from Foundation import NSCalibratedRGBColor, NSKeyedArchiver  # pylint: disable=no-name-in-module
+from AppKit import NSCalibratedRGBColor, NSFont  # pylint: disable=no-name-in-module
+from Foundation import NSKeyedArchiver  # pylint: disable=no-name-in-module
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.nodes import MappingNode
 
