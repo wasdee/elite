@@ -47,7 +47,7 @@ class Brew(Action):
                 brew_info_multiple = json.loads(brew_info_proc.stdout)
                 brew_info = brew_info_multiple[0]
 
-                brew_installed = True if brew_info['installed'] else False
+                brew_installed = bool(brew_info['installed'])
                 brew_outdated = brew_info['outdated']
             except (json.JSONDecodeError, IndexError, KeyError):
                 raise ActionError('unable to parse installed package information')

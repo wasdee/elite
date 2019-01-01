@@ -17,7 +17,7 @@ def convert_to_spotify_value(value):
 
 def convert_from_spotify_value(value):
     if value in ['true', 'false']:
-        return True if value == 'true' else False
+        return bool(value == 'true')
     elif value.startswith('"') and value.endswith('"'):
         return value[1:-1]
     else:
