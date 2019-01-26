@@ -66,9 +66,6 @@ def test_absent_not_installed(monkeypatch):
             CommandMapping(
                 command=['brew', 'tap'],
                 stdout_filename='brew_tap_untapped.stdout'
-            ),
-            CommandMapping(
-                command=['brew', 'untap', 'homebrew/cask-fonts']
             )
         ]
     ))

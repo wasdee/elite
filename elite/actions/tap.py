@@ -34,7 +34,7 @@ class Tap(Action):
         # Obtain information about installed taps
         tap_list_proc = self.run(['brew', 'tap'], stdout=True, ignore_fail=True)
 
-        # Check whether the package is installed
+        # Check whether the tap is installed
         if tap_list_proc.returncode != 0:
             raise ActionError('unable to obtain a list of taps')
 
@@ -44,7 +44,7 @@ class Tap(Action):
         # Prepare the URL if provided options
         url_list = [self.url] if self.url else []
 
-        # Install or remove the package as requested
+        # Install or remove the tap as requested
         if self.state == 'present':
             if tapped:
                 return self.ok()
