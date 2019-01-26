@@ -15,6 +15,7 @@ from .actions.fail import Fail
 from .actions.file import File
 from .actions.file_info import FileInfo
 from .actions.find import Find
+from .actions.go import Go
 from .actions.gem import Gem
 from .actions.git import Git
 from .actions.handler import Handler
@@ -157,6 +158,7 @@ class Elite:
         self.register_action('file', File)
         self.register_action('file_info', FileInfo)
         self.register_action('find', Find)
+        self.register_action('go', Go)
         self.register_action('gem', Gem)
         self.register_action('git', Git)
         self.register_action('handler', Handler)
