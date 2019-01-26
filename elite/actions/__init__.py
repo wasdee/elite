@@ -44,7 +44,7 @@ class Action:
 
         # Allow for a bool to enable stderr or enable it anyway if the command will fail on
         # error and no message has been provided
-        if kwargs.get('stderr') or not ignore_fail and not fail_error:
+        if kwargs.get('stderr') or not ignore_fail:
             kwargs['stderr'] = subprocess.PIPE
         else:
             kwargs['stderr'] = devnull
@@ -60,7 +60,10 @@ class Action:
         # Fail if the command returned a non-zero returrn code
         if process.returncode != 0 and not ignore_fail:
             if fail_error:
-                raise ActionError(fail_error)
+                if process.stderr:
+                    raise ActionError(f'{fail_error}: {process.stderr.rstrip()}')
+                else:
+                    raise ActionError(fail_error)
             elif process.stderr:
                 raise ActionError(process.stderr.rstrip())
             else:

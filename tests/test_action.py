@@ -64,6 +64,16 @@ def test_action_run_failed_with_custom_error():
     assert e.value.args[0] == 'no cows allowed'
 
 
+def test_action_run_failed_with_custom_error_and_stderr():
+    action = Action()
+    with pytest.raises(ActionError) as e:
+        action.run(
+            '>&2 echo -n oh no && false', shell=True, executable='/bin/bash',
+            fail_error='no cows allowed'
+        )
+    assert e.value.args[0] == 'no cows allowed: oh no'
+
+
 def test_action_run_capture_stdout():
     action = Action()
     process = action.run(['echo', '-n', 'hi'], stdout=True)
