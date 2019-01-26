@@ -50,11 +50,10 @@ class LoginItem(Action):
         if self.state == 'present':
             # Search for the login item in the existing login items
             for login_item in login_items.allItems():
-                login_item_url, _ = LSSharedFileListItemCopyResolvedURL(login_item, 0, None)
-
+                login_item_url, error = LSSharedFileListItemCopyResolvedURL(login_item, 0, None)
                 # The item path was found and has the same hidden setting
                 if (
-                    login_item_url.path() == url.path() and
+                    not error and login_item_url.path() == url.path() and
                     login_item.properties()['com.apple.loginitem.HideOnLaunch'] == self.hidden
                 ):
                     return self.ok()
@@ -69,10 +68,10 @@ class LoginItem(Action):
             # Search for the login item in the existing login items
             found_item = None
             for login_item in login_items.allItems():
-                login_item_url, _ = LSSharedFileListItemCopyResolvedURL(login_item, 0, None)
+                login_item_url, error = LSSharedFileListItemCopyResolvedURL(login_item, 0, None)
 
                 # The item path was found so we delete it
-                if login_item_url.path() == url.path():
+                if not error and login_item_url.path() == url.path():
                     found_item = login_item
                     break
 
