@@ -15,9 +15,9 @@ from .actions.fail import Fail
 from .actions.file import File
 from .actions.file_info import FileInfo
 from .actions.find import Find
-from .actions.go import Go
 from .actions.gem import Gem
 from .actions.git import Git
+from .actions.go import Go
 from .actions.handler import Handler
 from .actions.hostname import Hostname
 from .actions.info import Info
