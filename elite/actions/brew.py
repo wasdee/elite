@@ -33,24 +33,18 @@ class Brew(Action):
         # We'll work in lowercase as brew is case insensitive
         name = self.name.lower()
 
-        # Obtain information about the requested package
-        brew_info_proc = self.run(
-            ['brew', 'info', '--json=v1', name], stdout=True, ignore_fail=True
+        # Obtain information about installed packages
+        brew_list_proc = self.run(
+            ['brew', 'list'], stdout=True, ignore_fail=True, cache=True
         )
 
         # Check whether the package is installed and whether it is outdated
-        if brew_info_proc.returncode != 0:
-            raise ActionError('unable to find a package matching the name provided')
-        else:
-            # Determine if the package is installed and/or outdated
-            try:
-                brew_info_multiple = json.loads(brew_info_proc.stdout)
-                brew_info = brew_info_multiple[0]
+        if brew_list_proc.returncode != 0:
+            raise ActionError('unable to obtain a list of brew packages')
 
-                brew_installed = bool(brew_info['installed'])
-                brew_outdated = brew_info['outdated']
-            except (json.JSONDecodeError, IndexError, KeyError):
-                raise ActionError('unable to parse installed package information')
+        # Determine if the package is installed
+        brew_list = brew_list_proc.stdout.rstrip().split('\n')
+        brew_installed = self.name in brew_list
 
         # Prepare any user provided options
         options_list = self.options if self.options else []
@@ -67,14 +61,26 @@ class Brew(Action):
                 return self.changed()
 
         elif self.state == 'latest':
-            if brew_installed and not brew_outdated:
-                return self.ok()
-            elif brew_installed and brew_outdated:
-                self.run(
-                    ['brew', 'upgrade'] + options_list + [name],
-                    fail_error='unable to upgrade the requested package'
+            if brew_installed:
+                # Determine if the installed package is outdated
+                brew_outdated = False
+
+                brew_outdated_proc = self.run(
+                    ['brew', 'outdated', '--json=v1'], stdout=True, ignore_fail=True, cache=True
                 )
-                return self.changed()
+                if brew_outdated_proc.returncode == 0:
+                    brew_outdated_multiple = json.loads(brew_outdated_proc.stdout)
+                    brew_outdated_list = [b['name'] for b in brew_outdated_multiple]
+                    brew_outdated = self.name in brew_outdated_list
+
+                if not brew_outdated:
+                    return self.ok()
+                else:
+                    self.run(
+                        ['brew', 'upgrade'] + options_list + [name],
+                        fail_error='unable to upgrade the requested package'
+                    )
+                    return self.changed()
             else:
                 self.run(
                     ['brew', 'install'] + options_list + [name],

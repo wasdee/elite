@@ -38,6 +38,7 @@ class Cask(Action):
         if cask_list_proc.returncode != 0:
             raise ActionError('unable to obtain a list of cask packages')
 
+        # Determine if the package is installed
         cask_list = cask_list_proc.stdout.rstrip().split('\n')
         cask_installed = self.name.split('/')[-1] in cask_list
 
@@ -64,8 +65,8 @@ class Cask(Action):
                     ['brew', 'cask', 'outdated'], stdout=True, ignore_fail=True, cache=True
                 )
                 if cask_outdated_proc.returncode == 0:
-                    cask_list = cask_outdated_proc.stdout.rstrip().split('\n')
-                    cask_outdated = self.name.split('/')[-1] in cask_list
+                    cask_outdated_list = cask_outdated_proc.stdout.rstrip().split('\n')
+                    cask_outdated = self.name.split('/')[-1] in cask_outdated_list
 
                 if not cask_outdated:
                     return self.ok()

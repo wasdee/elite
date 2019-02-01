@@ -7,36 +7,21 @@ from .helpers import CommandMapping, build_run
 
 def test_argument_state_invalid():
     with pytest.raises(ValueError):
-        Brew(name='wget', state='hmmm')
+        Brew(name='youtube-dl', state='hmmm')
 
 
-def test_info_output_invalid(monkeypatch):
+def test_list_output_invalid(monkeypatch):
     monkeypatch.setattr(Brew, 'run', build_run(
         fixture_subpath='brew',
         command_mappings=[
             CommandMapping(
-                command=['brew', 'info', '--json=v1', 'wget']
-            )
-        ]
-    ))
-
-    brew = Brew(name='wget', state='present')
-    with pytest.raises(ActionError):
-        brew.process()
-
-
-def test_name_invalid(monkeypatch):
-    monkeypatch.setattr(Brew, 'run', build_run(
-        fixture_subpath='brew',
-        command_mappings=[
-            CommandMapping(
-                command=['brew', 'info', '--json=v1', 'fake'],
+                command=['brew', 'list'],
                 returncode=1
             )
         ]
     ))
 
-    brew = Brew(name='fake', state='present')
+    brew = Brew(name='youtube-dl', state='present')
     with pytest.raises(ActionError):
         brew.process()
 
@@ -46,13 +31,13 @@ def test_present_installed(monkeypatch):
         fixture_subpath='brew',
         command_mappings=[
             CommandMapping(
-                command=['brew', 'info', '--json=v1', 'wget'],
-                stdout_filename='brew_info_installed.stdout'
+                command=['brew', 'list'],
+                stdout_filename='brew_list_installed.stdout'
             )
         ]
     ))
 
-    brew = Brew(name='wget', state='present')
+    brew = Brew(name='youtube-dl', state='present')
     assert brew.process() == ActionResponse(changed=False)
 
 
@@ -61,16 +46,16 @@ def test_present_not_installed(monkeypatch):
         fixture_subpath='brew',
         command_mappings=[
             CommandMapping(
-                command=['brew', 'info', '--json=v1', 'wget'],
-                stdout_filename='brew_info_not_installed.stdout'
+                command=['brew', 'list'],
+                stdout_filename='brew_list_not_installed.stdout'
             ),
             CommandMapping(
-                command=['brew', 'install', 'wget']
+                command=['brew', 'install', 'youtube-dl']
             )
         ]
     ))
 
-    brew = Brew(name='wget', state='present')
+    brew = Brew(name='youtube-dl', state='present')
     assert brew.process() == ActionResponse(changed=True)
 
 
@@ -79,13 +64,17 @@ def test_latest_installed_and_up_to_date(monkeypatch):
         fixture_subpath='brew',
         command_mappings=[
             CommandMapping(
-                command=['brew', 'info', '--json=v1', 'wget'],
-                stdout_filename='brew_info_installed.stdout'
+                command=['brew', 'list'],
+                stdout_filename='brew_list_installed.stdout'
+            ),
+            CommandMapping(
+                command=['brew', 'outdated', '--json=v1'],
+                stdout_filename='brew_outdated_up_to_date.stdout'
             )
         ]
     ))
 
-    brew = Brew(name='wget', state='latest')
+    brew = Brew(name='youtube-dl', state='latest')
     assert brew.process() == ActionResponse(changed=False)
 
 
@@ -94,16 +83,20 @@ def test_latest_installed_but_outdated(monkeypatch):
         fixture_subpath='brew',
         command_mappings=[
             CommandMapping(
-                command=['brew', 'info', '--json=v1', 'hugo'],
-                stdout_filename='brew_info_installed_but_outdated.stdout'
+                command=['brew', 'list'],
+                stdout_filename='brew_list_installed.stdout'
             ),
             CommandMapping(
-                command=['brew', 'upgrade', 'hugo']
+                command=['brew', 'outdated', '--json=v1'],
+                stdout_filename='brew_outdated_outdated.stdout'
+            ),
+            CommandMapping(
+                command=['brew', 'upgrade', 'youtube-dl']
             )
         ]
     ))
 
-    brew = Brew(name='hugo', state='latest')
+    brew = Brew(name='youtube-dl', state='latest')
     assert brew.process() == ActionResponse(changed=True)
 
 
@@ -112,16 +105,16 @@ def test_latest_not_installed(monkeypatch):
         fixture_subpath='brew',
         command_mappings=[
             CommandMapping(
-                command=['brew', 'info', '--json=v1', 'wget'],
-                stdout_filename='brew_info_not_installed.stdout'
+                command=['brew', 'list'],
+                stdout_filename='brew_list_not_installed.stdout'
             ),
             CommandMapping(
-                command=['brew', 'install', 'wget']
+                command=['brew', 'install', 'youtube-dl']
             )
         ]
     ))
 
-    brew = Brew(name='wget', state='latest')
+    brew = Brew(name='youtube-dl', state='latest')
     assert brew.process() == ActionResponse(changed=True)
 
 
@@ -130,16 +123,16 @@ def test_absent_not_installed(monkeypatch):
         fixture_subpath='brew',
         command_mappings=[
             CommandMapping(
-                command=['brew', 'info', '--json=v1', 'wget'],
-                stdout_filename='brew_info_not_installed.stdout'
+                command=['brew', 'list'],
+                stdout_filename='brew_list_not_installed.stdout'
             ),
             CommandMapping(
-                command=['brew', 'remove', 'wget']
+                command=['brew', 'remove', 'youtube-dl']
             )
         ]
     ))
 
-    brew = Brew(name='wget', state='absent')
+    brew = Brew(name='youtube-dl', state='absent')
     assert brew.process() == ActionResponse(changed=False)
 
 
@@ -148,14 +141,14 @@ def test_absent_installed(monkeypatch):
         fixture_subpath='brew',
         command_mappings=[
             CommandMapping(
-                command=['brew', 'info', '--json=v1', 'wget'],
-                stdout_filename='brew_info_installed.stdout'
+                command=['brew', 'list'],
+                stdout_filename='brew_list_installed.stdout'
             ),
             CommandMapping(
-                command=['brew', 'remove', 'wget']
+                command=['brew', 'remove', 'youtube-dl']
             )
         ]
     ))
 
-    brew = Brew(name='wget', state='absent')
+    brew = Brew(name='youtube-dl', state='absent')
     assert brew.process() == ActionResponse(changed=True)
