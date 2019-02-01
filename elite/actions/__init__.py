@@ -1,5 +1,7 @@
 import grp
+import hashlib
 import os
+import pickle
 import pwd
 import shutil
 import subprocess
@@ -23,19 +25,39 @@ class Action:
     """
     The action base class which actions may inherit from.
 
+    :param cache_base_dir: the base directory containing the Elite cache or None to disable caching
     :param preexec_fn: the function to call prior exec of commands that are run
     """
 
-    def __init__(self, preexec_fn=None):
+    def __init__(self, cache_base_dir=None, preexec_fn=None):
+        self.cache_base_dir = cache_base_dir
         self.preexec_fn = preexec_fn
+
+    @property
+    def cache_dir(self):
+        if self.cache_base_dir:
+            return os.path.join(self.cache_base_dir, self.__class__.__name__)
+        else:
+            return None
 
     def ok(self, **data):
         return ActionResponse(changed=False, data=data)
 
     def changed(self, **data):
+        if self.cache_dir and os.path.exists(self.cache_dir):
+            shutil.rmtree(self.cache_dir)
         return ActionResponse(changed=True, data=data)
 
-    def run(self, command, ignore_fail=False, fail_error=None, **kwargs):
+    def run(self, command, ignore_fail=False, fail_error=None, cache=False, **kwargs):
+        # Determine the cache path based on the command and return the cached item if it exists
+        if self.cache_dir:
+            command_bytes = b' '.join(a.encode('utf-8') for a in command)
+            cache_path = os.path.join(self.cache_dir, hashlib.md5(command_bytes).hexdigest())
+
+            if os.path.exists(cache_path):
+                with open(cache_path, 'rb') as fp:
+                    return pickle.load(fp)
+
         # Allow for the user to simply set stdout to a bool to enable them
         if kwargs.get('stdout'):
             kwargs['stdout'] = subprocess.PIPE
@@ -68,6 +90,12 @@ class Action:
                 raise ActionError(process.stderr.rstrip())
             else:
                 raise ActionError(f'unable to execute command {command}')
+
+        # Cache the output of the command if required
+        if self.cache_dir and cache:
+            os.makedirs(self.cache_dir, exist_ok=True)
+            with open(cache_path, 'wb') as fp:
+                pickle.dump(process, fp)
 
         return process
 

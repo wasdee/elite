@@ -33,7 +33,7 @@ class Go(Action):
         go_path = os.environ.get('GOPATH', os.path.expanduser('~/go'))
 
         # Obtain information about installed packages
-        go_list_proc = self.run(['go', 'list', 'all'], stdout=True, ignore_fail=True)
+        go_list_proc = self.run(['go', 'list', 'all'], stdout=True, ignore_fail=True, cache=True)
 
         # Check whether the package is installed
         if go_list_proc.returncode != 0:

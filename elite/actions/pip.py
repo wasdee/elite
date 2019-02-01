@@ -104,7 +104,7 @@ class Pip(Action):
 
         # Obtain a list of installed packages
         pip_list_proc = self.run(
-            [executable, 'list', '--format', 'json'], stdout=True, ignore_fail=True
+            [executable, 'list', '--format', 'json'], stdout=True, ignore_fail=True, cache=True
         )
 
         # Check whether the package is installed and whether it is outdated

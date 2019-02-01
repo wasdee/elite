@@ -1,5 +1,6 @@
 import os
 import pwd
+import shutil
 from collections import namedtuple
 from contextlib import contextmanager
 from enum import Enum
@@ -133,6 +134,14 @@ class Elite:
             EliteState.CHANGED: []
         }
 
+        # Clear the cache
+        if os.path.exists(self.cache_base_dir):
+            shutil.rmtree(self.cache_base_dir)
+
+    @property
+    def cache_base_dir(self):
+        return os.path.expanduser('~/.cache/elite')
+
     def register_action(self, action_name, action_class):
         """
         Registers a new action given its name and class.
@@ -242,6 +251,7 @@ class Elite:
             Action = self.actions[action_name]  # noqa: N806
             action = Action(
                 *args, **kwargs,
+                cache_base_dir=self.cache_base_dir,
                 preexec_fn=demote(self.current_options.uid, self.current_options.gid)
             )
 

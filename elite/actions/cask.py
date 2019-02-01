@@ -29,7 +29,9 @@ class Cask(Action):
 
     def process(self):
         # Obtain information about installed packages
-        cask_list_proc = self.run(['brew', 'cask', 'list'], stdout=True, ignore_fail=True)
+        cask_list_proc = self.run(
+            ['brew', 'cask', 'list'], stdout=True, ignore_fail=True, cache=True
+        )
 
         # Check whether the package is installed using only its short name
         # (e.g. fgimian/general/cog will check for a cask called cog)
@@ -59,7 +61,7 @@ class Cask(Action):
                 cask_outdated = False
 
                 cask_outdated_proc = self.run(
-                    ['brew', 'cask', 'outdated'], stdout=True, ignore_fail=True
+                    ['brew', 'cask', 'outdated'], stdout=True, ignore_fail=True, cache=True
                 )
                 if cask_outdated_proc.returncode == 0:
                     cask_list = cask_outdated_proc.stdout.rstrip().split('\n')
