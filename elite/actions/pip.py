@@ -124,7 +124,7 @@ class Pip(Action):
             if pip_installed and self.state == 'latest':
                 pip_list_outdated_proc = self.run(
                     [executable, 'list', '--format', 'json', '--outdated'],
-                    stdout=True, ignore_fail=True
+                    stdout=True, ignore_fail=True, cache=True
                 )
 
                 pip_list_outdated_multiple = json.loads(pip_list_outdated_proc.stdout)
